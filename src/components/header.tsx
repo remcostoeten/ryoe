@@ -55,10 +55,7 @@ export function Header() {
         }
     }, [isOpen])
 
-    const navLinksData = [
-        { label: 'Home', href: '/' },
-        { label: 'Docs', href: '/docs' }
-    ]
+    const navLinksData = [{ label: 'Docs', href: '/docs' }]
 
     return (
         <header
