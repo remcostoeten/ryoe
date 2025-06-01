@@ -37,6 +37,15 @@ async fn execute_database_query(
     Ok(db_manager.execute_query(&query))
 }
 
+#[tauri::command]
+async fn create_user(
+    name: String,
+    snippets_path: String,
+    db_manager: State<'_, Arc<DatabaseManager>>,
+) -> Result<i64, String> {
+    db_manager.create_user(&name, &snippets_path)
+}
+
 fn main() {
     let db_manager = Arc::new(DatabaseManager::new());
 
@@ -48,7 +57,8 @@ fn main() {
             greet,
             initialize_database,
             check_database_health,
-            execute_database_query
+            execute_database_query,
+            create_user
         ])
         .setup(|app| {
             let db_manager = app.state::<Arc<DatabaseManager>>();

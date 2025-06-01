@@ -51,3 +51,20 @@ export async function checkDatabaseHealth(): Promise<DatabaseHealth> {
         }
     }
 }
+
+export async function createUser(
+    name: string,
+    snippetsPath: string
+): Promise<number> {
+    try {
+        const userId = await invoke<number>('create_user', {
+            name,
+            snippetsPath
+        })
+        console.log('User created with ID:', userId)
+        return userId
+    } catch (error) {
+        console.error('Failed to create user:', error)
+        throw error
+    }
+}

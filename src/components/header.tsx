@@ -9,7 +9,7 @@ import {
     TooltipTrigger
 } from '@/components/ui/tooltip'
 
-export default function BuiltWith() {
+export function Header() {
     return (
         <div className="flex flex-row justify-center">
             <LogoLink href="https://vitejs.dev" src={viteLogo} alt="Vite" />

@@ -20,7 +20,7 @@ import {
     Code
 } from 'lucide-react'
 
-interface QueryResult {
+type TQueryResults = {
     status: string
     message: string
     result?: string
@@ -60,14 +60,17 @@ export function DatabaseQueryTester() {
     const [currentQueryIndex, setCurrentQueryIndex] = useState(0)
     const [customQuery, setCustomQuery] = useState('')
     const [isExecuting, setIsExecuting] = useState(false)
-    const [lastResult, setLastResult] = useState<QueryResult | null>(null)
+    const [lastResult, setLastResult] = useState<TQueryResults | null>(null)
 
-    const executeQuery = async (query: string) => {
+    async function executeQuery(query: string) {
         setIsExecuting(true)
         try {
-            const result = await invoke<QueryResult>('execute_database_query', {
-                query
-            })
+            const result = await invoke<TQueryResults>(
+                'execute_database_query',
+                {
+                    query
+                }
+            )
             setLastResult(result)
         } catch (error) {
             setLastResult({
@@ -84,16 +87,16 @@ export function DatabaseQueryTester() {
         }
     }
 
-    const executeCurrentTestQuery = () => {
+    function executeCurrentTestQuery() {
         const query = TEST_QUERIES[currentQueryIndex]
         executeQuery(query.query)
     }
 
-    const cycleToNextQuery = () => {
+    function cycleToNextQuery() {
         setCurrentQueryIndex((prev) => (prev + 1) % TEST_QUERIES.length)
     }
 
-    const executeCustomQuery = () => {
+    function executeCustomQuery() {
         if (customQuery.trim()) {
             executeQuery(customQuery.trim())
         }
@@ -101,7 +104,7 @@ export function DatabaseQueryTester() {
 
     const currentQuery = TEST_QUERIES[currentQueryIndex]
 
-    const getStatusIcon = (status: string) => {
+    function getStatusIcon(status: string) {
         switch (status) {
             case 'success':
                 return <CheckCircle className="h-4 w-4 text-green-500" />
@@ -112,7 +115,7 @@ export function DatabaseQueryTester() {
         }
     }
 
-    const getStatusBadge = (status: string) => {
+    function getStatusBadge(status: string) {
         switch (status) {
             case 'success':
                 return <Badge variant="success">Success</Badge>
@@ -137,7 +140,6 @@ export function DatabaseQueryTester() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-                {/* Test Query Section */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-semibold">Test Queries</h3>
@@ -181,7 +183,6 @@ export function DatabaseQueryTester() {
                     </div>
                 </div>
 
-                {/* Custom Query Section */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Custom Query</h3>
                     <div className="flex gap-2">
@@ -212,7 +213,6 @@ export function DatabaseQueryTester() {
                     </div>
                 </div>
 
-                {/* Results Section */}
                 {lastResult && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -243,9 +243,106 @@ export function DatabaseQueryTester() {
                                     <div className="text-sm font-medium text-muted-foreground mb-2">
                                         Result
                                     </div>
-                                    <pre className="text-sm bg-muted p-3 rounded border font-mono whitespace-pre-wrap overflow-x-auto">
-                                        {lastResult.result}
-                                    </pre>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm border-collapse">
+                                            {lastResult.result.includes(
+                                                '|'
+                                            ) && (
+                                                <>
+                                                    <thead>
+                                                        <tr className="bg-muted/50">
+                                                            {lastResult.result
+                                                                .split('\n')[0]
+                                                                .split(' | ')
+                                                                .map(
+                                                                    (
+                                                                        header,
+                                                                        i
+                                                                    ) => (
+                                                                        <th
+                                                                            key={
+                                                                                i
+                                                                            }
+                                                                            className="px-3 py-2 text-left font-medium text-muted-foreground border-b"
+                                                                        >
+                                                                            {
+                                                                                header
+                                                                            }
+                                                                        </th>
+                                                                    )
+                                                                )}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {lastResult.result
+                                                            .split('\n')
+                                                            .slice(2) // Skip header and separator line
+                                                            .filter(
+                                                                (line) =>
+                                                                    line.trim() !==
+                                                                    ''
+                                                            )
+                                                            .map(
+                                                                (
+                                                                    row,
+                                                                    rowIndex
+                                                                ) => (
+                                                                    <tr
+                                                                        key={
+                                                                            rowIndex
+                                                                        }
+                                                                        className={
+                                                                            rowIndex %
+                                                                                2 ===
+                                                                            0
+                                                                                ? 'bg-background'
+                                                                                : 'bg-muted/30'
+                                                                        }
+                                                                    >
+                                                                        {row
+                                                                            .split(
+                                                                                ' | '
+                                                                            )
+                                                                            .map(
+                                                                                (
+                                                                                    cell,
+                                                                                    cellIndex
+                                                                                ) => (
+                                                                                    <td
+                                                                                        key={
+                                                                                            cellIndex
+                                                                                        }
+                                                                                        className="px-3 py-2 border-t border-border/40"
+                                                                                    >
+                                                                                        {
+                                                                                            cell
+                                                                                        }
+                                                                                    </td>
+                                                                                )
+                                                                            )}
+                                                                    </tr>
+                                                                )
+                                                            )}
+                                                    </tbody>
+                                                </>
+                                            )}
+                                            {!lastResult.result.includes(
+                                                '|'
+                                            ) && (
+                                                <tbody>
+                                                    <tr>
+                                                        <td className="px-3 py-2">
+                                                            <pre className="whitespace-pre-wrap">
+                                                                {
+                                                                    lastResult.result
+                                                                }
+                                                            </pre>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            )}
+                                        </table>
+                                    </div>
                                 </div>
                             )}
 

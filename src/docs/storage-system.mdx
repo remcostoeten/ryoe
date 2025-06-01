@@ -1,0 +1,320 @@
+# Storage System Documentation
+
+The Notr application provides a flexible storage system that works seamlessly in both Tauri (desktop) and web environments. This document explains how to use the storage factory and providers.
+
+## Overview
+
+The storage system consists of:
+
+1. **Storage Providers** - Implementations for different storage backends
+2. **Storage Factory** - Creates the appropriate provider based on environment
+3. **Storage API** - Consistent interface for storing and retrieving data
+
+## Quick Start
+
+```typescript
+import { createStorageProvider } from '@/lib/storage'
+
+// Create a storage provider
+const storage = await createStorageProvider('my-store.dat')
+
+// Store data
+await storage.set('user.preferences', { theme: 'dark', fontSize: 14 })
+
+// Retrieve data
+const preferences = await storage.get('user.preferences')
+console.log(preferences) // { theme: 'dark', fontSize: 14 }
+```
+
+## Storage Provider Factory
+
+The factory automatically selects the best storage implementation based on the current environment:
+
+```typescript
+// In src/lib/storage.ts
+export async function createStorageProvider(
+    storeName: string = 'app-storage.dat'
+): Promise<TStorageProvider> {
+    if (isTauriEnvironment()) {
+        return await createFallbackProvider(storeName)
+    } else {
+        return createLocalStorageProvider()
+    }
+}
+```
+
+### Environment Detection
+
+The system detects whether it's running in a Tauri environment:
+
+```typescript
+function isTauriEnvironment(): boolean {
+    return typeof window !== 'undefined' && '__TAURI__' in window
+}
+```
+
+## Storage Providers
+
+### Tauri Store Provider
+
+Uses Tauri's persistent storage for desktop environments:
+
+```typescript
+async function createTauriStoreProvider(
+    storeName: string
+): Promise<TStorageProvider> {
+    const store = await Store.load(storeName)
+
+    return {
+        async get<T>(key: string): Promise<T | null> {
+            try {
+                return await store.get(key)
+            } catch (error) {
+                console.error(`Error getting ${key} from store:`, error)
+                return null
+            }
+        },
+
+        async set<T>(key: string, value: T): Promise<void> {
+            try {
+                await store.set(key, value)
+                await store.save()
+            } catch (error) {
+                console.error(`Error setting ${key} in store:`, error)
+            }
+        },
+
+        async delete(key: string): Promise<void> {
+            try {
+                await store.delete(key)
+                await store.save()
+            } catch (error) {
+                console.error(`Error deleting ${key} from store:`, error)
+            }
+        },
+
+        async clear(): Promise<void> {
+            try {
+                await store.clear()
+                await store.save()
+            } catch (error) {
+                console.error('Error clearing store:', error)
+            }
+        }
+    }
+}
+```
+
+### LocalStorage Provider
+
+Uses browser's localStorage for web environments:
+
+```typescript
+function createLocalStorageProvider(): TStorageProvider {
+    return {
+        async get<T>(key: string): Promise<T | null> {
+            try {
+                const item = localStorage.getItem(key)
+                return item ? JSON.parse(item) : null
+            } catch (error) {
+                console.error(`Error getting ${key} from localStorage:`, error)
+                return null
+            }
+        },
+
+        async set<T>(key: string, value: T): Promise<void> {
+            try {
+                localStorage.setItem(key, JSON.stringify(value))
+            } catch (error) {
+                console.error(`Error setting ${key} in localStorage:`, error)
+            }
+        },
+
+        async delete(key: string): Promise<void> {
+            try {
+                localStorage.removeItem(key)
+            } catch (error) {
+                console.error(`Error deleting ${key} from localStorage:`, error)
+            }
+        },
+
+        async clear(): Promise<void> {
+            try {
+                localStorage.clear()
+            } catch (error) {
+                console.error('Error clearing localStorage:', error)
+            }
+        }
+    }
+}
+```
+
+### Fallback Provider
+
+Automatically falls back to localStorage if Tauri store fails:
+
+```typescript
+async function createFallbackProvider(
+    storeName: string
+): Promise<TStorageProvider> {
+    const tauriProvider = await createTauriStoreProvider(storeName)
+    const localStorageProvider = createLocalStorageProvider()
+
+    return {
+        async get<T>(key: string): Promise<T | null> {
+            try {
+                return await tauriProvider.get(key)
+            } catch (error) {
+                console.warn('Falling back to localStorage for get:', error)
+                return await localStorageProvider.get(key)
+            }
+        },
+
+        async set<T>(key: string, value: T): Promise<void> {
+            try {
+                await tauriProvider.set(key, value)
+            } catch (error) {
+                console.warn('Falling back to localStorage for set:', error)
+                await localStorageProvider.set(key, value)
+            }
+        },
+
+        async delete(key: string): Promise<void> {
+            try {
+                await tauriProvider.delete(key)
+            } catch (error) {
+                console.warn('Falling back to localStorage for delete:', error)
+                await localStorageProvider.delete(key)
+            }
+        },
+
+        async clear(): Promise<void> {
+            try {
+                await tauriProvider.clear()
+            } catch (error) {
+                console.warn(
+                    'Falling back to localStorage for clearing storage:',
+                    error
+                )
+                await localStorageProvider.clear()
+            }
+        }
+    }
+}
+```
+
+## Usage Examples
+
+### Storing User Preferences
+
+```typescript
+import { getAppStorage } from '@/lib/storage'
+
+async function saveUserPreferences(preferences: UserPreferences) {
+    const storage = await getAppStorage()
+    await storage.set('user.preferences', preferences)
+}
+
+async function getUserPreferences(): Promise<UserPreferences | null> {
+    const storage = await getAppStorage()
+    return await storage.get('user.preferences')
+}
+```
+
+### Managing Application State
+
+```typescript
+import { createStorageProvider } from '@/lib/storage'
+
+class AppStateManager {
+    private storage: TStorageProvider
+
+    constructor() {
+        this.initialize()
+    }
+
+    private async initialize() {
+        this.storage = await createStorageProvider('app-state.dat')
+    }
+
+    async saveState(state: AppState): Promise<void> {
+        await this.storage.set('app.state', state)
+    }
+
+    async loadState(): Promise<AppState | null> {
+        return await this.storage.get('app.state')
+    }
+
+    async resetState(): Promise<void> {
+        await this.storage.delete('app.state')
+    }
+}
+```
+
+### Storing Multiple Data Types
+
+```typescript
+import { getAppStorage } from '@/lib/storage'
+
+async function storeMultipleItems() {
+    const storage = await getAppStorage()
+
+    // Store different types of data
+    await storage.set('user.id', 12345)
+    await storage.set('user.name', 'John Doe')
+    await storage.set('user.isActive', true)
+    await storage.set('user.lastLogin', new Date().toISOString())
+    await storage.set('user.tags', ['developer', 'designer'])
+    await storage.set('user.profile', {
+        bio: 'Full-stack developer',
+        avatar: 'avatar.png',
+        social: {
+            github: 'johndoe',
+            twitter: '@johndoe'
+        }
+    })
+}
+```
+
+## Best Practices
+
+1. **Use Namespaced Keys**: Organize your data with dot notation (e.g., `user.preferences`, `app.state`)
+2. **Handle Async Operations**: Always use `await` with storage methods
+3. **Error Handling**: Wrap storage operations in try/catch blocks for robust error handling
+4. **Type Safety**: Use TypeScript generics for type-safe data retrieval
+5. **Data Validation**: Validate data before storing and after retrieval
+
+## Troubleshooting
+
+### Storage Not Working in Tauri
+
+If storage operations fail in Tauri:
+
+1. Check if the Tauri store plugin is properly initialized
+2. Verify the store file path is writable
+3. Check for permissions issues in the app's directory
+
+### Data Not Persisting
+
+If data doesn't persist between app restarts:
+
+1. Ensure `store.save()` is called after modifications in Tauri
+2. Check if localStorage is being cleared by browser settings
+3. Verify the correct storage provider is being used
+
+## API Reference
+
+### `createStorageProvider(storeName?: string): Promise<TStorageProvider>`
+
+Creates a storage provider with the given store name.
+
+### `TStorageProvider` Interface
+
+```typescript
+interface TStorageProvider {
+    get<T>(key: string): Promise<T | null>
+    set<T>(key: string, value: T): Promise<void>
+    delete(key: string): Promise<void>
+    clear(): Promise<void>
+}
+```

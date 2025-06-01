@@ -139,44 +139,127 @@ impl DatabaseManager {
             },
             Some(conn) => {
                 let query = query.trim();
+                let upper_query = query.to_uppercase();
 
-                // For simplicity, let's handle all queries as execute() and provide basic feedback
-                match conn.execute(query, []) {
-                    Ok(rows_affected) => {
-                        let response_time = start_time.elapsed().as_millis() as u64;
+                if upper_query.starts_with("SELECT") {
+                    // Handle SELECT queries
+                    match conn.prepare(query) {
+                        Ok(mut stmt) => {
+                            // Get column names before executing the query
+                            let column_names: Vec<String> = stmt
+                                .column_names()
+                                .into_iter()
+                                .map(|s| s.to_string())
+                                .collect();
+                            
+                            match stmt.query([]) {
+                                Ok(mut rows) => {
+                                    let mut result = String::new();
+                                    
+                                    // Add column headers
+                                    if !column_names.is_empty() {
+                                        result.push_str(&column_names.join(" | "));
+                                        result.push_str("\n");
+                                        result.push_str(&"-".repeat(column_names.join(" | ").len()));
+                                        result.push_str("\n");
+                                    }
 
-                        // Provide different messages based on query type
-                        let (message, result) = if query.to_uppercase().trim().starts_with("SELECT") {
-                            // For SELECT queries, we can't show results with execute(), but we can confirm it ran
-                            (
-                                format!("SELECT query executed successfully ({}ms)", response_time),
-                                Some("Query executed successfully. Note: Use a proper SELECT handler to see results.".to_string())
-                            )
-                        } else {
-                            (
-                                format!("Query executed successfully ({}ms)", response_time),
-                                Some(format!("Rows affected: {}", rows_affected))
-                            )
-                        };
+                                    // Process rows
+                                    let mut row_count = 0;
+                                    while let Ok(Some(row)) = rows.next() {
+                                        let mut row_values = Vec::new();
+                                        for i in 0..column_names.len() {
+                                            let value: String = match row.get(i) {
+                                                Ok(val) => val,
+                                                Err(_) => "NULL".to_string(),
+                                            };
+                                            row_values.push(value);
+                                        }
+                                        result.push_str(&row_values.join(" | "));
+                                        result.push_str("\n");
+                                        row_count += 1;
+                                    }
 
-                        QueryResult {
-                            status: "success".to_string(),
-                            message,
-                            result,
-                            response_time,
-                            last_executed: chrono::Utc::now().to_rfc3339(),
+                                    let response_time = start_time.elapsed().as_millis() as u64;
+                                    QueryResult {
+                                        status: "success".to_string(),
+                                        message: format!("Query returned {} rows ({}ms)", row_count, response_time),
+                                        result: Some(result),
+                                        response_time,
+                                        last_executed: chrono::Utc::now().to_rfc3339(),
+                                    }
+                                }
+                                Err(e) => {
+                                    let response_time = start_time.elapsed().as_millis() as u64;
+                                    QueryResult {
+                                        status: "error".to_string(),
+                                        message: format!("Error executing query: {}", e),
+                                        result: Some(format!("Error details: {}", e)),
+                                        response_time,
+                                        last_executed: chrono::Utc::now().to_rfc3339(),
+                                    }
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            let response_time = start_time.elapsed().as_millis() as u64;
+                            QueryResult {
+                                status: "error".to_string(),
+                                message: format!("Error preparing query: {}", e),
+                                result: Some(format!("Error details: {}", e)),
+                                response_time,
+                                last_executed: chrono::Utc::now().to_rfc3339(),
+                            }
                         }
                     }
-                    Err(e) => {
-                        let response_time = start_time.elapsed().as_millis() as u64;
-                        QueryResult {
-                            status: "error".to_string(),
-                            message: format!("Query execution error: {}", e),
-                            result: Some(format!("Error details: {}", e)),
-                            response_time,
-                            last_executed: chrono::Utc::now().to_rfc3339(),
+                } else {
+                    // Handle non-SELECT queries (INSERT, UPDATE, DELETE, CREATE, etc.)
+                    match conn.execute(query, []) {
+                        Ok(rows_affected) => {
+                            let response_time = start_time.elapsed().as_millis() as u64;
+                            QueryResult {
+                                status: "success".to_string(),
+                                message: format!("Query executed successfully ({}ms)", response_time),
+                                result: Some(format!("Rows affected: {}", rows_affected)),
+                                response_time,
+                                last_executed: chrono::Utc::now().to_rfc3339(),
+                            }
+                        }
+                        Err(e) => {
+                            let response_time = start_time.elapsed().as_millis() as u64;
+                            QueryResult {
+                                status: "error".to_string(),
+                                message: format!("Query execution error: {}", e),
+                                result: Some(format!("Error details: {}", e)),
+                                response_time,
+                                last_executed: chrono::Utc::now().to_rfc3339(),
+                            }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    pub fn create_user(&self, name: &str, snippets_path: &str) -> Result<i64, String> {
+        let connection_guard = self.connection.lock().unwrap();
+        
+        match &*connection_guard {
+            None => Err("Database not initialized".to_string()),
+            Some(conn) => {
+                let now = chrono::Utc::now().timestamp();
+                
+                match conn.execute(
+                    "INSERT INTO users (name, snippets_path, created_at) VALUES (?, ?, ?)",
+                    [name, snippets_path, &now.to_string()],
+                ) {
+                    Ok(_) => {
+                        // Get the last inserted row id
+                        match conn.last_insert_rowid() {
+                            id => Ok(id),
+                        }
+                    },
+                    Err(e) => Err(format!("Failed to create user: {}", e)),
                 }
             }
         }
