@@ -3,7 +3,7 @@
 
 mod database;
 
-use database::{DatabaseManager, DatabaseHealth};
+use database::{DatabaseManager, DatabaseHealth, QueryResult};
 use std::sync::Arc;
 use tauri::{AppHandle, Manager, State};
 
@@ -29,6 +29,14 @@ async fn check_database_health(
     Ok(db_manager.check_health())
 }
 
+#[tauri::command]
+async fn execute_database_query(
+    query: String,
+    db_manager: State<'_, Arc<DatabaseManager>>,
+) -> Result<QueryResult, String> {
+    Ok(db_manager.execute_query(&query))
+}
+
 fn main() {
     let db_manager = Arc::new(DatabaseManager::new());
 
@@ -39,7 +47,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             greet,
             initialize_database,
-            check_database_health
+            check_database_health,
+            execute_database_query
         ])
         .setup(|app| {
             let db_manager = app.state::<Arc<DatabaseManager>>();

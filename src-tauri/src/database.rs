@@ -124,4 +124,61 @@ impl DatabaseManager {
             }
         }
     }
+
+    pub fn execute_query(&self, query: &str) -> QueryResult {
+        let start_time = std::time::Instant::now();
+        let connection_guard = self.connection.lock().unwrap();
+
+        match &*connection_guard {
+            None => QueryResult {
+                status: "error".to_string(),
+                message: "Database not initialized".to_string(),
+                result: None,
+                response_time: start_time.elapsed().as_millis() as u64,
+                last_executed: chrono::Utc::now().to_rfc3339(),
+            },
+            Some(conn) => {
+                let query = query.trim();
+
+                // For simplicity, let's handle all queries as execute() and provide basic feedback
+                match conn.execute(query, []) {
+                    Ok(rows_affected) => {
+                        let response_time = start_time.elapsed().as_millis() as u64;
+
+                        // Provide different messages based on query type
+                        let (message, result) = if query.to_uppercase().trim().starts_with("SELECT") {
+                            // For SELECT queries, we can't show results with execute(), but we can confirm it ran
+                            (
+                                format!("SELECT query executed successfully ({}ms)", response_time),
+                                Some("Query executed successfully. Note: Use a proper SELECT handler to see results.".to_string())
+                            )
+                        } else {
+                            (
+                                format!("Query executed successfully ({}ms)", response_time),
+                                Some(format!("Rows affected: {}", rows_affected))
+                            )
+                        };
+
+                        QueryResult {
+                            status: "success".to_string(),
+                            message,
+                            result,
+                            response_time,
+                            last_executed: chrono::Utc::now().to_rfc3339(),
+                        }
+                    }
+                    Err(e) => {
+                        let response_time = start_time.elapsed().as_millis() as u64;
+                        QueryResult {
+                            status: "error".to_string(),
+                            message: format!("Query execution error: {}", e),
+                            result: Some(format!("Error details: {}", e)),
+                            response_time,
+                            last_executed: chrono::Utc::now().to_rfc3339(),
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
