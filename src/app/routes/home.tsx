@@ -1,10 +1,11 @@
 import BuiltWith from '@/features/built-with'
 import GithubStarButton from '@/features/github-star-button'
+import { DatabaseHealthIndicator } from '@/components/database-health-indicator'
 
 export function HomePage() {
     return (
         <div className="flex h-screen">
-            <div className="m-auto text-center space-y-3">
+            <div className="m-auto text-center space-y-6 max-w-2xl">
                 <div className="space-y-3">
                     <BuiltWith />
                     <h1 className="text-3xl items-center">
@@ -15,6 +16,18 @@ export function HomePage() {
                         apps with Vite, React, and Tailwind CSS.
                     </p>
                 </div>
+
+                <div className="flex justify-center">
+                    <DatabaseHealthIndicator />
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                    <p>
+                        Database health indicator shows real-time SQLite
+                        database status
+                    </p>
+                </div>
+
                 <GithubStarButton />
             </div>
         </div>

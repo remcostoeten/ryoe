@@ -16,9 +16,9 @@
       "icons/icon.ico"
     ]
   },
-  "productName": "create-tauri-core",
+  "productName": "notr-tauri",
   "version": "0.1.0",
-  "identifier": "com.tauri.app",
+  "identifier": "com.remcostoeten.notr",
   "plugins": {
     "process": {
       "active": true
@@ -30,7 +30,7 @@
     },
     "windows": [
       {
-        "title": "Tauri App",
+        "title": "Notr",
         "width": 1000,
         "height": 600,
         "dragDropEnabled": false

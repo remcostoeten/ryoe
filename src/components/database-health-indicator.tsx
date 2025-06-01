@@ -1,0 +1,140 @@
+import { useDatabaseHealth } from '@/hooks/use-database-health'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger
+} from '@/components/ui/tooltip'
+import {
+    CheckCircle,
+    XCircle,
+    AlertCircle,
+    Loader2,
+    RefreshCw,
+    Database
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+interface DatabaseHealthIndicatorProps {
+    /** Show refresh button. Default: true */
+    showRefresh?: boolean
+    /** Show detailed status text. Default: true */
+    showDetails?: boolean
+    /** Custom className */
+    className?: string
+    /** Health check interval in milliseconds. Default: 30000 (30 seconds) */
+    interval?: number
+}
+
+const statusConfig = {
+    checking: {
+        icon: Loader2,
+        variant: 'secondary' as const,
+        label: 'Checking',
+        color: 'text-gray-500'
+    },
+    healthy: {
+        icon: CheckCircle,
+        variant: 'success' as const,
+        label: 'Healthy',
+        color: 'text-green-500'
+    },
+    error: {
+        icon: XCircle,
+        variant: 'error' as const,
+        label: 'Error',
+        color: 'text-red-500'
+    },
+    disconnected: {
+        icon: AlertCircle,
+        variant: 'warning' as const,
+        label: 'Disconnected',
+        color: 'text-yellow-500'
+    }
+} as const
+
+export function DatabaseHealthIndicator({
+    showRefresh = true,
+    showDetails = true,
+    className,
+    interval = 30000
+}: DatabaseHealthIndicatorProps) {
+    const { health, isLoading, refresh } = useDatabaseHealth({ interval })
+
+    const config = statusConfig[health.status]
+    const Icon = config.icon
+
+    const formatLastChecked = (date: Date) => {
+        const now = new Date()
+        const diffMs = now.getTime() - date.getTime()
+        const diffSeconds = Math.floor(diffMs / 1000)
+        const diffMinutes = Math.floor(diffSeconds / 60)
+
+        if (diffSeconds < 60) {
+            return `${diffSeconds}s ago`
+        } else if (diffMinutes < 60) {
+            return `${diffMinutes}m ago`
+        } else {
+            return date.toLocaleTimeString()
+        }
+    }
+
+    const tooltipContent = (
+        <div className="space-y-1">
+            <div className="font-medium">Database Status</div>
+            <div className="text-sm">{health.message}</div>
+            <div className="text-xs text-muted-foreground">
+                Last checked: {formatLastChecked(health.lastChecked)}
+            </div>
+            {health.responseTime && (
+                <div className="text-xs text-muted-foreground">
+                    Response time: {health.responseTime}ms
+                </div>
+            )}
+        </div>
+    )
+
+    return (
+        <div className={cn('flex items-center gap-2', className)}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2">
+                        <Database className="h-4 w-4 text-muted-foreground" />
+                        <Badge variant={config.variant} className="gap-1">
+                            <Icon
+                                className={cn(
+                                    'h-3 w-3',
+                                    health.status === 'checking' &&
+                                        'animate-spin'
+                                )}
+                            />
+                            {config.label}
+                        </Badge>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent>{tooltipContent}</TooltipContent>
+            </Tooltip>
+
+            {showDetails && (
+                <span className="text-sm text-muted-foreground">
+                    {health.responseTime ? `${health.responseTime}ms` : ''}
+                </span>
+            )}
+
+            {showRefresh && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={refresh}
+                    disabled={isLoading}
+                    className="h-6 w-6 p-0"
+                >
+                    <RefreshCw
+                        className={cn('h-3 w-3', isLoading && 'animate-spin')}
+                    />
+                </Button>
+            )}
+        </div>
+    )
+}
