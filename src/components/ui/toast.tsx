@@ -69,7 +69,6 @@ function ToastItem({
     toast,
     onRemove,
     index,
-    total,
     isHovered
 }: {
     toast: TToast

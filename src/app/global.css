@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'highlight.js/styles/github-dark.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -123,4 +124,123 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Custom prose styles for MDX content */
+@layer components {
+    .prose {
+        @apply text-foreground;
+    }
+
+    .prose h1 {
+        @apply text-3xl font-bold mb-6 text-foreground border-b pb-2;
+    }
+
+    .prose h2 {
+        @apply text-2xl font-semibold mt-8 mb-4 text-foreground;
+    }
+
+    .prose h3 {
+        @apply text-xl font-semibold mt-6 mb-3 text-foreground;
+    }
+
+    .prose h4 {
+        @apply text-lg font-medium mt-4 mb-2 text-foreground;
+    }
+
+    .prose p {
+        @apply mb-4 leading-7 text-foreground/90;
+    }
+
+    .prose ul {
+        @apply mb-4 ml-6 list-disc;
+    }
+
+    .prose ol {
+        @apply mb-4 ml-6 list-decimal;
+    }
+
+    .prose li {
+        @apply mb-2;
+    }
+
+    .prose pre {
+        @apply bg-muted p-4 rounded-lg overflow-x-auto mb-4 text-sm;
+    }
+
+    .prose code {
+        @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+    }
+
+    .prose pre code {
+        @apply bg-transparent p-0;
+    }
+
+    .prose blockquote {
+        @apply border-l-4 border-primary pl-4 italic my-4 text-muted-foreground;
+    }
+
+    .prose table {
+        @apply w-full border-collapse border border-border mb-4;
+    }
+
+    .prose th {
+        @apply border border-border px-4 py-2 bg-muted font-semibold text-left;
+    }
+
+    .prose td {
+        @apply border border-border px-4 py-2;
+    }
+
+    .prose a {
+        @apply text-primary hover:underline;
+    }
+
+    .prose strong {
+        @apply font-semibold;
+    }
+
+    .prose em {
+        @apply italic;
+    }
+}
+
+@keyframes pulse-animation {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+.pulse-emerald {
+    animation: pulse-animation 1.5s infinite;
+    animation-fill-mode: forwards;
+    /* Set the initial box-shadow color to match the text-emerald-600 */
+    box-shadow: 0 0 0 0 hsl(140, 50%, 40%); /* Example for emerald */
+}
+
+.pulse-amber {
+    animation: pulse-animation 1.5s infinite;
+    animation-fill-mode: forwards;
+    /* Set the initial box-shadow color to match the text-amber-600 */
+    box-shadow: 0 0 0 0 hsl(35, 70%, 40%); /* Example for amber */
+}
+
+.pulse-rose {
+    animation: pulse-animation 1.5s infinite;
+    animation-fill-mode: forwards;
+    /* Set the initial box-shadow color to match the text-rose-600 */
+    box-shadow: 0 0 0 0 hsl(340, 70%, 40%); /* Example for rose */
+}
+
+.pulse-gray {
+    animation: pulse-animation 1.5s infinite;
+    animation-fill-mode: forwards;
+    /* Set the initial box-shadow color to match the text-gray-600 */
+    box-shadow: 0 0 0 0 hsl(220, 10%, 40%); /* Example for gray */
 }

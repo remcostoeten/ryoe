@@ -1,0 +1,317 @@
+# Storage & File System Guide
+
+## Table of Contents
+
+## Overview
+
+This guide covers how local storage and file system operations work in our Tauri application. Our app uses a combination of browser storage APIs and Tauri's file system capabilities to provide robust data persistence.
+
+## Storage Architecture
+
+Our application implements a multi-layered storage approach:
+
+```
+┌─────────────────────────────────────┐
+│           Frontend (React)          │
+├─────────────────────────────────────┤
+│         Tauri Commands              │
+├─────────────────────────────────────┤
+│         Rust Backend               │
+├─────────────────────────────────────┤
+│    File System + SQLite Database   │
+└─────────────────────────────────────┘
+```
+
+## File System Structure
+
+Our application stores data in the following directory structure:
+
+```bash
+# Application data directory
+~/.local/share/com.remcostoeten.notr/
+├── notes.db                 # SQLite database
+├── config/
+│   ├── settings.json        # Application settings
+│   └── preferences.json     # User preferences
+├── snippets/
+│   ├── javascript/          # JavaScript code snippets
+│   ├── typescript/          # TypeScript code snippets
+│   └── rust/               # Rust code snippets
+└── logs/
+    ├── app.log             # Application logs
+    └── error.log           # Error logs
+```
+
+## Local Storage Implementation
+
+### Browser Storage
+
+For temporary data and UI state, we use browser storage APIs:
+
+```typescript
+// Store user preferences
+localStorage.setItem('theme', 'dark')
+localStorage.setItem('sidebar-collapsed', 'true')
+
+// Session-specific data
+sessionStorage.setItem('current-tab', 'editor')
+```
+
+### Tauri File System
+
+For persistent data that needs to survive app restarts:
+
+```rust
+// src-tauri/src/storage.rs
+use tauri::api::path::app_data_dir;
+use std::fs;
+
+pub async fn get_app_data_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    app_handle
+        .path_resolver()
+        .app_data_dir()
+        .ok_or_else(|| "Failed to get app data directory".to_string())
+}
+```
+
+## Path Resolution
+
+### Getting Application Paths
+
+```typescript
+// Frontend - Get application data directory
+import { appDataDir } from '@tauri-apps/api/path'
+
+const dataDir = await appDataDir()
+console.log('App data directory:', dataDir)
+// Output: /home/remcostoeten/.local/share/com.remcostoeten.notr
+```
+
+### Working with Relative Paths
+
+```typescript
+import { join } from '@tauri-apps/api/path'
+
+// Create paths relative to app data directory
+const configPath = await join(dataDir, 'config', 'settings.json')
+const snippetsPath = await join(dataDir, 'snippets', 'javascript')
+```
+
+## File Operations
+
+### Reading Files
+
+```typescript
+import { readTextFile } from '@tauri-apps/api/fs'
+
+try {
+    const content = await readTextFile(configPath)
+    const config = JSON.parse(content)
+    console.log('Configuration:', config)
+} catch (error) {
+    console.error('Failed to read config:', error)
+}
+```
+
+### Writing Files
+
+```typescript
+import { writeTextFile, createDir } from '@tauri-apps/api/fs'
+
+// Ensure directory exists
+await createDir(snippetsPath, { recursive: true })
+
+// Write file
+const snippet = {
+    title: 'React Hook',
+    content: 'const [state, setState] = useState()',
+    language: 'typescript'
+}
+
+await writeTextFile(
+    await join(snippetsPath, 'react-hook.json'),
+    JSON.stringify(snippet, null, 2)
+)
+```
+
+## Database Storage
+
+### SQLite Database Location
+
+Our SQLite database is stored at:
+
+```bash
+~/.local/share/com.remcostoeten.notr/notes.db
+```
+
+### Database Schema
+
+```sql
+-- Users table
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    snippets_path TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
+
+-- Snippets table
+CREATE TABLE snippets (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+```
+
+## Storage Utilities
+
+### Configuration Manager
+
+```typescript
+// src/lib/storage/config.ts
+export class ConfigManager {
+    private configPath: string
+
+    constructor(configPath: string) {
+        this.configPath = configPath
+    }
+
+    async load<T>(): Promise<T | null> {
+        try {
+            const content = await readTextFile(this.configPath)
+            return JSON.parse(content)
+        } catch {
+            return null
+        }
+    }
+
+    async save<T>(data: T): Promise<void> {
+        await writeTextFile(this.configPath, JSON.stringify(data, null, 2))
+    }
+}
+```
+
+### Usage Example
+
+```typescript
+import { ConfigManager } from '@/lib/storage/config'
+
+const configManager = new ConfigManager(
+    await join(await appDataDir(), 'config', 'settings.json')
+)
+
+// Load configuration
+const settings = await configManager.load<AppSettings>()
+
+// Save configuration
+await configManager.save({
+    theme: 'dark',
+    autoSave: true,
+    fontSize: 14
+})
+```
+
+## Best Practices
+
+### 1. Error Handling
+
+Always wrap file operations in try-catch blocks:
+
+```typescript
+async function saveUserData(data: UserData) {
+    try {
+        await writeTextFile(userDataPath, JSON.stringify(data))
+        console.log('Data saved successfully')
+    } catch (error) {
+        console.error('Failed to save data:', error)
+        // Show user-friendly error message
+        showErrorToast('Failed to save your data. Please try again.')
+    }
+}
+```
+
+### 2. Directory Creation
+
+Ensure directories exist before writing files:
+
+```typescript
+import { createDir, exists } from '@tauri-apps/api/fs'
+
+async function ensureDirectoryExists(path: string) {
+    if (!(await exists(path))) {
+        await createDir(path, { recursive: true })
+    }
+}
+```
+
+### 3. Data Validation
+
+Validate data before storage:
+
+```typescript
+import { z } from 'zod'
+
+const UserDataSchema = z.object({
+    name: z.string().min(1),
+    email: z.string().email(),
+    preferences: z.object({
+        theme: z.enum(['light', 'dark']),
+        notifications: z.boolean()
+    })
+})
+
+async function saveUserData(data: unknown) {
+    const validatedData = UserDataSchema.parse(data)
+    await writeTextFile(userDataPath, JSON.stringify(validatedData))
+}
+```
+
+## Security Considerations
+
+### 1. Path Traversal Prevention
+
+Always use Tauri's path APIs to prevent path traversal attacks:
+
+```typescript
+// ✅ Safe - uses Tauri's path resolution
+const safePath = await join(await appDataDir(), userInput)
+
+// ❌ Dangerous - direct string concatenation
+const unsafePath = `/app/data/${userInput}` // Could be exploited
+```
+
+### 2. Data Encryption
+
+For sensitive data, consider encryption:
+
+```typescript
+import { invoke } from '@tauri-apps/api/tauri'
+
+// Encrypt sensitive data before storage
+const encryptedData = await invoke('encrypt_data', { data: sensitiveInfo })
+await writeTextFile(secureDataPath, encryptedData)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Permission Denied**: Ensure the app has write permissions to the data directory
+2. **File Not Found**: Check if the file path is correct and the file exists
+3. **JSON Parse Error**: Validate JSON data before parsing
+
+### Debug Logging
+
+Enable debug logging to troubleshoot storage issues:
+
+```typescript
+// Enable debug mode
+localStorage.setItem('debug-storage', 'true')
+
+// Log storage operations
+console.log('Writing to:', filePath)
+console.log('Data:', JSON.stringify(data, null, 2))
+```

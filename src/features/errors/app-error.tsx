@@ -6,8 +6,17 @@ import {
     ErrorDescription,
     ErrorActions
 } from '@/features/errors/error-base'
+import { isTauriEnvironment } from '@/lib/environment'
 
 export default function AppErrorPage() {
+    const handleRestart = () => {
+        if (isTauriEnvironment()) {
+            relaunch()
+        } else {
+            window.location.reload()
+        }
+    }
+
     return (
         <ErrorView>
             <ErrorHeader>We&apos;re fixing it</ErrorHeader>
@@ -17,8 +26,8 @@ export default function AppErrorPage() {
                 We know about it and we&apos;re working to fix it.
             </ErrorDescription>
             <ErrorActions>
-                <Button size="lg" onClick={relaunch}>
-                    Relaunch app
+                <Button size="lg" onClick={handleRestart}>
+                    {isTauriEnvironment() ? 'Relaunch app' : 'Reload page'}
                 </Button>
             </ErrorActions>
         </ErrorView>

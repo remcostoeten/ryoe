@@ -1,11 +1,11 @@
-import { useDatabaseHealth } from '@/hooks/use-database-health'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useDatabaseHealth } from '../hooks/use-database-health'
 import {
     Tooltip,
+    Button,
+    Badge,
     TooltipContent,
     TooltipTrigger
-} from '@/components/ui/tooltip'
+} from '@/components/ui/'
 import {
     CheckCircle,
     XCircle,
@@ -104,15 +104,13 @@ export function DatabaseHealthIndicator({
                         <Badge
                             variant={config.variant}
                             className={cn(
-                                'gap-1.5 px-2 transition-colors duration-200',
+                                'gap-1.5 px-2 transition-colors duration-200 bg-opacity-50',
                                 health.status === 'error' &&
-                                    'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 border-rose-300/10',
+                                    'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200',
                                 health.status === 'disconnected' &&
-                                    'bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 border-amber-300/10',
+                                    'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200',
                                 health.status === 'healthy' &&
-                                    'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 border-emerald-300/10',
-                                health.status === 'checking' &&
-                                    'bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 border-gray-300/10'
+                                    'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
                             )}
                         >
                             <Icon

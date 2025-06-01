@@ -1,0 +1,495 @@
+# Database Operations Guide
+
+## Table of Contents
+
+## Overview
+
+This guide covers how to query and mutate data using SQLite and our Tauri-based database system. Our application uses a Rust backend with SQLite for data persistence and provides a clean API for frontend operations.
+
+## Database Architecture
+
+```
+┌─────────────────────────────────────┐
+│     Frontend (React/TypeScript)    │
+│   ┌─────────────────────────────┐   │
+│   │    Database Health Hook     │   │
+│   │    Query Execution Hook     │   │
+│   └─────────────────────────────┘   │
+├─────────────────────────────────────┤
+│         Tauri Commands              │
+│   ┌─────────────────────────────┐   │
+│   │  check_database_health()    │   │
+│   │  execute_database_query()   │   │
+│   │  initialize_database()      │   │
+│   └─────────────────────────────┘   │
+├─────────────────────────────────────┤
+│         Rust Backend               │
+│   ┌─────────────────────────────┐   │
+│   │    DatabaseManager          │   │
+│   │    Connection Pool          │   │
+│   │    Query Execution          │   │
+│   └─────────────────────────────┘   │
+├─────────────────────────────────────┤
+│         SQLite Database            │
+│   ┌─────────────────────────────┐   │
+│   │  ~/.local/share/com.        │   │
+│   │  remcostoeten.notr/notes.db │   │
+│   └─────────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+## Database Schema
+
+Our application uses the following database schema:
+
+```sql
+-- Users table for storing user information
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    snippets_path TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
+
+-- Snippets table for storing code snippets
+CREATE TABLE IF NOT EXISTS snippets (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+```
+
+## Query Operations
+
+### Basic Queries
+
+#### Frontend Query Execution
+
+```typescript
+import { invoke } from '@tauri-apps/api/core'
+
+interface QueryResult {
+    status: string
+    message: string
+    result?: string
+    response_time: number
+    last_executed: string
+}
+
+// Execute a database query
+async function executeQuery(query: string): Promise<QueryResult> {
+    try {
+        const result = await invoke<QueryResult>('execute_database_query', {
+            query
+        })
+        return result
+    } catch (error) {
+        throw new Error(`Query failed: ${error}`)
+    }
+}
+```
+
+#### Example Queries
+
+```typescript
+// Create a new table
+const createTableResult = await executeQuery(`
+  CREATE TABLE IF NOT EXISTS projects (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at INTEGER NOT NULL
+  )
+`)
+
+// Insert data
+const insertResult = await executeQuery(`
+  INSERT INTO projects (name, description, created_at) 
+  VALUES ('My Project', 'A sample project', ${Date.now()})
+`)
+
+// Update data
+const updateResult = await executeQuery(`
+  UPDATE projects 
+  SET description = 'Updated description' 
+  WHERE name = 'My Project'
+`)
+
+// Delete data
+const deleteResult = await executeQuery(`
+  DELETE FROM projects 
+  WHERE id = 1
+`)
+```
+
+### Using the Database Health Hook
+
+```typescript
+import { useDatabaseHealth } from '@/hooks/use-database-health'
+
+function DatabaseStatus() {
+  const { health, isLoading, refresh } = useDatabaseHealth({
+    interval: 30000, // Check every 30 seconds
+    immediate: true  // Check immediately on mount
+  })
+
+  return (
+    <div>
+      <p>Status: {health.status}</p>
+      <p>Message: {health.message}</p>
+      {health.responseTime && (
+        <p>Response Time: {health.responseTime}ms</p>
+      )}
+      <button onClick={refresh} disabled={isLoading}>
+        Refresh
+      </button>
+    </div>
+  )
+}
+```
+
+## Mutation Operations
+
+### Insert Operations
+
+```typescript
+// Insert a new user
+async function createUser(name: string, snippetsPath: string) {
+    const query = `
+    INSERT INTO users (name, snippets_path, created_at) 
+    VALUES ('${name}', '${snippetsPath}', ${Date.now()})
+  `
+
+    const result = await executeQuery(query)
+
+    if (result.status === 'success') {
+        console.log('User created successfully')
+        return result
+    } else {
+        throw new Error(result.message)
+    }
+}
+```
+
+### Update Operations
+
+```typescript
+// Update user information
+async function updateUser(id: number, name: string) {
+    const query = `
+    UPDATE users 
+    SET name = '${name}' 
+    WHERE id = ${id}
+  `
+
+    const result = await executeQuery(query)
+
+    if (result.status === 'success') {
+        console.log('User updated successfully')
+        return result
+    } else {
+        throw new Error(result.message)
+    }
+}
+```
+
+### Delete Operations
+
+```typescript
+// Delete a user
+async function deleteUser(id: number) {
+    const query = `DELETE FROM users WHERE id = ${id}`
+
+    const result = await executeQuery(query)
+
+    if (result.status === 'success') {
+        console.log('User deleted successfully')
+        return result
+    } else {
+        throw new Error(result.message)
+    }
+}
+```
+
+## Advanced Query Patterns
+
+### Transactions
+
+For operations that need to be atomic, you can use transactions:
+
+```typescript
+async function transferSnippet(
+    fromUserId: number,
+    toUserId: number,
+    snippetId: number
+) {
+    const queries = [
+        'BEGIN TRANSACTION',
+        `UPDATE snippets SET user_id = ${toUserId} WHERE id = ${snippetId} AND user_id = ${fromUserId}`,
+        `UPDATE users SET updated_at = ${Date.now()} WHERE id IN (${fromUserId}, ${toUserId})`,
+        'COMMIT'
+    ]
+
+    try {
+        for (const query of queries) {
+            const result = await executeQuery(query)
+            if (result.status !== 'success') {
+                await executeQuery('ROLLBACK')
+                throw new Error(`Transaction failed: ${result.message}`)
+            }
+        }
+        console.log('Transfer completed successfully')
+    } catch (error) {
+        await executeQuery('ROLLBACK')
+        throw error
+    }
+}
+```
+
+### Joins and Complex Queries
+
+```typescript
+// Get users with their snippet counts
+async function getUsersWithSnippetCounts() {
+    const query = `
+    SELECT 
+      u.id,
+      u.name,
+      u.created_at,
+      COUNT(s.id) as snippet_count
+    FROM users u
+    LEFT JOIN snippets s ON u.id = s.user_id
+    GROUP BY u.id, u.name, u.created_at
+    ORDER BY snippet_count DESC
+  `
+
+    return await executeQuery(query)
+}
+```
+
+## Error Handling
+
+### Frontend Error Handling
+
+```typescript
+async function safeExecuteQuery(query: string): Promise<QueryResult | null> {
+    try {
+        const result = await executeQuery(query)
+
+        if (result.status === 'error') {
+            console.error('Database error:', result.message)
+            // Show user-friendly error message
+            showErrorToast('Database operation failed. Please try again.')
+            return null
+        }
+
+        return result
+    } catch (error) {
+        console.error('Query execution failed:', error)
+        showErrorToast('Unable to connect to database.')
+        return null
+    }
+}
+```
+
+### Rust Backend Error Handling
+
+```rust
+// src-tauri/src/database.rs
+impl DatabaseManager {
+    pub fn execute_query(&self, query: &str) -> QueryResult {
+        let start_time = std::time::Instant::now();
+        let connection_guard = self.connection.lock().unwrap();
+
+        match &*connection_guard {
+            None => QueryResult {
+                status: "error".to_string(),
+                message: "Database not initialized".to_string(),
+                result: None,
+                response_time: start_time.elapsed().as_millis() as u64,
+                last_executed: chrono::Utc::now().to_rfc3339(),
+            },
+            Some(conn) => {
+                match conn.execute(query, []) {
+                    Ok(rows_affected) => {
+                        let response_time = start_time.elapsed().as_millis() as u64;
+                        QueryResult {
+                            status: "success".to_string(),
+                            message: format!("Query executed successfully ({}ms)", response_time),
+                            result: Some(format!("Rows affected: {}", rows_affected)),
+                            response_time,
+                            last_executed: chrono::Utc::now().to_rfc3339(),
+                        }
+                    }
+                    Err(e) => {
+                        let response_time = start_time.elapsed().as_millis() as u64;
+                        QueryResult {
+                            status: "error".to_string(),
+                            message: format!("Query execution error: {}", e),
+                            result: Some(format!("Error details: {}", e)),
+                            response_time,
+                            last_executed: chrono::Utc::now().to_rfc3339(),
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+## Performance Optimization
+
+### Connection Pooling
+
+Our database manager uses connection pooling to optimize performance:
+
+```rust
+pub struct DatabaseManager {
+    pub connection: Mutex<Option<Connection>>,
+}
+
+impl DatabaseManager {
+    pub fn new() -> Self {
+        Self {
+            connection: Mutex::new(None),
+        }
+    }
+}
+```
+
+### Query Optimization Tips
+
+1. **Use Indexes**: Create indexes for frequently queried columns
+2. **Limit Results**: Use `LIMIT` clause for large datasets
+3. **Avoid N+1 Queries**: Use JOINs instead of multiple queries
+4. **Prepare Statements**: For repeated queries with different parameters
+
+```sql
+-- Create indexes for better performance
+CREATE INDEX idx_snippets_user_id ON snippets(user_id);
+CREATE INDEX idx_snippets_created_at ON snippets(created_at);
+CREATE INDEX idx_users_name ON users(name);
+```
+
+## Testing Database Operations
+
+### Unit Testing Queries
+
+```typescript
+// tests/database.test.ts
+import { describe, it, expect, beforeEach } from 'vitest'
+import { executeQuery } from '@/lib/database'
+
+describe('Database Operations', () => {
+    beforeEach(async () => {
+        // Setup test database
+        await executeQuery('DELETE FROM test_users')
+    })
+
+    it('should create a user', async () => {
+        const result = await executeQuery(`
+      INSERT INTO test_users (name, email) 
+      VALUES ('Test User', 'test@example.com')
+    `)
+
+        expect(result.status).toBe('success')
+        expect(result.result).toContain('Rows affected: 1')
+    })
+
+    it('should handle invalid queries', async () => {
+        const result = await executeQuery('INVALID SQL QUERY')
+
+        expect(result.status).toBe('error')
+        expect(result.message).toContain('syntax error')
+    })
+})
+```
+
+## Best Practices
+
+### 1. SQL Injection Prevention
+
+Always sanitize user input:
+
+```typescript
+// ❌ Vulnerable to SQL injection
+const unsafeQuery = `SELECT * FROM users WHERE name = '${userInput}'`
+
+// ✅ Safe approach - validate and escape input
+function sanitizeInput(input: string): string {
+    return input.replace(/'/g, "''") // Escape single quotes
+}
+
+const safeQuery = `SELECT * FROM users WHERE name = '${sanitizeInput(userInput)}'`
+```
+
+### 2. Error Logging
+
+Log database errors for debugging:
+
+```typescript
+async function loggedExecuteQuery(query: string) {
+    console.log('Executing query:', query)
+
+    const result = await executeQuery(query)
+
+    if (result.status === 'error') {
+        console.error('Query failed:', {
+            query,
+            error: result.message,
+            timestamp: result.last_executed
+        })
+    }
+
+    return result
+}
+```
+
+### 3. Connection Management
+
+Always check database health before critical operations:
+
+```typescript
+async function criticalDatabaseOperation() {
+    const health = await invoke('check_database_health')
+
+    if (health.status !== 'healthy') {
+        throw new Error('Database is not healthy, aborting operation')
+    }
+
+    // Proceed with operation
+    return await executeQuery('...')
+}
+```
+
+## Database File Location
+
+The SQLite database is stored at:
+
+```bash
+# Linux/macOS
+~/.local/share/com.remcostoeten.notr/notes.db
+
+# Windows
+%APPDATA%\com.remcostoeten.notr\notes.db
+```
+
+You can access this file directly with SQLite tools for debugging:
+
+```bash
+# Open database with sqlite3 CLI
+sqlite3 ~/.local/share/com.remcostoeten.notr/notes.db
+
+# List all tables
+.tables
+
+# Show schema
+.schema
+
+# Query data
+SELECT * FROM users LIMIT 5;
+```

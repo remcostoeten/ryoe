@@ -5,22 +5,29 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { initializeDatabase } from '@/api/db'
 import { initTheme } from '@/lib/theme'
 import { ToastProvider } from '@/components/ui/toast'
+import { Spinner } from '@/components/ui/spinner'
+import { isTauriEnvironment } from '@/lib/environment'
 
-export default function AppProvider({ children }: { children: ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
     useEffect(() => {
-        // Initialize database when app starts
-        initializeDatabase().catch((error) => {
-            console.error('Failed to initialize database:', error)
-        })
+        // Only initialize database in Tauri environment
+        if (isTauriEnvironment()) {
+            initializeDatabase().catch((error) => {
+                console.error('Failed to initialize database:', error)
+            })
+        } else {
+            console.log(
+                'Running in web environment - database initialization skipped'
+            )
+        }
 
-        // Initialize theme
         initTheme().catch((error) => {
             console.error('Failed to initialize theme:', error)
         })
     }, [])
 
     return (
-        <Suspense fallback={<>Loading...</>}>
+        <Suspense fallback={<Spinner />}>
             <ErrorBoundary FallbackComponent={AppErrorPage}>
                 <ToastProvider>
                     <TooltipProvider>{children}</TooltipProvider>

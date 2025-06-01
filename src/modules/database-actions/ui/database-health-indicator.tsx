@@ -1,53 +1,33 @@
-import { useDatabaseHealth } from '@/hooks/use-database-health'
-import { Badge } from '@/components/ui/badge'
+import { useDatabaseHealth } from '@/modules/database-actions/hooks/use-database-health'
 import { Button } from '@/components/ui/button'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger
-} from '@/components/ui/tooltip'
-import {
-    CheckCircle,
-    XCircle,
-    AlertCircle,
-    Loader2,
-    RefreshCw,
-    Database
-} from 'lucide-react'
+import { Badge, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
+import { RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface DatabaseHealthIndicatorProps {
-    /** Show refresh button. Default: true */
+type TProps = {
     showRefresh?: boolean
-    /** Show detailed status text. Default: true */
     showDetails?: boolean
-    /** Custom className */
     className?: string
-    /** Health check interval in milliseconds. Default: 30000 (30 seconds) */
     interval?: number
 }
 
 const statusConfig = {
     checking: {
-        icon: Loader2,
         variant: 'secondary' as const,
         label: 'Checking',
         color: 'text-gray-500'
     },
     healthy: {
-        icon: CheckCircle,
         variant: 'success' as const,
         label: 'Connected',
         color: 'text-emerald-600'
     },
     error: {
-        icon: XCircle,
         variant: 'destructive' as const,
         label: 'Connection Failed',
         color: 'text-rose-600'
     },
     disconnected: {
-        icon: AlertCircle,
         variant: 'warning' as const,
         label: 'Reconnecting',
         color: 'text-amber-600'
@@ -59,11 +39,10 @@ export function DatabaseHealthIndicator({
     showDetails = true,
     className,
     interval = 30000
-}: DatabaseHealthIndicatorProps) {
+}: TProps) {
     const { health, isLoading, refresh } = useDatabaseHealth({ interval })
 
     const config = statusConfig[health.status]
-    const Icon = config.icon
 
     function formatLastChecked(date: Date) {
         const now = new Date()
@@ -95,36 +74,37 @@ export function DatabaseHealthIndicator({
         </div>
     )
 
+    const healthy = health.status === 'healthy'
+    const disconnected = health.status === 'disconnected'
+    const error = health.status === 'error'
+    const checking = health.status === 'checking'
+
     return (
         <div className={cn('flex items-center gap-2', className)}>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <div className="flex items-center gap-2">
-                        <Database className="h-4 w-4 text-muted-foreground" />
                         <Badge
                             variant={config.variant}
                             className={cn(
-                                'gap-1.5 px-2 transition-colors duration-200 bg-opacity-50',
+                                'gap-1.5 px-2 transition-colors duration-200',
                                 health.status === 'error' &&
-                                    'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200',
+                                    'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 border-rose-300/10',
                                 health.status === 'disconnected' &&
-                                    'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200',
+                                    'bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 border-amber-300/10',
                                 health.status === 'healthy' &&
-                                    'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                                    'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 border-emerald-300/10',
+                                health.status === 'checking' &&
+                                    'bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 border-gray-300/10'
                             )}
                         >
-                            <Icon
+                            <span
                                 className={cn(
-                                    'h-3.5 w-3.5',
-                                    config.color,
-                                    health.status === 'checking' &&
-                                        'animate-spin',
-                                    health.status === 'error' &&
-                                        'text-rose-600',
-                                    health.status === 'disconnected' &&
-                                        'text-amber-600',
-                                    health.status === 'healthy' &&
-                                        'text-emerald-600'
+                                    'w-2 h-2 rounded-full',
+                                    healthy && 'bg-emerald-600 pulse-emerald',
+                                    disconnected && 'bg-amber-600 pulse-amber',
+                                    error && 'bg-rose-600 pulse-rose',
+                                    checking && 'bg-gray-600 pulse-gray'
                                 )}
                             />
                             {config.label}

@@ -14,6 +14,22 @@ const createAppRouter = () =>
             }
         },
         {
+            path: '/docs',
+            lazy: () => import('@/app/routes/docs')
+        },
+        {
+            path: '/docs/storage',
+            lazy: () => import('@/app/routes/docs/storage')
+        },
+        {
+            path: '/docs/db-operations',
+            lazy: () => import('@/app/routes/docs/db-operations')
+        },
+        {
+            path: '/docs/storage-api',
+            lazy: () => import('@/app/routes/docs/storage-api')
+        },
+        {
             path: '*',
             lazy: () => import('@/app/routes/not-found')
         }
