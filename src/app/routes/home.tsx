@@ -1,6 +1,5 @@
 import { Header } from '@/components/header'
 import { DatabaseHealthIndicator } from '@/modules/database-actions/ui/database-health-indicator'
-import GithubStarButton from '@/features/github-star-button'
 import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-form'
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
 
@@ -26,10 +25,6 @@ export function HomePage() {
 
                         <div className="flex justify-center">
                             <DatabaseQueryTester />
-                        </div>
-
-                        <div className="flex justify-center">
-                            <GithubStarButton />
                         </div>
 
                         <div className="mt-8 p-6 bg-card rounded-lg shadow-sm">

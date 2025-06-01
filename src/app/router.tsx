@@ -15,11 +15,17 @@ const createAppRouter = () =>
         },
         {
             path: '/docs',
-            lazy: () => import('@/app/routes/docs')
+            lazy: async () => {
+                const module = await import('@/app/routes/docs')
+                return { Component: module.default }
+            }
         },
         {
             path: '/docs/storage',
-            lazy: () => import('@/app/routes/docs/storage')
+            lazy: async () => {
+                const module = await import('@/app/routes/docs/storage')
+                return { Component: module.default }
+            }
         },
         {
             path: '/docs/db-operations',
@@ -27,7 +33,10 @@ const createAppRouter = () =>
         },
         {
             path: '/docs/storage-api',
-            lazy: () => import('@/app/routes/docs/storage-api')
+            lazy: async () => {
+                const module = await import('@/app/routes/docs/storage-api')
+                return { Component: module.default }
+            }
         },
         {
             path: '*',

@@ -27,6 +27,10 @@ export default defineConfig({
     server: {
         port: 1420,
         strictPort: true,
+        hmr: {
+            port: 1421,
+            overlay: false // Disable error overlay to prevent reconnection messages
+        },
         watch: {
             // 3. tell vite to ignore watching `src-tauri`
             ignored: ['**/src-tauri/**']

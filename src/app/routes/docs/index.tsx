@@ -1,4 +1,3 @@
-import { Link } from 'react-router'
 import {
     Card,
     CardContent,
@@ -13,10 +12,13 @@ import {
     FileText,
     ArrowRight,
     BookOpen,
-    Code2
+    Code2,
+    Search
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Link } from 'react-router'
 
-export function DocsPage() {
+function DocsPage() {
     const docSections = [
         {
             title: 'Storage & File System',
@@ -60,8 +62,8 @@ export function DocsPage() {
     ]
 
     return (
-        <div className="min-h-screen p-6">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 py-10">
                 {/* Header */}
                 <div className="text-center space-y-4">
                     <div className="flex items-center justify-center gap-3">
@@ -72,6 +74,15 @@ export function DocsPage() {
                         Complete guide to storage, database operations, and file
                         system management in our Tauri application
                     </p>
+                    <div className="max-w-md mx-auto mt-6">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search documentation..."
+                                className="pl-10 pr-4 py-6 h-12 rounded-full border-muted-foreground/20"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 {/* Navigation Cards */}
@@ -81,7 +92,7 @@ export function DocsPage() {
                         return (
                             <Card
                                 key={section.path}
-                                className="group hover:shadow-lg transition-all duration-200"
+                                className="group hover:shadow-lg transition-all duration-200 border-muted-foreground/20"
                             >
                                 <CardHeader>
                                     <div className="flex items-center gap-3">
@@ -126,7 +137,7 @@ export function DocsPage() {
                 </div>
 
                 {/* Quick Start */}
-                <Card className="bg-muted/50">
+                <Card className="bg-muted/50 border-muted-foreground/20">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="h-5 w-5" />
@@ -167,7 +178,7 @@ export function DocsPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
                             <Link to="/docs/storage">
                                 <Button variant="outline">
                                     Start with Storage
@@ -188,4 +199,4 @@ export function DocsPage() {
     )
 }
 
-export const Component = DocsPage
+export default DocsPage

@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { cn } from '@/lib/utils' // Assuming this utility is available
+import { cn } from '@/lib/utils'
 import { Logo } from './logo'
 
 const AnimatedNavLink = ({
@@ -18,7 +16,7 @@ const AnimatedNavLink = ({
     return (
         <a
             href={href}
-            className={`group relative inline-block overflow-hidden h-5 flex items-center ${textSizeClass}`}
+            className={`group relative  overflow-hidden h-5 flex items-center ${textSizeClass}`}
         >
             <div className="flex flex-col transition-transform duration-400 ease-out transform group-hover:-translate-y-1/2">
                 <span className={defaultTextColor}>{children}</span>

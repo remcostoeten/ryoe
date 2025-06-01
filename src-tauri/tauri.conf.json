@@ -1,9 +1,9 @@
 {
   "build": {
-    "beforeDevCommand": "npx vite --port 5173",
+    "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173"
+    "devUrl": "http://localhost:1420"
   },
   "bundle": {
     "active": true,
