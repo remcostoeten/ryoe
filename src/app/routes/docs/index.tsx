@@ -13,7 +13,8 @@ import {
     ArrowRight,
     BookOpen,
     Code2,
-    Search
+    Search,
+    Monitor
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Link } from 'react-router'
@@ -58,6 +59,19 @@ function DocsPage() {
                 'Examples',
                 'Best Practices'
             ]
+        },
+        {
+            title: 'Window Management',
+            description:
+                'Screen position persistence and window state management for desktop applications',
+            icon: Monitor,
+            path: '/docs/window-management',
+            topics: [
+                'Position Persistence',
+                'Multi-Monitor Support',
+                'Window State Saving',
+                'Automatic Restoration'
+            ]
         }
     ]
 
@@ -71,8 +85,9 @@ function DocsPage() {
                         <h1 className="text-4xl font-bold">Documentation</h1>
                     </div>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                        Complete guide to storage, database operations, and file
-                        system management in our Tauri application
+                        Complete guide to storage, database operations, window
+                        management, and file system management in our Tauri
+                        application
                     </p>
                     <div className="max-w-md mx-auto mt-6">
                         <div className="relative">
@@ -188,6 +203,12 @@ function DocsPage() {
                             <Link to="/docs/db-operations">
                                 <Button variant="outline">
                                     Database Guide
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </Link>
+                            <Link to="/docs/window-management">
+                                <Button variant="outline">
+                                    Window Management
                                     <ArrowRight className="h-4 w-4 ml-2" />
                                 </Button>
                             </Link>

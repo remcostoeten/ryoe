@@ -1,0 +1,210 @@
+# Window Management & Screen Position Persistence
+
+## Table of Contents
+
+## Overview
+
+The Notr application includes advanced window management features that automatically save and restore window position, size, and state across application restarts. This provides a seamless user experience by remembering where you positioned your application window.
+
+## Features
+
+### Screen Position Persistence
+
+The application automatically saves:
+
+- **Window Position**: X and Y coordinates on screen
+- **Window Size**: Width and height dimensions
+- **Window State**: Maximized, minimized, or normal state
+- **Multi-Monitor Support**: Handles multiple display configurations
+
+### Automatic State Management
+
+- **Save on Change**: Window state is saved automatically when moved or resized
+- **Restore on Launch**: Previous window state is restored when the app starts
+- **Graceful Fallbacks**: Uses default dimensions if saved state is invalid
+
+## Implementation
+
+### Tauri Plugin Integration
+
+The feature is implemented using the official `tauri-plugin-window-state` plugin:
+
+```rust
+// src-tauri/src/main.rs
+use tauri_plugin_window_state;
+
+fn main() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        // ... other plugins
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+```
+
+### Dependency Configuration
+
+```toml
+# src-tauri/Cargo.toml
+[dependencies]
+tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+```
+
+### Default Window Configuration
+
+```json
+// src-tauri/tauri.conf.json
+{
+    "app": {
+        "windows": [
+            {
+                "title": "Notr",
+                "width": 1000,
+                "height": 600,
+                "dragDropEnabled": false
+            }
+        ]
+    }
+}
+```
+
+## Storage Details
+
+### File Location
+
+Window state is stored in the application data directory:
+
+```bash
+~/.local/share/com.remcostoeten.notr/config/window-state.dat
+```
+
+### Data Format
+
+The plugin stores window state in a binary format that includes:
+
+- Window position (x, y coordinates)
+- Window dimensions (width, height)
+- Window state flags (maximized, minimized, etc.)
+- Display information for multi-monitor setups
+
+## Usage Examples
+
+### Programmatic Window Control
+
+While the plugin handles automatic persistence, you can also control windows programmatically:
+
+```typescript
+import { getCurrentWindow } from '@tauri-apps/api/window'
+
+// Get current window instance
+const appWindow = getCurrentWindow()
+
+// Manually save current state
+await appWindow.emit('tauri://save-window-state')
+
+// Get window position
+const position = await appWindow.outerPosition()
+console.log(`Window at: ${position.x}, ${position.y}`)
+
+// Get window size
+const size = await appWindow.outerSize()
+console.log(`Window size: ${size.width}x${size.height}`)
+```
+
+### Window State Events
+
+Listen for window state changes:
+
+```typescript
+import { getCurrentWindow } from '@tauri-apps/api/window'
+
+const appWindow = getCurrentWindow()
+
+// Listen for window move events
+await appWindow.listen('tauri://move', (event) => {
+    console.log('Window moved:', event.payload)
+})
+
+// Listen for window resize events
+await appWindow.listen('tauri://resize', (event) => {
+    console.log('Window resized:', event.payload)
+})
+```
+
+## Benefits
+
+### User Experience
+
+- **Consistent Layout**: Window appears in the same location every time
+- **Multi-Monitor Friendly**: Remembers which monitor the app was on
+- **No Manual Repositioning**: Saves time by eliminating need to reposition windows
+
+### Development Benefits
+
+- **Zero Configuration**: Works automatically without additional setup
+- **Cross-Platform**: Consistent behavior across Windows, macOS, and Linux
+- **Reliable Storage**: Uses platform-native storage mechanisms
+
+## Troubleshooting
+
+### Common Issues
+
+#### Window Appears Off-Screen
+
+If the saved position is invalid (e.g., monitor was disconnected):
+
+- The plugin automatically detects this and uses default position
+- Window will appear in the center of the primary monitor
+
+#### State Not Persisting
+
+Check that the application has write permissions to:
+
+```bash
+~/.local/share/com.remcostoeten.notr/config/
+```
+
+#### Multiple Instances
+
+Each window instance maintains its own state. If you have multiple windows, each will remember its individual position and size.
+
+### Debug Information
+
+Enable debug logging to see window state operations:
+
+```rust
+// In development, add logging
+#[cfg(debug_assertions)]
+println!("Window state saved/restored");
+```
+
+## Environment Compatibility
+
+### Desktop Only Feature
+
+Window position persistence is only available in the Tauri desktop environment:
+
+```typescript
+import { isTauriEnvironment } from '@/lib/environment'
+
+if (isTauriEnvironment()) {
+    // Window management features available
+    console.log('Window state persistence enabled')
+} else {
+    // Web environment - feature not available
+    console.log('Running in web mode - window persistence disabled')
+}
+```
+
+### Graceful Degradation
+
+The application handles the absence of this feature gracefully in web environments, ensuring consistent functionality across platforms.
+
+## Future Enhancements
+
+Potential improvements for window management:
+
+- **Custom Window Profiles**: Save different window configurations for different workflows
+- **Workspace Management**: Remember window layouts for multi-window setups
+- **Display Preference**: Remember preferred monitor for multi-display setups
+- **Window Snapping**: Integration with OS window snapping features

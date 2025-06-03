@@ -251,6 +251,30 @@ class AppStateManager {
 }
 ```
 
+### Window State Persistence
+
+For desktop applications, window position and size are automatically managed by the `tauri-plugin-window-state` plugin:
+
+```typescript
+// Window state is automatically saved and restored
+// No manual intervention required for basic functionality
+
+// Optional: Programmatic access to window state
+import { getCurrentWindow } from '@tauri-apps/api/window'
+
+const appWindow = getCurrentWindow()
+
+// Get current window position and size
+const position = await appWindow.outerPosition()
+const size = await appWindow.outerSize()
+
+console.log(
+    `Window: ${size.width}x${size.height} at (${position.x}, ${position.y})`
+)
+```
+
+> **Note**: Window state persistence is only available in Tauri desktop environment. See the [Window Management documentation](/docs/window-management) for detailed information.
+
 ### Storing Multiple Data Types
 
 ```typescript

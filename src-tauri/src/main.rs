@@ -6,6 +6,7 @@ mod database;
 use database::{DatabaseManager, DatabaseHealth, QueryResult};
 use std::sync::Arc;
 use tauri::{AppHandle, Manager, State};
+use tauri_plugin_window_state;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -52,6 +53,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .manage(db_manager)
         .invoke_handler(tauri::generate_handler![
             greet,

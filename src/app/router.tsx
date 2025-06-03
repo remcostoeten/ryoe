@@ -46,6 +46,15 @@ const createAppRouter = () =>
             }
         },
         {
+            path: '/docs/window-management',
+            lazy: async () => {
+                const module = await import(
+                    '@/app/routes/docs/window-management'
+                )
+                return { Component: module.default }
+            }
+        },
+        {
             path: '*',
             lazy: () => import('@/app/routes/not-found')
         }
