@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { FolderService } from '@/api/services/folder-service'
+import { toast } from '@/components/ui/toast'
 import type { Folder, FolderTreeNode } from '@/types/notes'
 import type { UseFolderTreeReturn, TreeBuildOptions } from '../types'
 
@@ -9,6 +10,7 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
   const [allFolders, setAllFolders] = useState<Folder[]>([])
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -66,6 +68,40 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
     setSelectedId(folderId)
   }, [])
 
+  const startEditing = useCallback((folderId: number) => {
+    setEditingId(folderId)
+  }, [])
+
+  const stopEditing = useCallback(() => {
+    setEditingId(null)
+  }, [])
+
+  const renameFolder = useCallback(async (folderId: number, newName: string): Promise<boolean> => {
+    try {
+      const response = await folderService.update({
+        id: folderId,
+        name: newName
+      })
+
+      if (response.success && response.data) {
+        // Update the folder in our local state
+        setAllFolders(prev => prev.map(folder =>
+          folder.id === folderId
+            ? { ...folder, name: newName, updatedAt: new Date() }
+            : folder
+        ))
+        toast.success(`Folder renamed to "${newName}"`)
+        return true
+      } else {
+        toast.error(response.error || 'Failed to rename folder')
+        return false
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to rename folder')
+      return false
+    }
+  }, [])
+
   const refreshTree = useCallback(async () => {
     await loadAllFolders()
   }, [loadAllFolders])
@@ -79,12 +115,16 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
     treeData,
     expandedIds,
     selectedId,
+    editingId,
     loading,
     error,
     expandFolder,
     collapseFolder,
     toggleFolder,
     selectFolder,
+    startEditing,
+    stopEditing,
+    renameFolder,
     refreshTree
   }
 }

@@ -56,13 +56,19 @@ export interface FolderItemProps {
   folder: FolderTreeNode
   isSelected?: boolean
   isExpanded?: boolean
+  isEditing?: boolean
   onSelect?: (folder: Folder) => void
   onExpand?: (folderId: number, isExpanded: boolean) => void
   onEdit?: (folder: Folder) => void
+  onRename?: (folderId: number, newName: string) => Promise<boolean>
   onDelete?: (folder: Folder) => void
   onCreateChild?: (parentId: number) => void
   onMove?: (folderId: number, newParentId: number | null, newPosition: number) => void
+  onStartEditing?: (folderId: number) => void
+  onStopEditing?: () => void
+  onKeyDown?: (e: React.KeyboardEvent, folder: FolderTreeNode) => void
   enableDragDrop?: boolean
+  enableKeyboardNavigation?: boolean
   showContextMenu?: boolean
   className?: string
 }
@@ -82,12 +88,16 @@ export interface UseFolderTreeReturn {
   treeData: FolderTreeNode[]
   expandedIds: Set<number>
   selectedId: number | null
+  editingId: number | null
   loading: boolean
   error: string | null
   expandFolder: (folderId: number) => void
   collapseFolder: (folderId: number) => void
   toggleFolder: (folderId: number) => void
   selectFolder: (folderId: number | null) => void
+  startEditing: (folderId: number) => void
+  stopEditing: () => void
+  renameFolder: (folderId: number, newName: string) => Promise<boolean>
   refreshTree: () => Promise<void>
 }
 
@@ -186,4 +196,25 @@ export interface BulkOperationResult {
   processedCount: number
   failedCount: number
   errors: string[]
+}
+
+// Keyboard navigation types
+export interface KeyboardNavigationState {
+  focusedId: number | null
+  editingId: number | null
+}
+
+export interface KeyboardAction {
+  type: 'select' | 'expand' | 'collapse' | 'edit' | 'delete' | 'create' | 'move'
+  folderId: number
+  payload?: any
+}
+
+// Inline editing types
+export interface InlineEditState {
+  isEditing: boolean
+  originalValue: string
+  currentValue: string
+  isValid: boolean
+  error?: string
 }

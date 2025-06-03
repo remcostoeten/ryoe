@@ -1,11 +1,13 @@
 // Test script for folder CRUD operations
 import { FolderService } from '@/api/services/folder-service'
+import { toast } from '@/components/ui/toast'
 
 async function testFolderCRUD() {
   const folderService = new FolderService()
-  
+
   console.log('🧪 Testing Folder CRUD Operations...')
-  
+  toast.info('Running folder CRUD tests...')
+
   try {
     // Test 1: Create a root folder
     console.log('\n1. Creating root folder...')
@@ -110,9 +112,11 @@ async function testFolderCRUD() {
     }
     
     console.log('\n🎉 All tests completed successfully!')
-    
+    toast.success('All folder CRUD tests completed successfully!')
+
   } catch (error) {
     console.error('💥 Test failed with error:', error)
+    toast.error('Folder CRUD tests failed. Check console for details.')
   }
 }
 

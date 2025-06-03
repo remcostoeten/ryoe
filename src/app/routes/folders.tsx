@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { toast } from '@/components/ui/toast'
 import { Plus, RefreshCw, TestTube } from 'lucide-react'
 import {
   FolderTree,
@@ -9,8 +10,19 @@ import {
   useFolderTree,
   useFolderOperations
 } from '@/modules/folder-management'
-import { testFolderCRUD } from '@/test-folder-crud'
+import { testFolderCRUD } from '@/__tests__/test-folder-crud'
 import type { Folder } from '@/types/notes'
+
+// Helper function to get all folders from tree structure
+function getAllFolders(folder: any): any[] {
+  const result = [folder]
+  if (folder.children) {
+    folder.children.forEach((child: any) => {
+      result.push(...getAllFolders(child))
+    })
+  }
+  return result
+}
 
 export default function FoldersPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -20,16 +32,32 @@ export default function FoldersPage() {
     treeData,
     expandedIds,
     selectedId,
+    editingId,
     loading,
     error,
     expandFolder,
     collapseFolder,
     selectFolder,
+    startEditing,
+    stopEditing,
+    renameFolder,
     refreshTree
   } = useFolderTree()
 
+  const { moveFolder } = useFolderOperations()
+
   const handleFolderSelect = (folder: Folder) => {
     selectFolder(folder.id)
+  }
+
+  const handleFolderMove = async (folderId: number, newParentId: number | null, newPosition: number) => {
+    try {
+      await moveFolder(folderId, newParentId, newPosition)
+      toast.success('Folder moved successfully')
+    } catch (error) {
+      toast.error('Failed to move folder')
+      console.error('Move folder error:', error)
+    }
   }
 
   const handleFolderExpand = (folderId: number, isExpanded: boolean) => {
@@ -57,15 +85,20 @@ export default function FoldersPage() {
     setSelectedParentId(null)
   }
 
-  const handleRefresh = () => {
-    refreshTree()
+  const handleRefresh = async () => {
+    try {
+      await refreshTree()
+      toast.success('Folder tree refreshed')
+    } catch (error) {
+      toast.error('Failed to refresh folder tree')
+    }
   }
 
   const handleRunTests = async () => {
     console.log('Running folder CRUD tests...')
     await testFolderCRUD()
     // Refresh the tree after tests
-    refreshTree()
+    await handleRefresh()
   }
 
   if (loading) {
@@ -139,10 +172,20 @@ export default function FoldersPage() {
                 folders={treeData}
                 selectedFolderId={selectedId}
                 expandedFolderIds={expandedIds}
+                editingFolderId={editingId}
                 onFolderSelect={handleFolderSelect}
                 onFolderExpand={handleFolderExpand}
                 onFolderCreate={handleCreateFolder}
-                enableDragDrop={false}
+                onFolderRename={renameFolder}
+                onFolderMove={async (folderId, newParentId, newPosition) => {
+                  // Handle folder move and refresh tree
+                  await handleFolderMove(folderId, newParentId, newPosition)
+                  refreshTree()
+                }}
+                onStartEditing={startEditing}
+                onStopEditing={stopEditing}
+                enableDragDrop={true}
+                enableKeyboardNavigation={true}
                 showContextMenu={true}
               />
             </CardContent>
@@ -170,21 +213,58 @@ export default function FoldersPage() {
           )}
 
           {/* Selected Folder Info */}
-          {selectedId && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Folder Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">ID:</span> {selectedId}
+          {selectedId && (() => {
+            const selectedFolder = treeData.find(f => f.id === selectedId) ||
+              treeData.flatMap(f => getAllFolders(f)).find(f => f.id === selectedId)
+
+            if (!selectedFolder) return null
+
+            const siblings = treeData.filter(f => f.parentId === selectedFolder.parentId && f.id !== selectedFolder.id)
+            const parent = selectedFolder.parentId ?
+              treeData.flatMap(f => getAllFolders(f)).find(f => f.id === selectedFolder.parentId) : null
+
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Folder Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <span className="font-medium">Name:</span> {selectedFolder.name}
+                    </div>
+                    <div>
+                      <span className="font-medium">ID:</span> {selectedFolder.id}
+                    </div>
+                    <div>
+                      <span className="font-medium">Privacy:</span>{' '}
+                      <span className={selectedFolder.isPublic ? 'text-green-600' : 'text-orange-600'}>
+                        {selectedFolder.isPublic ? 'Public' : 'Private'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Parent:</span>{' '}
+                      {parent ? parent.name : 'Root'}
+                    </div>
+                    <div>
+                      <span className="font-medium">Children:</span> {selectedFolder.children?.length || 0}
+                    </div>
+                    <div>
+                      <span className="font-medium">Siblings:</span> {siblings.length}
+                      {siblings.length > 0 && (
+                        <div className="mt-1 ml-2 text-xs text-muted-foreground">
+                          {siblings.map(sibling => sibling.name).join(', ')}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-medium">Depth:</span> {selectedFolder.depth}
+                    </div>
                   </div>
-                  {/* Add more folder details here */}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )
+          })()}
 
           {/* Statistics */}
           <Card>
@@ -204,6 +284,57 @@ export default function FoldersPage() {
                 <div className="flex justify-between">
                   <span>Selected:</span>
                   <span className="font-medium">{selectedId ? 'Yes' : 'None'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Editing:</span>
+                  <span className="font-medium">{editingId ? 'Yes' : 'None'}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Keyboard Shortcuts */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Keyboard Shortcuts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-xs">
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">↑↓</span>
+                  <span>Navigate</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">→</span>
+                  <span>Expand</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">←</span>
+                  <span>Collapse</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">Enter</span>
+                  <span>Select</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">F2</span>
+                  <span>Rename</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">Insert</span>
+                  <span>New Child</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">Delete</span>
+                  <span>Delete</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">*</span>
+                  <span>Expand All</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-mono">Double-click</span>
+                  <span>Rename</span>
                 </div>
               </div>
             </CardContent>

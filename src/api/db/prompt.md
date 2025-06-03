@@ -1,4 +1,4 @@
-We want for the desktop application a aesthetic minimal footer which displays information about the app. This consists of multiple tasks which I want you to do:
+op2We want for the desktop application a aesthetic minimal footer which displays information about the app. This consists of multiple tasks which I want you to do:bbbbbbb                          1111
 
 1. Create the footer component via proper semantics, render (for this part) static text to define the ui.
 

@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react'
 import { FolderService } from '@/api/services/folder-service'
-import type { 
-  Folder, 
-  CreateFolderInput, 
-  UpdateFolderInput 
+import { toast } from '@/components/ui/toast'
+import type {
+  Folder,
+  CreateFolderInput,
+  UpdateFolderInput
 } from '@/types/notes'
 import type { UseFolderOperationsReturn } from '../types'
 
@@ -17,18 +18,22 @@ export function useFolderOperations(): UseFolderOperationsReturn {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await folderService.create(input)
-      
+
       if (response.success && response.data) {
+        toast.success(`Folder "${input.name}" created successfully`)
         return response.data
       } else {
-        setError(response.error || 'Failed to create folder')
+        const errorMessage = response.error || 'Failed to create folder'
+        setError(errorMessage)
+        toast.error(errorMessage)
         return null
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
+      toast.error(errorMessage)
       return null
     } finally {
       setLoading(false)
@@ -39,18 +44,22 @@ export function useFolderOperations(): UseFolderOperationsReturn {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await folderService.update(input)
-      
+
       if (response.success && response.data) {
+        toast.success('Folder updated successfully')
         return response.data
       } else {
-        setError(response.error || 'Failed to update folder')
+        const errorMessage = response.error || 'Failed to update folder'
+        setError(errorMessage)
+        toast.error(errorMessage)
         return null
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
+      toast.error(errorMessage)
       return null
     } finally {
       setLoading(false)
@@ -58,27 +67,31 @@ export function useFolderOperations(): UseFolderOperationsReturn {
   }, [])
 
   const deleteFolder = useCallback(async (
-    id: number, 
+    id: number,
     options?: { deleteChildren?: boolean }
   ): Promise<boolean> => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await folderService.delete(id, {
         folderId: id,
         deleteChildren: options?.deleteChildren
       })
-      
+
       if (response.success) {
+        toast.success('Folder deleted successfully')
         return true
       } else {
-        setError(response.error || 'Failed to delete folder')
+        const errorMessage = response.error || 'Failed to delete folder'
+        setError(errorMessage)
+        toast.error(errorMessage)
         return false
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
+      toast.error(errorMessage)
       return false
     } finally {
       setLoading(false)
@@ -86,25 +99,29 @@ export function useFolderOperations(): UseFolderOperationsReturn {
   }, [])
 
   const moveFolder = useCallback(async (
-    folderId: number, 
-    newParentId: number | null, 
+    folderId: number,
+    newParentId: number | null,
     newPosition: number
   ): Promise<Folder | null> => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await folderService.move(folderId, newParentId, newPosition)
-      
+
       if (response.success && response.data) {
+        toast.success('Folder moved successfully')
         return response.data
       } else {
-        setError(response.error || 'Failed to move folder')
+        const errorMessage = response.error || 'Failed to move folder'
+        setError(errorMessage)
+        toast.error(errorMessage)
         return null
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
+      toast.error(errorMessage)
       return null
     } finally {
       setLoading(false)
@@ -112,24 +129,28 @@ export function useFolderOperations(): UseFolderOperationsReturn {
   }, [])
 
   const reorderFolders = useCallback(async (
-    parentId: number | null, 
+    parentId: number | null,
     folderIds: number[]
   ): Promise<Folder[]> => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await folderService.reorder(parentId, folderIds)
-      
+
       if (response.success && response.data) {
+        toast.success('Folders reordered successfully')
         return response.data
       } else {
-        setError(response.error || 'Failed to reorder folders')
+        const errorMessage = response.error || 'Failed to reorder folders'
+        setError(errorMessage)
+        toast.error(errorMessage)
         return []
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
+      toast.error(errorMessage)
       return []
     } finally {
       setLoading(false)

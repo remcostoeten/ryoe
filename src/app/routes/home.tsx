@@ -4,6 +4,7 @@ import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-fo
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
 import { VersionTest } from '@/components/version-test'
 import { EnvironmentDebug } from '@/components/debug/environment-debug'
+import { FooterEnhanced } from '@/components/footer-enhanced'
 
 export function HomePage() {
     return (
@@ -47,6 +48,7 @@ export function HomePage() {
                 </div>
             </div>
             <Footer />
+            <FooterEnhanced />
         </div>
     )
 }

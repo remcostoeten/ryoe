@@ -27,3 +27,4 @@ drizzle.config.ts
 .vercel
 
 prompts.md
+src/api/db/prompt.md
