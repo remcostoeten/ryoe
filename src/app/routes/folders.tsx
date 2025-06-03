@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/toast'
 import { Plus, RefreshCw, TestTube } from 'lucide-react'
 import {
@@ -178,9 +177,18 @@ export default function FoldersPage() {
                 onFolderCreate={handleCreateFolder}
                 onFolderRename={renameFolder}
                 onFolderMove={async (folderId, newParentId, newPosition) => {
-                  // Handle folder move and refresh tree
-                  await handleFolderMove(folderId, newParentId, newPosition)
-                  refreshTree()
+                  // Handle folder move without immediate refresh to prevent DOM reload
+                  try {
+                    await handleFolderMove(folderId, newParentId, newPosition)
+                    // Only refresh on success, and do it after a delay to prevent DOM reload
+                    setTimeout(() => {
+                      refreshTree()
+                    }, 500)
+                  } catch (error) {
+                    console.error('Failed to move folder:', error)
+                    // Refresh immediately on error to revert state
+                    refreshTree()
+                  }
                 }}
                 onStartEditing={startEditing}
                 onStopEditing={stopEditing}

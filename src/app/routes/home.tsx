@@ -47,8 +47,9 @@ export function HomePage() {
                     </main>
                 </div>
             </div>
-            <Footer />
+            {/* <Footer /> */}
             <FooterEnhanced />
+
         </div>
     )
 }

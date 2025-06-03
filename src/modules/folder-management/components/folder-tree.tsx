@@ -122,13 +122,26 @@ export function FolderTree({
 
   if (enableDragDrop) {
     return (
-      <DndContextComponent
-        sensors={sensors}
-        collisionDetection={customCollisionDetection}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
+      <div
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onReset={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
       >
+        <DndContextComponent
+          sensors={sensors}
+          collisionDetection={customCollisionDetection}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => {
+            // Reset drag state on cancel
+          }}
+        >
         <SortableContextComponent items={folderIds} strategy={undefined}>
           <div
             ref={treeRef}
@@ -158,6 +171,10 @@ export function FolderTree({
                 enableDragDrop={enableDragDrop}
                 enableKeyboardNavigation={enableKeyboardNavigation}
                 showContextMenu={showContextMenu}
+                selectedFolderId={selectedFolderId}
+                expandedFolderIds={expandedFolderIds}
+                editingFolderId={editingFolderId}
+                focusedId={focusedId}
               />
             ))}
           </div>
@@ -174,6 +191,7 @@ export function FolderTree({
           )}
         </DragOverlayComponent>
       </DndContextComponent>
+      </div>
     )
   }
 
@@ -206,6 +224,10 @@ export function FolderTree({
           enableDragDrop={enableDragDrop}
           enableKeyboardNavigation={enableKeyboardNavigation}
           showContextMenu={showContextMenu}
+          selectedFolderId={selectedFolderId}
+          expandedFolderIds={expandedFolderIds}
+          editingFolderId={editingFolderId}
+          focusedId={focusedId}
         />
       ))}
     </div>
@@ -229,8 +251,19 @@ function FolderItem({
   onStopEditing,
   enableDragDrop = false,
   enableKeyboardNavigation = true,
-  showContextMenu = true
-}: FolderItemProps & { isFocused?: boolean }) {
+  showContextMenu = true,
+  // Add these props to pass down to children
+  selectedFolderId,
+  expandedFolderIds,
+  editingFolderId,
+  focusedId
+}: FolderItemProps & {
+  isFocused?: boolean
+  selectedFolderId?: number | null
+  expandedFolderIds?: Set<number>
+  editingFolderId?: number | null
+  focusedId?: number | null
+}) {
   const hasChildren = folder.hasChildren
   const indentLevel = folder.depth * 16
 
@@ -311,20 +344,60 @@ function FolderItem({
     }
   }
 
+  const handleMoreOptions = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // Create a simple context menu
+    const options = [
+      { label: 'Rename', action: () => handleStartEdit(e) },
+      { label: 'Create Subfolder', action: () => handleCreateChild(e) },
+      { label: 'Delete', action: () => {
+        if (confirm(`Delete folder "${folder.name}"?`)) {
+          handleDelete(e)
+        }
+      }}
+    ]
+
+    // For now, show a simple menu using native browser methods
+    const choice = prompt(
+      `Choose action for "${folder.name}":\n` +
+      options.map((opt, i) => `${i + 1}. ${opt.label}`).join('\n') +
+      '\n\nEnter number (1-3):'
+    )
+
+    const choiceNum = parseInt(choice || '0')
+    if (choiceNum >= 1 && choiceNum <= options.length) {
+      options[choiceNum - 1].action()
+    }
+  }
+
   return (
     <div>
       {/* Folder Item */}
       <div
         className={cn(
-          "group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm cursor-pointer hover:bg-accent transition-colors",
-          isSelected && "bg-accent text-accent-foreground",
-          isFocused && "ring-2 ring-primary ring-offset-1",
-          effectiveIsEditing && "bg-accent",
+          "group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-all duration-200",
+          "hover:bg-accent/30 hover:scale-[1.01]",
+          isSelected && "bg-gradient-to-r from-accent/15 to-accent/10 text-foreground shadow-sm",
+          isFocused && "bg-accent/8 outline-none",
+          effectiveIsEditing && "bg-accent/25 shadow-sm",
           enableDragDrop && "draggable"
         )}
         style={{ paddingLeft: `${8 + indentLevel}px` }}
         onClick={handleSelect}
         draggable={enableDragDrop}
+        onDragStart={(e) => {
+          if (!enableDragDrop) {
+            e.preventDefault()
+          }
+        }}
+        onDrop={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
         role="treeitem"
         aria-selected={isSelected}
         aria-expanded={hasChildren ? isExpanded : undefined}
@@ -425,6 +498,7 @@ function FolderItem({
             {showContextMenu && (
               <div className="relative">
                 <button
+                  onClick={handleMoreOptions}
                   className="flex h-5 w-5 items-center justify-center rounded hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
                   title="More options"
                   tabIndex={-1}
@@ -445,10 +519,10 @@ function FolderItem({
             <FolderItem
               key={child.id}
               folder={child}
-              isSelected={isSelected}
-              isExpanded={isExpanded}
-              isEditing={false} // Children inherit editing state separately
-              isFocused={false} // Children inherit focus state separately
+              isSelected={selectedFolderId === child.id}
+              isExpanded={expandedFolderIds?.has(child.id) || false}
+              isEditing={editingFolderId === child.id}
+              isFocused={focusedId === child.id}
               onSelect={onSelect}
               onExpand={onExpand}
               onEdit={onEdit}
@@ -461,6 +535,10 @@ function FolderItem({
               enableDragDrop={enableDragDrop}
               enableKeyboardNavigation={enableKeyboardNavigation}
               showContextMenu={showContextMenu}
+              selectedFolderId={selectedFolderId}
+              expandedFolderIds={expandedFolderIds}
+              editingFolderId={editingFolderId}
+              focusedId={focusedId}
             />
           ))}
         </div>

@@ -18,7 +18,7 @@ export interface GitCommit {
   authorAvatar: string
   authorUsername: string
   parents: string[]
-  branchType: "main" | "feature" | "merge" | "hotfix"
+  branchType: "master" | "feature" | "merge" | "hotfix"
   branchColor: string
 }
 
@@ -29,7 +29,7 @@ export interface GitBranch {
 
 // Branch color palette - aesthetically pleasing colors for dark theme
 const BRANCH_COLORS = {
-  main: "#88c0d0", // Nord frost blue
+  master: "#88c0d0", // Nord frost blue
   feature: "#a3be8c", // Nord green
   merge: "#d08770", // Nord orange
   hotfix: "#bf616a", // Nord red
@@ -38,7 +38,7 @@ const BRANCH_COLORS = {
 } as const
 
 const BRANCH_COLOR_PALETTE = [
-  BRANCH_COLORS.main,
+  BRANCH_COLORS.master,
   BRANCH_COLORS.feature,
   BRANCH_COLORS.secondary,
   BRANCH_COLORS.tertiary,
@@ -77,9 +77,9 @@ function detectBranchType(commit: any, index: number, allCommits: any[]): GitCom
     return "feature"
   }
 
-  // Main branch (first few commits or conventional patterns)
+  // master branch (first few commits or conventional patterns)
   if (index < 3 || message.includes("release") || message.includes("version") || message.includes("initial")) {
-    return "main"
+    return "master"
   }
 
   // Default to feature for other commits
@@ -89,8 +89,8 @@ function detectBranchType(commit: any, index: number, allCommits: any[]): GitCom
 // Assign colors based on branch lanes and types
 function assignBranchColor(branchType: GitCommit["branchType"], laneIndex: number): string {
   switch (branchType) {
-    case "main":
-      return BRANCH_COLORS.main
+    case "master":
+      return BRANCH_COLORS.master
     case "merge":
       return BRANCH_COLORS.merge
     case "hotfix":
@@ -137,12 +137,12 @@ export async function fetchGitTree(repoUrl: string, branch = "master", maxCommit
   } catch (error) {
     console.warn(`Failed to fetch git tree for ${branch}:`, error)
 
-    // Try main as fallback
-    if (branch !== "main") {
+    // Try master as fallback
+    if (branch !== "master") {
       try {
-        return await fetchGitTree(repoUrl, "main", maxCommits)
+        return await fetchGitTree(repoUrl, "master", maxCommits)
       } catch {
-        // If main fails too, return empty array
+        // If master fails too, return empty array
         return []
       }
     }
@@ -152,7 +152,14 @@ export async function fetchGitTree(repoUrl: string, branch = "master", maxCommit
 }
 
 // Calculate positions for the git tree visualization with branch lanes
-export function calculateTreePositions(commits: GitCommit[]) {
+export function calculateTreePositions(commits: Array<{
+  commitHash?: string
+  sha?: string
+  commitMessage?: string
+  message?: string
+  branchType: "master" | "feature" | "merge" | "hotfix"
+  parents?: string[]
+}>) {
   const positions: Record<string, { x: number; y: number; lane: number }> = {}
   const lanes: Record<string, number> = {}
   const branchLanes: Record<string, number> = {}
@@ -162,15 +169,15 @@ export function calculateTreePositions(commits: GitCommit[]) {
   commits.forEach((commit, index) => {
     let assignedLane = 0
 
-    if (commit.branchType === "main") {
-      // Main branch always gets lane 0
+    if (commit.branchType === "master") {
+      // master branch always gets lane 0
       assignedLane = 0
-    } else if (commit.parents.length > 0) {
+    } else if (commit.parents && commit.parents.length > 0) {
       // Check if parent already has a lane
-      const parentLanes = commit.parents.map((p) => lanes[p]).filter((lane) => lane !== undefined)
+      const parentLanes = commit.parents.map((p: string) => lanes[p]).filter((lane: number) => lane !== undefined)
 
       if (parentLanes.length > 0) {
-        // For merge commits, use the main parent's lane
+        // For merge commits, use the master parent's lane
         if (commit.branchType === "merge") {
           assignedLane = Math.min(...parentLanes)
         } else {
@@ -188,7 +195,8 @@ export function calculateTreePositions(commits: GitCommit[]) {
 
     // For feature branches, try to group similar types
     if (commit.branchType === "feature" || commit.branchType === "hotfix") {
-      const branchKey = `${commit.branchType}-${commit.message.split(":")[0]}`
+      const message = commit.commitMessage || commit.message || ""
+      const branchKey = `${commit.branchType}-${message.split(":")[0]}`
       if (branchLanes[branchKey] !== undefined) {
         assignedLane = branchLanes[branchKey]
       } else {
@@ -196,11 +204,12 @@ export function calculateTreePositions(commits: GitCommit[]) {
       }
     }
 
-    lanes[commit.sha] = assignedLane
+    const commitId = commit.commitHash || commit.sha || `commit-${index}`
+    lanes[commitId] = assignedLane
     maxLane = Math.max(maxLane, assignedLane)
 
     // Position based on lane and index
-    positions[commit.sha] = {
+    positions[commitId] = {
       x: assignedLane * 45,
       y: index * 60, // Increased spacing for avatars
       lane: assignedLane,
@@ -213,7 +222,7 @@ export function calculateTreePositions(commits: GitCommit[]) {
 // Get branch type display info
 export function getBranchTypeInfo(branchType: GitCommit["branchType"]) {
   const info = {
-    main: { label: "Main", icon: "●" },
+    master: { label: "master", icon: "●" },
     feature: { label: "Feature", icon: "◆" },
     merge: { label: "Merge", icon: "◉" },
     hotfix: { label: "Hotfix", icon: "▲" },

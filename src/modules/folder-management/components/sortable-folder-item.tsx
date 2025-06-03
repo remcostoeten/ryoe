@@ -11,6 +11,10 @@ import type { Folder as FolderType } from '@/types/notes'
 
 interface SortableFolderItemProps extends FolderItemProps {
   isDragOverlay?: boolean
+  selectedFolderId?: number | null
+  expandedFolderIds?: Set<number>
+  editingFolderId?: number | null
+  focusedId?: number | null
 }
 
 export function SortableFolderItem({
@@ -31,7 +35,11 @@ export function SortableFolderItem({
   enableDragDrop = false,
   enableKeyboardNavigation = true,
   showContextMenu = true,
-  isDragOverlay = false
+  isDragOverlay = false,
+  selectedFolderId,
+  expandedFolderIds,
+  editingFolderId,
+  focusedId
 }: SortableFolderItemProps & { isFocused?: boolean }) {
   const hasChildren = folder.hasChildren
   const indentLevel = folder.depth * 16
@@ -127,6 +135,32 @@ export function SortableFolderItem({
     }
   }
 
+  const handleMoreOptions = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // Create a simple context menu
+    const options = [
+      { label: 'Rename', action: () => handleStartEdit(e) },
+      { label: 'Create Subfolder', action: () => handleCreateChild(e) },
+      { label: 'Delete', action: () => {
+        if (confirm(`Delete folder "${folder.name}"?`)) {
+          handleDelete(e)
+        }
+      }}
+    ]
+
+    // For now, show a simple menu using native browser methods
+    const choice = prompt(
+      `Choose action for "${folder.name}":\n` +
+      options.map((opt, i) => `${i + 1}. ${opt.label}`).join('\n') +
+      '\n\nEnter number (1-3):'
+    )
+
+    const choiceNum = parseInt(choice || '0')
+    if (choiceNum >= 1 && choiceNum <= options.length) {
+      options[choiceNum - 1].action()
+    }
+  }
+
   // Transform styles for drag animation
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -140,19 +174,33 @@ export function SortableFolderItem({
       <div
         ref={setNodeRef}
         className={cn(
-          "group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm cursor-pointer hover:bg-accent transition-colors relative",
-          isSelected && "bg-accent text-accent-foreground",
-          isFocused && "ring-2 ring-primary ring-offset-1",
-          effectiveIsEditing && "bg-accent",
-          isDragging && "z-50 shadow-lg bg-background border",
-          isOver && "bg-accent/50",
-          isDragOverlay && "shadow-xl bg-background border-2 border-primary"
+          "group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-all duration-200 relative",
+          "hover:bg-accent/30 hover:scale-[1.01]",
+          isSelected && "bg-gradient-to-r from-accent/15 to-accent/10 text-foreground shadow-sm",
+          isFocused && "bg-accent/8 outline-none",
+          effectiveIsEditing && "bg-accent/25 shadow-sm",
+          isDragging && "z-50 shadow-lg bg-background/95 backdrop-blur-sm scale-105",
+          isOver && "bg-accent/35 scale-[1.02]",
+          isDragOverlay && "shadow-xl bg-background/95 backdrop-blur-sm scale-110"
         )}
         style={{
           paddingLeft: `${8 + indentLevel}px`,
           ...style
         }}
         onClick={handleSelect}
+        onDragStart={(e) => {
+          if (!enableDragDrop) {
+            e.preventDefault()
+          }
+        }}
+        onDrop={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
         role="treeitem"
         aria-selected={isSelected}
         aria-expanded={hasChildren ? isExpanded : undefined}
@@ -170,6 +218,14 @@ export function SortableFolderItem({
             )}
             aria-label="Drag to reorder folder"
             tabIndex={-1}
+            onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+            onReset={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
           >
             <GripVertical className="h-3 w-3" />
           </button>
@@ -252,6 +308,7 @@ export function SortableFolderItem({
             </button>
             
             <button
+              onClick={handleMoreOptions}
               className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
               aria-label="More options"
               tabIndex={-1}
@@ -276,10 +333,10 @@ export function SortableFolderItem({
             <SortableFolderItem
               key={child.id}
               folder={child}
-              isSelected={isSelected}
-              isExpanded={isExpanded}
-              isEditing={false} // Children inherit editing state separately
-              isFocused={false} // Children inherit focus state separately
+              isSelected={selectedFolderId === child.id}
+              isExpanded={expandedFolderIds?.has(child.id) || false}
+              isEditing={editingFolderId === child.id}
+              isFocused={focusedId === child.id}
               onSelect={onSelect}
               onExpand={onExpand}
               onEdit={onEdit}
@@ -292,6 +349,10 @@ export function SortableFolderItem({
               enableDragDrop={enableDragDrop}
               enableKeyboardNavigation={enableKeyboardNavigation}
               showContextMenu={showContextMenu}
+              selectedFolderId={selectedFolderId}
+              expandedFolderIds={expandedFolderIds}
+              editingFolderId={editingFolderId}
+              focusedId={focusedId}
             />
           ))}
         </div>

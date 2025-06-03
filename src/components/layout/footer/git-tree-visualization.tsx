@@ -1,9 +1,94 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { type GitCommit, calculateTreePositions, fetchGitTree, getBranchTypeInfo } from "./git-tree"
 import { appConfig } from "@/app/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { fetchCommitHistory, type GitCommitInfo } from "@/lib/git-info"
+import { calculateTreePositions, getBranchTypeInfo } from "./git-tree"
+
+// Enhanced GitCommit type that includes visualization data
+interface GitCommit extends GitCommitInfo {
+  shortSha: string
+  parents: string[]
+  branchType: "master" | "feature" | "merge" | "hotfix"
+  branchColor: string
+}
+
+// Branch color palette - aesthetically pleasing colors for dark theme
+const BRANCH_COLORS = {
+  master: "#88c0d0", // Nord frost blue
+  feature: "#a3be8c", // Nord green
+  merge: "#d08770", // Nord orange
+  hotfix: "#bf616a", // Nord red
+  secondary: "#b48ead", // Nord purple
+  tertiary: "#ebcb8b", // Nord yellow
+} as const
+
+const BRANCH_COLOR_PALETTE = [
+  BRANCH_COLORS.master,
+  BRANCH_COLORS.feature,
+  BRANCH_COLORS.secondary,
+  BRANCH_COLORS.tertiary,
+  BRANCH_COLORS.merge,
+  BRANCH_COLORS.hotfix,
+]
+
+// Detect branch type based on commit patterns
+function detectBranchType(commit: GitCommitInfo, index: number): GitCommit["branchType"] {
+  const message = commit.commitMessage.toLowerCase()
+
+  // Check for merge patterns (we don't have parent info from git-info, so use message patterns)
+  if (message.includes("merge") || message.includes("pull request")) {
+    return "merge"
+  }
+
+  // Check for hotfix patterns
+  if (message.includes("hotfix") || message.includes("fix:") || message.includes("patch")) {
+    return "hotfix"
+  }
+
+  // Check for feature patterns
+  if (message.includes("feat:") || message.includes("feature") || message.includes("add:")) {
+    return "feature"
+  }
+
+  // Main branch (first few commits or conventional patterns)
+  if (index < 3 || message.includes("release") || message.includes("version") || message.includes("initial")) {
+    return "master"
+  }
+
+  // Default to feature for other commits
+  return "feature"
+}
+
+// Assign colors based on branch lanes and types
+function assignBranchColor(branchType: GitCommit["branchType"], laneIndex: number): string {
+  switch (branchType) {
+    case "master":
+      return BRANCH_COLORS.master
+    case "merge":
+      return BRANCH_COLORS.merge
+    case "hotfix":
+      return BRANCH_COLORS.hotfix
+    case "feature":
+      // Cycle through colors for different feature branches
+      return BRANCH_COLOR_PALETTE[laneIndex % BRANCH_COLOR_PALETTE.length]
+    default:
+      return BRANCH_COLORS.feature
+  }
+}
+
+// Convert GitCommitInfo to GitCommit with visualization data
+function enhanceCommitForVisualization(commit: GitCommitInfo, index: number): GitCommit {
+  const branchType = detectBranchType(commit, index)
+  return {
+    ...commit,
+    shortSha: commit.commitHash.substring(0, 7),
+    parents: [], // We don't have parent info from git-info, so empty array
+    branchType,
+    branchColor: assignBranchColor(branchType, index)
+  }
+}
 
 interface GitTreeVisualizationProps {
   branch: string
@@ -29,14 +114,14 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
           const img = new Image()
           img.crossOrigin = "anonymous"
           img.onload = () => {
-            loadedStatus[commit.sha] = true
+            loadedStatus[commit.commitHash] = true
             resolve()
           }
           img.onerror = () => {
-            loadedStatus[commit.sha] = false
+            loadedStatus[commit.commitHash] = false
             resolve()
           }
-          img.src = commit.authorAvatar
+          img.src = commit.authorAvatar || `https://github.com/${commit.authorUsername || commit.author}.png`
         })
       })
 
@@ -52,12 +137,27 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
     const loadGitTree = async () => {
       try {
         setLoading(true)
-        const gitCommits = await fetchGitTree(appConfig.repository, branch, 8)
-        setCommits(gitCommits)
+        console.log('Loading git tree from real git data...')
+
+        // Parse repository URL to get owner and repo
+        const repoMatch = appConfig.repository.match(/github\.com\/([^/]+)\/([^/]+)/)
+        const owner = repoMatch?.[1] || 'remcostoeten'
+        const repo = repoMatch?.[2]?.replace('.git', '') || 'ryoe'
+
+        // Fetch real commit history from GitHub API
+        const commitHistory = await fetchCommitHistory(owner, repo, branch, 8)
+
+        // Convert to GitCommit format with visualization data
+        const enhancedCommits = commitHistory.map((commit, index) =>
+          enhanceCommitForVisualization(commit, index)
+        )
+
+        setCommits(enhancedCommits)
         setError(null)
+        console.log('Successfully loaded real git data:', enhancedCommits)
       } catch (err) {
         setError("Failed to load git tree")
-        console.error(err)
+        console.error('Git tree loading error:', err)
       } finally {
         setLoading(false)
       }
@@ -87,13 +187,13 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
 
     // Draw connections with bezier curves using branch colors
     commits.forEach((commit) => {
-      const pos = positions[commit.sha]
+      const pos = positions[commit.commitHash]
 
       // Draw connections to parents
       commit.parents.forEach((parentSha) => {
         if (positions[parentSha]) {
           const parentPos = positions[parentSha]
-          const parentCommit = commits.find((c) => c.sha === parentSha)
+          const parentCommit = commits.find((c) => c.commitHash === parentSha)
 
           ctx.beginPath()
           ctx.moveTo(pos.x + 12, pos.y + 12)
@@ -123,7 +223,7 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
             ctx.strokeStyle = commit.branchColor + "80" // Add transparency
           }
 
-          ctx.lineWidth = commit.branchType === "main" ? 3 : 2
+          ctx.lineWidth = commit.branchType === "master" ? 3 : 2
           ctx.stroke()
         }
       })
@@ -131,7 +231,7 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
 
     // Draw commit dots with branch colors and animation
     commits.forEach((commit, index) => {
-      const pos = positions[commit.sha]
+      const pos = positions[commit.commitHash]
 
       // Draw commit dot with animation
       setTimeout(() => {
@@ -198,23 +298,23 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
         <div className="absolute inset-0 pointer-events-none">
           {commits.map((commit, index) => {
             const { positions } = calculateTreePositions(commits)
-            const pos = positions[commit.sha]
+            const pos = positions[commit.commitHash]
 
             if (!pos) return null
 
             return (
               <div
-                key={commit.sha}
+                key={commit.commitHash}
                 className="absolute transition-opacity duration-300"
                 style={{
                   left: `${pos.x + 60}px`,
                   top: `${pos.y - 2}px`,
-                  opacity: avatarsLoaded[commit.sha] ? 1 : 0,
+                  opacity: avatarsLoaded[commit.commitHash] ? 1 : 0,
                   transitionDelay: `${index * 120}ms`,
                 }}
               >
                 <Avatar className="h-6 w-6 border border-gray-800 shadow-md">
-                  <AvatarImage src={commit.authorAvatar || "/placeholder.svg"} alt={commit.author} />
+                  <AvatarImage src={commit.authorAvatar || `https://github.com/${commit.authorUsername || commit.author}.png`} alt={commit.author} />
                   <AvatarFallback className="text-[10px] bg-gray-800 text-gray-300">
                     {commit.author.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -246,9 +346,9 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
           const info = getBranchTypeInfo(commit.branchType)
 
           return (
-            <div key={commit.sha} className="flex items-start gap-2">
+            <div key={commit.commitHash} className="flex items-start gap-2">
               <Avatar className="h-5 w-5 flex-shrink-0 mt-0.5">
-                <AvatarImage src={commit.authorAvatar || "/placeholder.svg"} alt={commit.author} />
+                <AvatarImage src={commit.authorAvatar || `https://github.com/${commit.authorUsername || commit.author}.png`} alt={commit.author} />
                 <AvatarFallback className="text-[8px] bg-gray-800 text-gray-300">
                   {commit.author.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -258,7 +358,7 @@ export function GitTreeVisualization({ branch }: GitTreeVisualizationProps) {
                 style={{ backgroundColor: commit.branchColor }}
               />
               <div className="font-mono text-gray-400 flex-shrink-0">{commit.shortSha}</div>
-              <div className="text-gray-300 truncate max-w-[150px]">{commit.message}</div>
+              <div className="text-gray-300 truncate max-w-[150px]">{commit.commitMessage}</div>
               <div className="text-gray-500 text-xs flex-shrink-0">{info.label}</div>
             </div>
           )

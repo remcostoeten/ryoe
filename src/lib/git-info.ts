@@ -4,6 +4,16 @@
  */
 
 import { appConfig } from '@/app/config'
+import { createHttpClient } from './http-client'
+
+// Create a cached HTTP client for GitHub API calls
+const githubClient = createHttpClient({
+    headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'ryoe-app'
+    },
+    cacheTtl: 10 * 60 * 1000 // 10 minutes cache for git info
+})
 
 // Extract owner and repo from repository URL
 function parseRepositoryUrl(url: string) {
@@ -28,6 +38,45 @@ export const gitInfo = {
     isDirty: import.meta.env.VITE_GIT_DIRTY === 'true'
 } as const
 
+// Types for GitHub API responses
+interface GitHubCommitResponse {
+    sha: string
+    commit: {
+        message: string
+        author: {
+            name: string
+            email: string
+            date: string
+        }
+        committer: {
+            name: string
+            email: string
+            date: string
+        }
+    }
+    author?: {
+        login: string
+        avatar_url: string
+    }
+    committer?: {
+        login: string
+        avatar_url: string
+    }
+    parents: Array<{
+        sha: string
+    }>
+}
+
+export interface GitCommitInfo {
+    commitHash: string
+    commitMessage: string
+    commitDate: string
+    author: string
+    authorAvatar?: string | null
+    authorUsername?: string
+    branch: string
+}
+
 // GitHub API client to fetch latest commit info
 export async function fetchLatestCommitInfo(
     owner?: string,
@@ -43,24 +92,23 @@ export async function fetchLatestCommitInfo(
     for (const branchName of branches) {
         try {
             console.log(`Trying to fetch from branch: ${branchName}`)
-            const response = await fetch(
+            const data = await githubClient.get<GitHubCommitResponse>(
                 `https://api.github.com/repos/${finalOwner}/${finalRepo}/commits/${branchName}`
             )
 
-            if (response.ok) {
-                const data = await response.json()
-                console.log('Successfully fetched commit data:', {
-                    hash: data.sha.substring(0, 7),
-                    message: data.commit.message.split('\n')[0],
-                    date: data.commit.author.date
-                })
-                return {
-                    commitHash: data.sha,
-                    commitMessage: data.commit.message,
-                    commitDate: data.commit.author.date,
-                    author: data.commit.author.name,
-                    branch: branchName
-                }
+            console.log('Successfully fetched commit data:', {
+                hash: data.sha.substring(0, 7),
+                message: data.commit.message.split('\n')[0],
+                date: data.commit.author.date
+            })
+            return {
+                commitHash: data.sha,
+                commitMessage: data.commit.message,
+                commitDate: data.commit.author.date,
+                author: data.commit.author.name,
+                authorAvatar: data.author?.avatar_url || data.committer?.avatar_url,
+                authorUsername: data.author?.login || data.committer?.login,
+                branch: branchName
             }
         } catch (error) {
             console.warn(`Failed to fetch from branch ${branchName}:`, error)
@@ -75,8 +123,50 @@ export async function fetchLatestCommitInfo(
         commitMessage: gitInfo.commitMessage,
         commitDate: gitInfo.commitDate,
         author: 'Remco Stoeten',
+        authorAvatar: null,
+        authorUsername: 'remcostoeten',
         branch: 'unknown'
     }
+}
+
+// Fetch commit history for git tree visualization
+export async function fetchCommitHistory(
+    owner?: string,
+    repo?: string,
+    branch = 'master',
+    maxCommits = 10
+): Promise<GitCommitInfo[]> {
+    // Parse from config if not provided
+    const { owner: configOwner, repo: configRepo } = parseRepositoryUrl(appConfig.repository)
+    const finalOwner = owner || configOwner
+    const finalRepo = repo || configRepo
+    const branches = [branch, 'master', 'main']
+
+    for (const branchName of branches) {
+        try {
+            console.log(`Fetching commit history from branch: ${branchName}`)
+            const commits = await githubClient.get<GitHubCommitResponse[]>(
+                `https://api.github.com/repos/${finalOwner}/${finalRepo}/commits?sha=${branchName}&per_page=${maxCommits}`
+            )
+
+            return commits.map(commit => ({
+                commitHash: commit.sha,
+                commitMessage: commit.commit.message.split('\n')[0], // First line only
+                commitDate: commit.commit.author.date,
+                author: commit.commit.author.name,
+                authorAvatar: commit.author?.avatar_url || commit.committer?.avatar_url,
+                authorUsername: commit.author?.login || commit.committer?.login || commit.commit.author.name,
+                branch: branchName
+            }))
+        } catch (error) {
+            console.warn(`Failed to fetch commit history from branch ${branchName}:`, error)
+            continue
+        }
+    }
+
+    // If all branches fail, return empty array
+    console.warn('All GitHub API attempts failed for commit history')
+    return []
 }
 
 export function getShortCommitHash(): string {

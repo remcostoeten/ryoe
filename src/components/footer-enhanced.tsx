@@ -215,9 +215,3 @@ export function FooterEnhanced() {
     </TooltipProvider>
   )
 }
-// testing auto version increment
-// test simple hook
-// test simple hook
-// another test
-// test without husky
-// test post-husky removal

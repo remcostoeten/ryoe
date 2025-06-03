@@ -1,121 +1,93 @@
-/**
- * Environment detection utilities for Tauri/Web compatibility
- */
-
 export function isTauriEnvironment(): boolean {
-    if (typeof window === 'undefined') {
-        return false
+  if (typeof window === "undefined") return false
+  return "__TAURI__" in window || "__TAURI_INVOKE__" in window
+}
+
+export function getEnvironmentType(): string {
+  if (typeof window === "undefined") return "server"
+  if (isTauriEnvironment()) return "tauri"
+  return "web"
+}
+
+export async function waitForTauri(timeoutMs = 3000): Promise<boolean> {
+  if (typeof window === "undefined") return false
+
+  return new Promise((resolve) => {
+    const startTime = Date.now()
+
+    const checkTauri = () => {
+      if (isTauriEnvironment()) {
+        resolve(true)
+        return
+      }
+
+      if (Date.now() - startTime >= timeoutMs) {
+        resolve(false)
+        return
+      }
+
+      setTimeout(checkTauri, 100)
     }
 
-    // Check for multiple Tauri indicators
-    const hasTauriGlobal = '__TAURI__' in window
-    const hasTauriInvoke = '__TAURI_INVOKE__' in window
-    const hasTauriMetadata = '__TAURI_METADATA__' in window
-    const isTauriContext = (window as any).__TAURI_INTERNALS__ !== undefined
+    checkTauri()
+  })
+}
 
-    const isTauri = hasTauriGlobal || hasTauriInvoke || hasTauriMetadata || isTauriContext
+export function debugEnvironment(): void {
+  const envInfo = {
+    isTauri: isTauriEnvironment(),
+    envType: getEnvironmentType(),
+    userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "N/A",
+    windowKeys: typeof window !== "undefined" ? Object.keys(window).filter((key) => key.includes("TAURI")) : [],
+    tauriGlobals:
+      typeof window !== "undefined"
+        ? {
+            __TAURI__: "__TAURI__" in window,
+            __TAURI_INVOKE__: "__TAURI_INVOKE__" in window,
+            __TAURI_METADATA__: "__TAURI_METADATA__" in window,
+            __TAURI_INTERNALS__: "__TAURI_INTERNALS__" in window,
+          }
+        : {},
+    environmentVariables: {
+      NODE_ENV: process.env.NODE_ENV,
+      VITE_TURSO_DATABASE_URL: import.meta.env.VITE_TURSO_DATABASE_URL ? "[SET]" : "[NOT SET]",
+      VITE_TURSO_AUTH_TOKEN: import.meta.env.VITE_TURSO_AUTH_TOKEN ? "[SET]" : "[NOT SET]",
+    },
+  }
 
-    // Debug logging for troubleshooting
-    if (process.env.NODE_ENV === 'development') {
-        console.debug('Environment Detection:', {
-            hasTauriGlobal,
-            hasTauriInvoke,
-            hasTauriMetadata,
-            isTauriContext,
-            isTauri,
-            userAgent: navigator.userAgent,
-            windowKeys: Object.keys(window).filter(key => key.includes('TAURI')).slice(0, 5)
-        })
-    }
+  console.group("🔍 Environment Debug Information")
+  console.log("Environment Type:", envInfo.envType)
+  console.log("Is Tauri:", envInfo.isTauri)
+  console.log("User Agent:", envInfo.userAgent)
+  console.log("Tauri Globals:", envInfo.tauriGlobals)
+  console.log("Tauri Window Keys:", envInfo.windowKeys)
+  console.log("Environment Variables:", envInfo.environmentVariables)
+  console.groupEnd()
 
-    return isTauri
+  return envInfo
+}
+
+// Additional utility functions for environment detection
+export function isDesktopEnvironment(): boolean {
+  return isTauriEnvironment()
 }
 
 export function isWebEnvironment(): boolean {
-    return !isTauriEnvironment()
+  return !isTauriEnvironment() && typeof window !== "undefined"
 }
 
-export function getEnvironmentType(): 'tauri' | 'web' {
-    return isTauriEnvironment() ? 'tauri' : 'web'
+export function isServerEnvironment(): boolean {
+  return typeof window === "undefined"
 }
 
-/**
- * Conditionally execute code based on environment
- */
-export async function executeInTauri<T>(
-    tauriCallback: () => Promise<T>,
-    fallbackValue?: T
-): Promise<T | undefined> {
-    if (isTauriEnvironment()) {
-        return await tauriCallback()
-    }
-    return fallbackValue
-}
-
-/**
- * Conditionally execute code based on environment with error handling
- */
-export async function safeExecuteInTauri<T>(
-    tauriCallback: () => Promise<T>,
-    fallbackValue: T,
-    errorMessage?: string
-): Promise<T> {
-    if (!isTauriEnvironment()) {
-        console.warn(
-            errorMessage || 'Operation not available in web environment'
-        )
-        return fallbackValue
-    }
-
-    try {
-        return await tauriCallback()
-    } catch (error) {
-        console.error('Tauri operation failed:', error)
-        return fallbackValue
-    }
-}
-
-/**
- * Debug function to log environment information
- */
-export function debugEnvironment(): void {
-    if (typeof window === 'undefined') {
-        console.log('Environment: Server-side (no window object)')
-        return
-    }
-
-    const tauriKeys = Object.keys(window).filter(key =>
-        key.includes('TAURI') || key.includes('__TAURI')
-    )
-
-    console.group('🔍 Environment Debug Information')
-    console.log('Environment Type:', getEnvironmentType())
-    console.log('Is Tauri:', isTauriEnvironment())
-    console.log('User Agent:', navigator.userAgent)
-    console.log('Tauri-related window keys:', tauriKeys)
-    console.log('Window.__TAURI__:', (window as any).__TAURI__)
-    console.log('Window.__TAURI_INVOKE__:', (window as any).__TAURI_INVOKE__)
-    console.log('Window.__TAURI_METADATA__:', (window as any).__TAURI_METADATA__)
-    console.log('Window.__TAURI_INTERNALS__:', (window as any).__TAURI_INTERNALS__)
-    console.groupEnd()
-}
-
-/**
- * Wait for Tauri to be available (useful for timing issues)
- */
-export async function waitForTauri(maxWaitMs: number = 5000): Promise<boolean> {
-    if (typeof window === 'undefined') {
-        return false
-    }
-
-    const startTime = Date.now()
-
-    while (Date.now() - startTime < maxWaitMs) {
-        if (isTauriEnvironment()) {
-            return true
-        }
-        await new Promise(resolve => setTimeout(resolve, 100))
-    }
-
-    return false
+export function getEnvironmentDetails() {
+  return {
+    type: getEnvironmentType(),
+    isTauri: isTauriEnvironment(),
+    isDesktop: isDesktopEnvironment(),
+    isWeb: isWebEnvironment(),
+    isServer: isServerEnvironment(),
+    userAgent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+    windowAvailable: typeof window !== "undefined",
+  }
 }

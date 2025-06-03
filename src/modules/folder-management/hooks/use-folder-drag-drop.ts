@@ -116,10 +116,29 @@ export function useFolderDragDrop({
 
   // Handle drag start
   const handleDragStart = useCallback((event: DragStartEvent) => {
+    console.log('Drag start triggered')
+
+    // Prevent any form submissions during drag
+    const preventFormSubmission = (e: Event) => {
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    }
+
+    // Add temporary event listeners to prevent form submissions
+    document.addEventListener('submit', preventFormSubmission, true)
+    document.addEventListener('reset', preventFormSubmission, true)
+
+    // Store cleanup function
+    ;(window as any).__dragCleanup = () => {
+      document.removeEventListener('submit', preventFormSubmission, true)
+      document.removeEventListener('reset', preventFormSubmission, true)
+    }
+
     const { active } = event
     const folderId = parseInt(active.id.toString())
     const folder = findFolderById(folders, folderId)
-    
+
     if (folder) {
       setDraggedFolder({
         id: folder.id,
@@ -134,6 +153,7 @@ export function useFolderDragDrop({
 
   // Handle drag over
   const handleDragOver = useCallback((event: DragOverEvent) => {
+    event.preventDefault?.()
     const { over } = event
     if (!over || !draggedFolder) return
 
@@ -143,18 +163,32 @@ export function useFolderDragDrop({
 
   // Handle drag end
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    console.log('Drag end triggered', event)
+
+    // Clean up event listeners
+    if ((window as any).__dragCleanup) {
+      (window as any).__dragCleanup()
+      delete (window as any).__dragCleanup
+    }
+
     const { active, over } = event
 
     setIsDragging(false)
     setDraggedFolder(null)
     setDropZone(null)
 
-    if (!over || !draggedFolder) return
+    if (!over || !draggedFolder) {
+      console.log('No valid drop target or dragged folder')
+      return
+    }
 
     const activeId = parseInt(active.id.toString())
     const overId = parseInt(over.id.toString())
 
-    if (activeId === overId) return
+    if (activeId === overId) {
+      console.log('Dropped on same item')
+      return
+    }
 
     const activeFolder = findFolderById(folders, activeId)
     const overFolder = findFolderById(folders, overId)
@@ -189,19 +223,24 @@ export function useFolderDragDrop({
           const reorderedSiblings = arrayMove(siblings, oldIndex, newIndex)
           const folderIds = reorderedSiblings.map(f => f.id)
 
-          await reorderFolders(activeFolder.parentId, folderIds)
-
-          // Update local state
+          // Update local state optimistically first
           const updatedFolders = [...folders]
-          // Update positions in the tree
           reorderedSiblings.forEach((folder, index) => {
             const folderInTree = findFolderById(updatedFolders, folder.id)
             if (folderInTree) {
               folderInTree.position = index
             }
           })
-
           onFoldersReorder(updatedFolders)
+
+          // Then update the database
+          try {
+            await reorderFolders(activeFolder.parentId, folderIds)
+          } catch (error) {
+            console.error('Failed to reorder folders:', error)
+            // Revert optimistic update on error
+            onFoldersReorder(folders)
+          }
         }
       } else {
         // Different parent - move folder
