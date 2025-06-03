@@ -150,7 +150,7 @@ const ResourceCard = ({
     color,
     unit = '%'
 }: {
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
     label: string
     value: number
     data: DataPoint[]

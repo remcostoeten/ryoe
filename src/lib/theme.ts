@@ -1,7 +1,6 @@
 import { appStorage } from './storage'
 
 type TTheme = 'dark' | 'light'
-
 export async function setTheme(isDark: boolean): Promise<void> {
     if (isDark) {
         document.documentElement.classList.add('dark')

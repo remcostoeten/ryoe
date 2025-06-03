@@ -14,6 +14,13 @@ const createAppRouter = () =>
             }
         },
         {
+            path: '/logo',
+            lazy: async () => {
+                const module = await import('@/app/routes/docs/logo')
+                return { Component: module.default }
+            }
+        },
+        {
             path: '/docs',
             lazy: async () => {
                 const module = await import('@/app/routes/docs')

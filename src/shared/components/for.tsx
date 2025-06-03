@@ -87,13 +87,13 @@ export function For<T>(props: TProps<T>) {
         [keyExtractor, children, itemWrapper]
     )
 
-    const MemoizedItem = useMemo(
-        () =>
-            memo((props: { item: T; index: number }) =>
-                renderItem(props.item, props.index)
-            ),
-        [renderItem]
-    )
+    const MemoizedItem = useMemo(() => {
+        const Component = memo((props: { item: T; index: number }) =>
+            renderItem(props.item, props.index)
+        )
+        Component.displayName = 'MemoizedForItem'
+        return Component
+    }, [renderItem])
 
     const mapped = useMemo(() => {
         return each.map((item, index) =>

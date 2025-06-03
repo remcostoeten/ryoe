@@ -6,20 +6,21 @@ export function DbOperationsPage() {
   const toc = useToc()
 
 return (
+
 <DocsLayout
-title="Database Operations"
-previousPage={{
-        title: "Storage Guide",
-        path: "/docs/storage",
-      }}
-nextPage={{
-        title: "API Reference",
-        path: "/docs/storage-api",
-      }}
-toc={toc} >
-<DbOperationsMDX />
+    title="Database Operations"
+    previousPage={{
+        title: 'Storage Guide',
+        path: '/docs/storage'
+    }}
+    nextPage={{
+        title: 'API Reference',
+        path: '/docs/storage-api'
+    }}
+    toc={toc}
+>
+    <DbOperationsMDX />
 </DocsLayout>
-)
-}
+) }
 
 export default DbOperationsPage

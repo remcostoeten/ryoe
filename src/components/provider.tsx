@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { initializeDatabase } from '@/api/db'
 import { initTheme } from '@/lib/theme'
 import { ToastProvider } from '@/components/ui/toast'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@/components/ui/loaders/spinner'
 import { isTauriEnvironment } from '@/lib/environment'
 
 export function Providers({ children }: { children: ReactNode }) {
