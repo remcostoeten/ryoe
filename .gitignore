@@ -25,3 +25,5 @@ dist-ssr
 *.sw?
 drizzle.config.ts
 .vercel
+
+prompts.md

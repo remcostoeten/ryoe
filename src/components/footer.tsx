@@ -1,8 +1,12 @@
+"use client"
+
 import { appConfig } from "@/app/config"
 import { fetchLatestCommitInfo } from "@/lib/git-info"
 import { useEffect, useState } from "react"
 import { GitBranch, GitCommit, Clock } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { GitTreeVisualization } from "./layout/footer/git-tree-visualization"
 
 export function Footer() {
   const [commitInfo, setCommitInfo] = useState({
@@ -58,18 +62,23 @@ export function Footer() {
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1 text-gray-400">
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex cursor-pointer items-center gap-1 text-gray-400 hover:text-gray-200 transition-colors">
                   <GitCommit className="h-3.5 w-3.5" />
                   <span className="font-mono">{commitInfo.hash}</span>
                 </div>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Commit: {commitInfo.hash}</p>
-                <p className="max-w-[200px] truncate">{commitInfo.message}</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-80 bg-gray-900 border border-gray-800 p-0 rounded-md shadow-xl"
+                sideOffset={5}
+              >
+                <div className="p-2 border-b border-gray-800">
+                  <h3 className="text-sm font-medium text-gray-300">Git History</h3>
+                </div>
+                <GitTreeVisualization branch={commitInfo.branch} />
+              </PopoverContent>
+            </Popover>
 
             <Tooltip>
               <TooltipTrigger asChild>
