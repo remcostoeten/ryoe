@@ -1,6 +1,6 @@
 {
     "name": "notr",
-    "version": "0.0,2",
+    "version": "0.03",
     "description": "A  os native desktop app built with T auri, React/Rust",
     "keywords": [
         "shadcn",

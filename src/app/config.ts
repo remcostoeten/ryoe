@@ -1,11 +1,11 @@
 // Dynamic values from build-time injection
 export const APP_NAME = __APP_NAME__ || 'Notr'
-export const APP_VERSION = __APP_VERSION__ || '0.01'
+export const APP_VERSION = '0.03'
 
 // Static configuration
 export const APP_AUTHOR = 'Remco Stoeten'
 export const APP_AUTHOR_URL = 'https://github.com/remcostoeten'
-export const APP_REPOSITORY_URL = 'https://github.com/remcostoeten/notr-tauri'
+export const APP_REPOSITORY_URL = 'https://github.com/remcostoeten/ryoe'
 export const APP_DESCRIPTION =
     'A native desktop note-taking app built with Tauri, React, and Rust'
 

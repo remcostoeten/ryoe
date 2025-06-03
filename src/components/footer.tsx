@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react'
 
 export function Footer() {
     const [commitInfo, setCommitInfo] = useState({
-        branch: 'main',
+        branch: 'loading',
         message: 'Loading...',
-        timestamp: ''
+        timestamp: '',
+        hash: ''
     })
 
     useEffect(() => {
@@ -15,12 +16,19 @@ export function Footer() {
             try {
                 const info = await fetchLatestCommitInfo()
                 setCommitInfo({
-                    branch: 'master', // Hardcoded to master as requested
+                    branch: info.branch || 'master',
                     message: info.commitMessage.split('\n')[0], // First line only
-                    timestamp: new Date(info.commitDate).toLocaleString()
+                    timestamp: new Date(info.commitDate).toLocaleString(),
+                    hash: info.commitHash.substring(0, 7)
                 })
-            } catch {
-                console.warn('Failed to fetch commit info')
+            } catch (error) {
+                console.warn('Failed to fetch commit info:', error)
+                setCommitInfo({
+                    branch: 'error',
+                    message: 'Failed to load commit info',
+                    timestamp: new Date().toLocaleString(),
+                    hash: 'unknown'
+                })
             }
         }
 
@@ -43,7 +51,15 @@ export function Footer() {
                     <span className="text-gray-400">{commitInfo.branch}</span>
                     <span className="text-gray-600">●</span>
                     <span className="font-mono text-gray-400">
-                        {commitInfo.message} • {commitInfo.timestamp}
+                        {commitInfo.hash}
+                    </span>
+                    <span className="text-gray-600">●</span>
+                    <span className="text-gray-400">
+                        {commitInfo.message}
+                    </span>
+                    <span className="text-gray-600">●</span>
+                    <span className="text-gray-400">
+                        {commitInfo.timestamp}
                     </span>
                 </div>
             </div>

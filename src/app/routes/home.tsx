@@ -1,5 +1,5 @@
 import { Header } from '@/components/header'
-import { MinimalFooter } from '@/components/minimal-footer'
+import { Footer } from '@/components/footer'
 import { DatabaseHealthIndicator } from '@/modules/database-actions/ui/database-health-indicator'
 import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-form'
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
@@ -42,7 +42,7 @@ export function HomePage() {
                     </main>
                 </div>
             </div>
-            <MinimalFooter />
+            <Footer />
         </div>
     )
 }

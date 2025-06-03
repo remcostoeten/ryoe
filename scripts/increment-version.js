@@ -27,6 +27,15 @@ function incrementVersion(version) {
     return newVersion
 }
 
+function toSemanticVersion(version) {
+    // Convert "0.03" to "0.3.0" for Tauri compatibility
+    const num = parseFloat(version);
+    const major = 0;
+    const minor = Math.round(num * 100);
+    const patch = 0;
+    return `${major}.${minor}.0`;
+}
+
 function updateFile(filePath, searchPattern, replacePattern) {
     try {
         const content = fs.readFileSync(filePath, 'utf8')
@@ -51,6 +60,9 @@ function main() {
     log(`📦 Current version: ${currentVersion}`, 'yellow')
     log(`📦 New version: ${newVersion}`, 'green')
 
+    const semanticVersion = toSemanticVersion(newVersion)
+    log(`📦 Semantic version: ${semanticVersion}`, 'green')
+
     // Files to update with their patterns
     const filesToUpdate = [
         {
@@ -66,12 +78,12 @@ function main() {
         {
             path: 'src-tauri/Cargo.toml',
             search: /version = "[^"]+"/,
-            replace: `version = "${newVersion}"`
+            replace: `version = "${semanticVersion}"`
         },
         {
             path: 'src-tauri/tauri.conf.json',
             search: /"version":\s*"[^"]+"/,
-            replace: `"version": "${newVersion}"`
+            replace: `"version": "${semanticVersion}"`
         }
     ]
 
