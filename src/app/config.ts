@@ -1,6 +1,6 @@
 // Dynamic values from build-time injection
 export const APP_NAME = __APP_NAME__ || 'ryoe'
-export const APP_VERSION = '0.03'
+export const APP_VERSION = '0.04'
 
 // Static configuration
 export const APP_AUTHOR = 'Remco Stoeten'

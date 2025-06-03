@@ -1,6 +1,6 @@
 {
     "name": "ryoe",
-    "version": "0.03",
+    "version": "0.04",
     "description": "A  os native desktop app built with T auri, React/Rust",
     "keywords": [
         "shadcn",
