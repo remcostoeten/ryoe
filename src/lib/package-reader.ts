@@ -1,5 +1,3 @@
-import { invoke } from '@tauri-apps/api/tauri'
-
 export interface PackageInfo {
     name: string
     version: string
@@ -86,7 +84,6 @@ const categorizeDependency = (
         return 'build'
     }
 
-    // Development tools
     if (
         name.includes('@types/') ||
         name.includes('eslint') ||

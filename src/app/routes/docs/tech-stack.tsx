@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { DocsLayout } from '@/components/layout/docs-layout'
 import { useToc } from '@/hooks/use-toc'
 import {
@@ -19,11 +19,9 @@ import {
     Monitor,
     Palette,
     Wrench,
-    Globe,
     Copy,
     Check,
-    ExternalLink,
-    Filter
+    ExternalLink
 } from 'lucide-react'
 import {
     getTechStack,

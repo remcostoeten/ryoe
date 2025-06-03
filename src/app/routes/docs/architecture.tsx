@@ -19,16 +19,13 @@ import {
     FileText,
     Settings,
     Search,
-    Zap,
-    Shield,
     Palette,
     FolderOpen,
     Terminal,
     Bell,
     Keyboard,
     Archive,
-    Monitor,
-    BarChart3
+    Monitor
 } from 'lucide-react'
 
 interface ServiceInfo {

@@ -9,12 +9,8 @@ import {
     Database,
     Settings,
     Package,
-    GitBranch,
-    Terminal,
     Image,
-    FileJson,
-    FileType,
-    Hash
+    FileJson
 } from 'lucide-react'
 
 export interface FileTreeNode {

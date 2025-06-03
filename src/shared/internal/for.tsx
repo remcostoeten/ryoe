@@ -22,7 +22,7 @@ import {
  * @property {(item: T, index: number) => ReactNode} children - A function that receives an item and its index and returns a ReactNode to render for that item.
  * @property {ElementType} [as=Fragment] - The HTML element or React component to wrap the list in. Defaults to Fragment.
  * @property {string} [role='list'] - The ARIA role for the wrapping element. Defaults to 'list'.
- * @property {string} [className=''] - The CSS class name for the wrapping element.
+ * @property {string} [className=''] - The CSS class name for the wrapping el ement.
  * @property {string} [id] - The ID for the wrapping element.
  * @property {string} [ariaLabel] - The ARIA label for the wrapping element.
  * @property {(item: T, index: number) => string | number} [keyExtractor=(_, i) => i] - A function to extract a unique key for each item. Defaults to using the index.

@@ -3,6 +3,7 @@
 ## Overview
 
 The application now has an automatic versioning system that:
+
 - Starts at version `0.01`
 - Increments by `0.01` with each commit
 - Synchronizes version across all configuration files
@@ -11,20 +12,23 @@ The application now has an automatic versioning system that:
 ## How It Works
 
 ### 1. **Dynamic Version Injection**
+
 - Vite reads the version from `package.json` at build time
 - Injects it as a global constant `__APP_VERSION__`
 - The app config uses this dynamic value
 
 ### 2. **Automatic Increment on Commit**
+
 - Git pre-commit hook runs `scripts/increment-version.js`
 - Updates version in all files:
-  - `package.json`
-  - `src/app/config.ts`
-  - `src-tauri/Cargo.toml`
-  - `src-tauri/tauri.conf.json`
+    - `package.json`
+    - `src/app/config.ts`
+    - `src-tauri/Cargo.toml`
+    - `src-tauri/tauri.conf.json`
 - Adds updated files to the commit
 
 ### 3. **Minimal Footer Display**
+
 - Shows: `Notr • v0.01`
 - Height: 30-60px max
 - Centered with circle separators
@@ -32,11 +36,13 @@ The application now has an automatic versioning system that:
 ## Setup Instructions
 
 ### 1. Install Git Hooks
+
 ```bash
 pnpm run setup:hooks
 ```
 
 ### 2. Manual Version Increment (if needed)
+
 ```bash
 pnpm run version:increment
 ```
@@ -61,4 +67,5 @@ pnpm run version:increment
 7. App displays new version in footer
 
 ## Current Version: 0.01
+
 Next commit will be: 0.02

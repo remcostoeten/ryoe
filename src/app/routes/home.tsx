@@ -1,4 +1,5 @@
 import { Header } from '@/components/header'
+import { MinimalFooter } from '@/components/minimal-footer'
 import { DatabaseHealthIndicator } from '@/modules/database-actions/ui/database-health-indicator'
 import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-form'
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
@@ -12,7 +13,7 @@ export function HomePage() {
                     <div className="space-y-3">
                         <Header />
                     </div>
-                    <main className="pt-20 space-y-4">
+                    <main className="pt-20 space-y-4 pb-16">
                         <div className="flex justify-center">
                             <DatabaseHealthIndicator />
                         </div>
@@ -41,6 +42,7 @@ export function HomePage() {
                     </main>
                 </div>
             </div>
+            <MinimalFooter />
         </div>
     )
 }
