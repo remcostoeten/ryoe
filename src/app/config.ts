@@ -1,6 +1,6 @@
 // Dynamic values from build-time injection
 export const APP_NAME = __APP_NAME__ || 'ryoe'
-export const APP_VERSION = '0.04'
+export const APP_VERSION = '0.03'
 
 // Static configuration
 export const APP_AUTHOR = 'Remco Stoeten'
@@ -19,4 +19,3 @@ export const appConfig = {
     repository: APP_REPOSITORY_URL,
     description: APP_DESCRIPTION
 } as const
-// test hook
