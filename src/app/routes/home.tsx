@@ -2,6 +2,7 @@ import { Header } from '@/components/header'
 import { DatabaseHealthIndicator } from '@/modules/database-actions/ui/database-health-indicator'
 import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-form'
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
+import { VersionTest } from '@/components/version-test'
 
 export function HomePage() {
     return (
@@ -21,6 +22,10 @@ export function HomePage() {
                                 Database health indicator shows real-time SQLite
                                 database status
                             </p>
+                        </div>
+
+                        <div className="flex justify-center">
+                            <VersionTest />
                         </div>
 
                         <div className="flex justify-center">

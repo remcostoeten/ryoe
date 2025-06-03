@@ -171,7 +171,7 @@ export function DatabaseQueryTester() {
                                 ) : (
                                     <Play className="h-4 w-4" />
                                 )}
-                                Execute
+                                Executee
                             </Button>
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">

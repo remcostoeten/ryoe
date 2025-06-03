@@ -7,6 +7,10 @@ import remarkGfm from 'remark-gfm'
 import remarkToc from 'remark-toc'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
+import { readFileSync } from 'fs'
+
+// Read package.json to get version
+const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'))
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +22,12 @@ export default defineConfig({
             rehypePlugins: [rehypeHighlight, rehypeSlug]
         })
     ],
+
+    // Define global constants
+    define: {
+        __APP_VERSION__: JSON.stringify(packageJson.version),
+        __APP_NAME__: JSON.stringify(packageJson.name)
+    },
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //

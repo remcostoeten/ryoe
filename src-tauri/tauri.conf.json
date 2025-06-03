@@ -17,7 +17,7 @@
     ]
   },
   "productName": "notr-tauri",
-  "version": "0.1.0",
+  "version": "0.02",
   "identifier": "com.remcostoeten.notr",
   "plugins": {
     "process": {

@@ -1,5 +1,5 @@
 import { Header } from './header'
-import { Footer } from './footer'
+import { MinimalFooter } from './minimal-footer'
 
 type TProps = {
     children: React.ReactNode
@@ -10,7 +10,7 @@ export function Layout({ children }: TProps) {
         <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1 pb-12">{children}</main>
-            <Footer />
+            <MinimalFooter />
         </div>
     )
 }

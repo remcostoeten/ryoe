@@ -14,7 +14,9 @@ import {
     BookOpen,
     Code2,
     Search,
-    Monitor
+    Monitor,
+    Package,
+    Building
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Link } from 'react-router'
@@ -72,6 +74,32 @@ function DocsPage() {
                 'Window State Saving',
                 'Automatic Restoration'
             ]
+        },
+        {
+            title: 'Technology Stack',
+            description:
+                'Comprehensive overview of all technologies, frameworks, and tools used in the application',
+            icon: Package,
+            path: '/docs/tech-stack',
+            topics: [
+                'Frontend Technologies',
+                'UI Libraries',
+                'Development Tools',
+                'Package Dependencies'
+            ]
+        },
+        {
+            title: 'Architecture',
+            description:
+                'Planned services architecture and development roadmap for the application',
+            icon: Building,
+            path: '/docs/architecture',
+            topics: [
+                'Core Services',
+                'Secondary Services',
+                'Enhancement Services',
+                'File Structure'
+            ]
         }
     ]
 
@@ -86,8 +114,8 @@ function DocsPage() {
                     </div>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                         Complete guide to storage, database operations, window
-                        management, and file system management in our Tauri
-                        application
+                        management, technology stack, and architecture for our
+                        Tauri application
                     </p>
                     <div className="max-w-md mx-auto mt-6">
                         <div className="relative">
@@ -209,6 +237,18 @@ function DocsPage() {
                             <Link to="/docs/window-management">
                                 <Button variant="outline">
                                     Window Management
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </Link>
+                            <Link to="/docs/tech-stack">
+                                <Button variant="outline">
+                                    Technology Stack
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </Link>
+                            <Link to="/docs/architecture">
+                                <Button variant="outline">
+                                    Architecture
                                     <ArrowRight className="h-4 w-4 ml-2" />
                                 </Button>
                             </Link>

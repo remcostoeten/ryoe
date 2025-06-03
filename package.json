@@ -1,6 +1,6 @@
 {
     "name": "notr-tauri",
-    "version": "1.0.0",
+    "version": "0.02",
     "description": "A  os native desktop app built with T auri, React/Rust",
     "keywords": [
         "shadcn",
@@ -26,7 +26,9 @@
         "push": "drizzle-kit push",
         "build:output:clipboard": "sh ./commands/build-output.sh",
         "build:output:file": "sh ./commands/build-output.sh file tmp/build.log",
-        "run:tauri": "sh ./commands/run-tauri.sh"
+        "run:tauri": "sh ./commands/run-tauri.sh",
+        "setup:hooks": "sh ./scripts/setup-git-hooks.sh",
+        "version:increment": "node scripts/increment-version.js"
     },
     "lint-staged": {
         "**/*": "prettier --write --ignore-unknown"

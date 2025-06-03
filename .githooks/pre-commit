@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+echo -e "${CYAN}🔄 Auto-incrementing version before commit...${NC}"
+
+# Run the version increment script
+node scripts/increment-version.js
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ Version incremented successfully${NC}"
+    
+    # Add the updated files to the commit
+    git add package.json
+    git add src/app/config.ts
+    git add src-tauri/Cargo.toml
+    git add src-tauri/tauri.conf.json
+    
+    echo -e "${YELLOW}📦 Updated version files added to commit${NC}"
+else
+    echo -e "${RED}❌ Failed to increment version${NC}"
+    exit 1
+fi

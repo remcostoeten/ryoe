@@ -1,5 +1,8 @@
-export const APP_NAME = 'Notr'
-export const APP_VERSION = '0.1.0'
+// Dynamic values from build-time injection
+export const APP_NAME = __APP_NAME__ || 'Notr'
+export const APP_VERSION = __APP_VERSION__ || '0.01'
+
+// Static configuration
 export const APP_AUTHOR = 'Remco Stoeten'
 export const APP_AUTHOR_URL = 'https://github.com/remcostoeten'
 export const APP_REPOSITORY_URL = 'https://github.com/remcostoeten/notr-tauri'

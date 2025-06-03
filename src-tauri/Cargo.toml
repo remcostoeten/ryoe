@@ -1,6 +1,6 @@
 [package]
 name = "notr-tauri"
-version = "0.1.0"
+version = "0.02"
 description = "A Tauri App"
 authors = ["Remco Stoeten"]
 edition = "2021"
