@@ -219,3 +219,4 @@ export function FooterEnhanced() {
 // test simple hook
 // test simple hook
 // another test
+// test without husky
