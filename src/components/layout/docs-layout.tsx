@@ -330,7 +330,8 @@ export const DocsLayout = memo(
                             const heading = headings[i]
                             const rect = heading.getBoundingClientRect()
 
-                            if (rect.top <= 100) {
+                            // Adjust for global header (80px) + docs header (approx 80px) = 160px
+                            if (rect.top <= 160) {
                                 const id = heading.id
                                 if (id && id !== activeSection) {
                                     setActiveSection(id)
@@ -360,7 +361,9 @@ export const DocsLayout = memo(
 
         return (
             <div className="min-h-screen flex flex-col">
-                <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+                {/* Add padding to account for global header */}
+                <div className="h-20" aria-hidden="true" />
+                <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-20 z-40">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">

@@ -11,7 +11,7 @@ export function ErrorView({
     return (
         <main
             className={cn(
-                'h-full flex flex-col items-center justify-center text-center bg-red-50 p-8',
+                'min-h-screen pt-24 flex flex-col items-center justify-center text-center bg-red-50 p-8',
                 className
             )}
         >

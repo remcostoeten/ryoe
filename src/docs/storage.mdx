@@ -24,12 +24,11 @@ Our application implements a multi-layered storage approach:
 
 ## File System Structure
 
-Our application stores data in the following directory structure:
+Our application stores local data in the following directory structure:
 
 ```bash
 # Application data directory
-~/.local/share/com.remcostoeten.notr/
-├── notes.db                 # SQLite database
+~/.local/share/com.remcostoeten.ryoe/
 ├── config/
 │   ├── settings.json        # Application settings
 │   ├── preferences.json     # User preferences
@@ -42,6 +41,8 @@ Our application stores data in the following directory structure:
     ├── app.log             # Application logs
     └── error.log           # Error logs
 ```
+
+**Note:** Database data is now stored in Turso cloud, not locally.
 
 ## Local Storage Implementation
 
@@ -85,7 +86,7 @@ import { appDataDir } from '@tauri-apps/api/path'
 
 const dataDir = await appDataDir()
 console.log('App data directory:', dataDir)
-// Output: /home/remcostoeten/.local/share/com.remcostoeten.notr
+// Output: /home/remcostoeten/.local/share/com.remcostoeten.ryoe
 ```
 
 ### Working with Relative Paths
@@ -137,13 +138,13 @@ await writeTextFile(
 
 ## Database Storage
 
-### SQLite Database Location
+### Turso Cloud Database
 
-Our SQLite database is stored at:
+Our application uses Turso, a cloud-based SQLite database that works in both web and desktop environments.
 
-```bash
-~/.local/share/com.remcostoeten.notr/notes.db
-```
+**Configuration:**
+- Database URL: Set via `VITE_TURSO_DATABASE_URL` environment variable
+- Auth Token: Set via `VITE_TURSO_AUTH_TOKEN` environment variable
 
 ### Database Schema
 
@@ -166,6 +167,29 @@ CREATE TABLE snippets (
     updated_at INTEGER NOT NULL
 );
 ```
+
+### Setup Instructions
+
+1. **Create a Turso database:**
+   ```bash
+   turso db create your-app-name
+   ```
+
+2. **Get the database URL:**
+   ```bash
+   turso db show your-app-name
+   ```
+
+3. **Create an auth token:**
+   ```bash
+   turso db tokens create your-app-name
+   ```
+
+4. **Set environment variables:**
+   ```env
+   VITE_TURSO_DATABASE_URL=libsql://your-database-name.turso.io
+   VITE_TURSO_AUTH_TOKEN=your-auth-token-here
+   ```
 
 ## Storage Utilities
 

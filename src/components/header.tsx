@@ -47,8 +47,10 @@ export function Header() {
     }, [isOpen])
 
     const navLinksData = [
+        { label: 'Home', href: '/' },
         { label: 'Docs', href: '/docs' },
-        { label: 'Logo', href: '/logo' }
+        { label: 'Logo', href: '/logo' },
+        { label: 'Sign In', href: '/sign-in' }
     ]
 
     return (

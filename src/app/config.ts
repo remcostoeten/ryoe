@@ -1,5 +1,5 @@
 // Dynamic values from build-time injection
-export const APP_NAME = __APP_NAME__ || 'Notr'
+export const APP_NAME = __APP_NAME__ || 'ryoe'
 export const APP_VERSION = '0.03'
 
 // Static configuration

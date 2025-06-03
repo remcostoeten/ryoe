@@ -134,7 +134,7 @@ export const readPackageJson = async (): Promise<PackageInfo> => {
     // This would normally read from the filesystem using Tauri's fs API
     // For now, we'll return the current package.json structure
     return {
-        name: 'notr-tauri',
+        name: 'ryoe',
         version: '0.01',
         description: 'A OS native desktop app built with Tauri, React/Rust',
         author: 'Remco Stoeten',

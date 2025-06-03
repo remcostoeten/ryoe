@@ -14,7 +14,7 @@ function parseRepositoryUrl(url: string) {
             repo: match[2].replace('.git', '')
         }
     }
-    return { owner: 'remcostoeten', repo: 'notr-tauri' }
+    return { owner: 'remcostoeten', repo: 'ryoe' }
 }
 
 // These would be injected during build process

@@ -16,9 +16,9 @@
       "icons/icon.ico"
     ]
   },
-  "productName": "notr",
+  "productName": "ryoe",
   "version": "0.3.0",
-  "identifier": "com.remcostoeten.notr",
+  "identifier": "com.remcostoeten.ryoe",
   "plugins": {
     "process": {
       "active": true
@@ -30,7 +30,7 @@
     },
     "windows": [
       {
-        "title": "Notr",
+        "title": "ryoe",
         "width": 960,
         "height": 400,
         "dragDropEnabled": true

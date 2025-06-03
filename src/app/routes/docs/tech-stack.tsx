@@ -279,7 +279,7 @@ function TechStackContent() {
                 </h2>
                 <p className="text-muted-foreground">
                     This page showcases all the technologies, frameworks, and
-                    tools used in the Notr Tauri application. The data is
+                    tools used in the ryoe Tauri application. The data is
                     dynamically read from our package.json file.
                 </p>
 

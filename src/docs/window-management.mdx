@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Notr application includes advanced window management features that automatically save and restore window position, size, and state across application restarts. This provides a seamless user experience by remembering where you positioned your application window.
+The ryoe application includes advanced window management features that automatically save and restore window position, size, and state across application restarts. This provides a seamless user experience by remembering where you positioned your application window.
 
 ## Features
 
@@ -58,7 +58,7 @@ tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-works
     "app": {
         "windows": [
             {
-                "title": "Notr",
+                "title": "ryoe",
                 "width": 1000,
                 "height": 600,
                 "dragDropEnabled": false
@@ -75,7 +75,7 @@ tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-works
 Window state is stored in the application data directory:
 
 ```bash
-~/.local/share/com.remcostoeten.notr/config/window-state.dat
+~/.local/share/com.remcostoeten.ryoe/config/window-state.dat
 ```
 
 ### Data Format
@@ -161,7 +161,7 @@ If the saved position is invalid (e.g., monitor was disconnected):
 Check that the application has write permissions to:
 
 ```bash
-~/.local/share/com.remcostoeten.notr/config/
+~/.local/share/com.remcostoeten.ryoe/config/
 ```
 
 #### Multiple Instances

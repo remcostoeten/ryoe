@@ -29,7 +29,7 @@ The application now has an automatic versioning system that:
 
 ### 3. **Minimal Footer Display**
 
-- Shows: `Notr • v0.01`
+- Shows: `ryoe • v0.01`
 - Height: 30-60px max
 - Centered with circle separators
 

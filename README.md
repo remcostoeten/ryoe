@@ -1,4 +1,4 @@
-# Notr - Desktop Note-Taking Application
+# ryoe - Desktop Note-Taking Application
 
 A modern, cross-platform desktop application built with Tauri, React, and TypeScript for efficient note-taking and code snippet management.
 
@@ -47,8 +47,8 @@ A modern, cross-platform desktop application built with Tauri, React, and TypeSc
 
 ```bash
 # Clone the repository
-git clone https://github.com/remcostoeten/notr-tauri.git
-cd notr-tauri
+git clone https://github.com/remcostoeten/ryoe.git
+cd ryoe
 
 # Install dependencies
 pnpm install
@@ -92,7 +92,7 @@ pnpm tauri build
 ### Project Structure
 
 ```
-notr-tauri/
+ryoe/
 ├── src/                    # React frontend
 │   ├── app/               # Application routes and pages
 │   ├── components/        # Reusable UI components

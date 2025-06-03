@@ -465,7 +465,7 @@ function ArchitectureContent() {
                     Architecture Overview
                 </h2>
                 <p className="text-muted-foreground">
-                    This page outlines the planned architecture for the Notr
+                    This page outlines the planned architecture for the ryoe
                     Tauri application, organized into three main categories of
                     services. Each service is designed to be modular and
                     independent, allowing for incremental development and

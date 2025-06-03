@@ -1,68 +1,90 @@
-import { appConfig } from '@/app/config'
-import { fetchLatestCommitInfo } from '@/lib/git-info'
-import { useEffect, useState } from 'react'
+import { appConfig } from "@/app/config"
+import { fetchLatestCommitInfo } from "@/lib/git-info"
+import { useEffect, useState } from "react"
+import { GitBranch, GitCommit, Clock } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function Footer() {
-    const [commitInfo, setCommitInfo] = useState({
-        branch: 'loading',
-        message: 'Loading...',
-        timestamp: '',
-        hash: ''
-    })
+  const [commitInfo, setCommitInfo] = useState({
+    branch: "loading",
+    message: "Loading...",
+    timestamp: "",
+    hash: "",
+  })
 
-    useEffect(() => {
-        // Fetch latest commit info when component mounts
-        const getLatestCommit = async () => {
-            try {
-                const info = await fetchLatestCommitInfo()
-                setCommitInfo({
-                    branch: info.branch || 'master',
-                    message: info.commitMessage.split('\n')[0], // First line only
-                    timestamp: new Date(info.commitDate).toLocaleString(),
-                    hash: info.commitHash.substring(0, 7)
-                })
-            } catch (error) {
-                console.warn('Failed to fetch commit info:', error)
-                setCommitInfo({
-                    branch: 'error',
-                    message: 'Failed to load commit info',
-                    timestamp: new Date().toLocaleString(),
-                    hash: 'unknown'
-                })
-            }
-        }
+  useEffect(() => {
+    const getLatestCommit = async () => {
+      try {
+        const info = await fetchLatestCommitInfo()
+        setCommitInfo({
+          branch: info.branch || "master",
+          message: info.commitMessage.split("\n")[0],
+          timestamp: new Date(info.commitDate).toLocaleString(),
+          hash: info.commitHash.substring(0, 7),
+        })
+      } catch (error) {
+        setCommitInfo({
+          branch: "error",
+          message: "Failed to load commit info",
+          timestamp: new Date().toLocaleString(),
+          hash: "unknown",
+        })
+      }
+    }
 
-        getLatestCommit()
-    }, [])
+    getLatestCommit()
+  }, [])
 
-    return (
-        <footer className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-800/50 bg-black/80 backdrop-blur-sm">
-            <div className="flex items-center justify-between px-6 py-3 text-xs text-gray-400">
-                <div className="flex items-center space-x-2">
-                    <span className="font-medium text-gray-300">
-                        {appConfig.name}
-                    </span>
-                    <span className="text-gray-600">●</span>
-                    <span className="font-mono text-gray-300">
-                        v{appConfig.version}
-                    </span>
+  return (
+    <TooltipProvider>
+      <footer className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-800/50 bg-black/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 py-1.5 text-xs">
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-gray-300">{appConfig.name}</span>
+            <span className="text-gray-500">|</span>
+            <span className="font-mono text-gray-400">v{appConfig.version}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-gray-400">
+                  <GitBranch className="h-3.5 w-3.5" />
+                  <span>{commitInfo.branch}</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                    <span className="text-gray-400">{commitInfo.branch}</span>
-                    <span className="text-gray-600">●</span>
-                    <span className="font-mono text-gray-400">
-                        {commitInfo.hash}
-                    </span>
-                    <span className="text-gray-600">●</span>
-                    <span className="text-gray-400">
-                        {commitInfo.message}
-                    </span>
-                    <span className="text-gray-600">●</span>
-                    <span className="text-gray-400">
-                        {commitInfo.timestamp}
-                    </span>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Branch: {commitInfo.branch}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-gray-400">
+                  <GitCommit className="h-3.5 w-3.5" />
+                  <span className="font-mono">{commitInfo.hash}</span>
                 </div>
-            </div>
-        </footer>
-    )
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Commit: {commitInfo.hash}</p>
+                <p className="max-w-[200px] truncate">{commitInfo.message}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-gray-400">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{new Date(commitInfo.timestamp).toLocaleTimeString()}</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>{commitInfo.timestamp}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </footer>
+    </TooltipProvider>
+  )
 }

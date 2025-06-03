@@ -1,17 +1,14 @@
-import { invoke } from '@tauri-apps/api/core'
-import { isTauriEnvironment } from '@/lib/environment'
+import {
+    initializeTursoDatabase,
+    checkTursoDatabaseHealth,
+    createUserInTurso,
+    executeQueryInTurso
+} from '@/lib/database/turso-client'
 
 export async function initializeDatabase() {
-    if (!isTauriEnvironment()) {
-        console.warn(
-            'Database initialization skipped: not in Tauri environment'
-        )
-        return 'Database initialization skipped (web environment)'
-    }
-
     try {
         console.log('Database initialization started...')
-        const result = await invoke<string>('initialize_database')
+        const result = await initializeTursoDatabase()
         console.log('Database initialized:', result)
         return result
     } catch (error) {
@@ -34,28 +31,10 @@ export interface DatabaseHealth {
 }
 
 export async function checkDatabaseHealth(): Promise<DatabaseHealth> {
-    if (!isTauriEnvironment()) {
-        return {
-            status: 'disconnected',
-            message: 'Database not available in web environment',
-            lastChecked: new Date()
-        }
-    }
-
     try {
-        const result = await invoke<{
-            status: string
-            message: string
-            last_checked: string
-            response_time?: number
-        }>('check_database_health')
-
-        return {
-            status: result.status as DatabaseHealthStatus,
-            message: result.message,
-            lastChecked: new Date(result.last_checked),
-            responseTime: result.response_time
-        }
+        console.debug('Database health check: Checking Turso database...')
+        const result = await checkTursoDatabaseHealth()
+        return result
     } catch (error) {
         return {
             status: 'error',
@@ -72,20 +51,25 @@ export async function createUser(
     name: string,
     snippetsPath: string
 ): Promise<number> {
-    if (!isTauriEnvironment()) {
-        console.warn('User creation skipped: not in Tauri environment')
-        throw new Error('User creation not available in web environment')
-    }
+    console.debug('Create user attempt:', { name, snippetsPath })
 
     try {
-        const userId = await invoke<number>('create_user', {
-            name,
-            snippetsPath
-        })
+        const userId = await createUserInTurso(name, snippetsPath)
         console.log('User created with ID:', userId)
         return userId
     } catch (error) {
         console.error('Failed to create user:', error)
+        throw error
+    }
+}
+
+export async function executeQuery(query: string) {
+    try {
+        console.debug('Executing query:', query)
+        const result = await executeQueryInTurso(query)
+        return result
+    } catch (error) {
+        console.error('Failed to execute query:', error)
         throw error
     }
 }

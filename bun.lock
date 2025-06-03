@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "notr-tauri",
+      "name": "ryoe",
       "dependencies": {
         "@libsql/client": "^0.15.8",
         "@mdx-js/react": "^3.1.0",

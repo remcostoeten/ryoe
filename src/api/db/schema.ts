@@ -15,3 +15,26 @@ export const snippets = sqliteTable('snippets', {
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
+
+// Folders table with hierarchical structure
+export const folders = sqliteTable('folders', {
+    id: integer('id').primaryKey(),
+    name: text('name').notNull(),
+    parentId: integer('parent_id').references(() => folders.id), // Self-referencing for hierarchy
+    position: integer('position').notNull().default(0), // For ordering within same parent
+    isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(false), // Privacy setting
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+})
+
+// Notes table with MDX support
+export const notes = sqliteTable('notes', {
+    id: integer('id').primaryKey(),
+    title: text('title').notNull(),
+    content: text('content').notNull(), // MDX content
+    folderId: integer('folder_id').references(() => folders.id), // Can be null for root notes
+    position: integer('position').notNull().default(0), // For ordering within folder
+    isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(false), // Privacy setting
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+})

@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Copy, Check, Download, Play, Terminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface CodeBlockProps {
+type TProps =  {
     children: string
     language?: string
     filename?: string
@@ -61,7 +61,7 @@ export const CodeBlock = memo(
         executable = false,
         downloadable = false,
         className
-    }: CodeBlockProps) => {
+    }: TProps) => {
         const [copied, setCopied] = useState(false)
         const [isExecuting, setIsExecuting] = useState(false)
         const codeRef = useRef<HTMLElement>(null)

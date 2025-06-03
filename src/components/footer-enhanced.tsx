@@ -9,22 +9,20 @@ export function FooterEnhanced() {
     const environment = isTauriEnvironment() ? 'Desktop' : 'Web'
 
     useEffect(() => {
-        // Check database health periodically (only in Tauri environment)
-        if (isTauriEnvironment()) {
-            const checkHealth = async () => {
-                try {
-                    const health = await checkDatabaseHealth()
-                    setDbHealth(health)
-                } catch (error) {
-                    console.warn('Failed to check database health:', error)
-                }
+        // Check database health periodically (works in both environments now)
+        const checkHealth = async () => {
+            try {
+                const health = await checkDatabaseHealth()
+                setDbHealth(health)
+            } catch (error) {
+                console.warn('Failed to check database health:', error)
             }
-
-            checkHealth()
-            const interval = setInterval(checkHealth, 30000) // Check every 30 seconds
-
-            return () => clearInterval(interval)
         }
+
+        checkHealth()
+        const interval = setInterval(checkHealth, 30000) // Check every 30 seconds
+
+        return () => clearInterval(interval)
     }, [])
 
     const getStatusColor = (status?: string) => {

@@ -6,24 +6,34 @@ import { initializeDatabase } from '@/api/db'
 import { initTheme } from '@/lib/theme'
 import { ToastProvider } from '@/components/ui/toast'
 import { Spinner } from '@/components/ui/loaders/spinner'
-import { isTauriEnvironment } from '@/lib/environment'
+import { debugEnvironment } from '@/lib/environment'
 
 export function Providers({ children }: { children: ReactNode }) {
     useEffect(() => {
-        // Only initialize database in Tauri environment
-        if (isTauriEnvironment()) {
-            initializeDatabase().catch((error) => {
+        const initializeApp = async () => {
+            // Debug environment information in development
+            if (process.env.NODE_ENV === 'development') {
+                debugEnvironment()
+            }
+
+            // Initialize Turso database (works in both web and Tauri environments)
+            try {
+                console.log('Initializing Turso database...')
+                await initializeDatabase()
+                console.log('Database initialized successfully')
+            } catch (error) {
                 console.error('Failed to initialize database:', error)
-            })
-        } else {
-            console.log(
-                'Running in web environment - database initialization skipped'
-            )
+            }
+
+            // Initialize theme (works in both environments)
+            try {
+                await initTheme()
+            } catch (error) {
+                console.error('Failed to initialize theme:', error)
+            }
         }
 
-        initTheme().catch((error) => {
-            console.error('Failed to initialize theme:', error)
-        })
+        initializeApp()
     }, [])
 
     return (

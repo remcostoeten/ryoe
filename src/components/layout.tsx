@@ -1,4 +1,18 @@
+import { Outlet } from 'react-router'
 import { Header } from './header'
+
+export function RootLayout() {
+    return (
+        <div className="min-h-screen">
+            <Header />
+            <main className="min-h-screen">
+                <Outlet />
+            </main>
+        </div>
+    )
+}
+
+// Keep the original Layout component for backward compatibility
 import { Footer } from './footer'
 
 type TProps = {

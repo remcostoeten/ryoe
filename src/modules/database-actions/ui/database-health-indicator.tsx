@@ -29,7 +29,7 @@ const statusConfig = {
     },
     disconnected: {
         variant: 'warning' as const,
-        label: 'Reconnecting',
+        label: 'Not Available',
         color: 'text-amber-600'
     }
 } as const

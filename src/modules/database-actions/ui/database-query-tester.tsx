@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { invoke } from '@tauri-apps/api/core'
+import { executeQuery } from '@/api/db'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -23,9 +23,9 @@ import {
 type TQueryResults = {
     status: string
     message: string
-    result?: string
-    response_time: number
-    last_executed: string
+    result?: string | null
+    responseTime: number
+    lastExecuted: string
 }
 
 const TEST_QUERIES = [
@@ -62,16 +62,17 @@ export function DatabaseQueryTester() {
     const [isExecuting, setIsExecuting] = useState(false)
     const [lastResult, setLastResult] = useState<TQueryResults | null>(null)
 
-    async function executeQuery(query: string) {
+    async function executeQueryHandler(query: string) {
         setIsExecuting(true)
         try {
-            const result = await invoke<TQueryResults>(
-                'execute_database_query',
-                {
-                    query
-                }
-            )
-            setLastResult(result)
+            const result = await executeQuery(query)
+            setLastResult({
+                status: result.status,
+                message: result.message,
+                result: result.result,
+                responseTime: result.responseTime,
+                lastExecuted: result.lastExecuted
+            })
         } catch (error) {
             setLastResult({
                 status: 'error',
@@ -79,8 +80,8 @@ export function DatabaseQueryTester() {
                     error instanceof Error
                         ? error.message
                         : 'Unknown error occurred',
-                response_time: 0,
-                last_executed: new Date().toISOString()
+                responseTime: 0,
+                lastExecuted: new Date().toISOString()
             })
         } finally {
             setIsExecuting(false)
@@ -89,7 +90,7 @@ export function DatabaseQueryTester() {
 
     function executeCurrentTestQuery() {
         const query = TEST_QUERIES[currentQueryIndex]
-        executeQuery(query.query)
+        executeQueryHandler(query.query)
     }
 
     function cycleToNextQuery() {
@@ -98,7 +99,7 @@ export function DatabaseQueryTester() {
 
     function executeCustomQuery() {
         if (customQuery.trim()) {
-            executeQuery(customQuery.trim())
+            executeQueryHandler(customQuery.trim())
         }
     }
 
@@ -171,7 +172,7 @@ export function DatabaseQueryTester() {
                                 ) : (
                                     <Play className="h-4 w-4" />
                                 )}
-                                Executee
+                                Execute
                             </Button>
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">
@@ -223,7 +224,7 @@ export function DatabaseQueryTester() {
                                 {getStatusIcon(lastResult.status)}
                                 {getStatusBadge(lastResult.status)}
                                 <span className="text-sm text-muted-foreground">
-                                    {lastResult.response_time}ms
+                                    {lastResult.responseTime}ms
                                 </span>
                             </div>
                         </div>
@@ -349,7 +350,7 @@ export function DatabaseQueryTester() {
                             <div className="text-xs text-muted-foreground">
                                 Executed at:{' '}
                                 {new Date(
-                                    lastResult.last_executed
+                                    lastResult.lastExecuted
                                 ).toLocaleString()}
                             </div>
                         </div>
