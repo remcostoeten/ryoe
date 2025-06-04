@@ -1,6 +1,6 @@
 {
     "name": "ryoe",
-    "version": "0.07",
+    "version": "0.08",
     "description": "A  os native desktop app built with T auri, React/Rust",
     "keywords": [
         "shadcn",
@@ -24,6 +24,7 @@
         "format": "prettier --write .",
         "gen": "drizzle-kit generate",
         "push": "drizzle-kit push",
+        "seed": "tsx src/scripts/seed-folders.ts",
         "build:output:clipboard": "sh ./commands/build-output.sh",
         "build:output:file": "sh ./commands/build-output.sh file tmp/build.log",
         "run:tauri": "sh ./commands/run-tauri.sh",
@@ -34,6 +35,8 @@
         "**/*": "prettier --write --ignore-unknown"
     },
     "dependencies": {
+        "@blocknote/core": "^0.32.0-hackdays.0",
+        "@blocknote/react": "^0.32.0-hackdays.0",
         "@libsql/client": "^0.15.8",
         "@mdx-js/react": "^3.1.0",
         "@mdx-js/rollup": "^3.1.0",
