@@ -35,3 +35,22 @@ export {
   handleUserMutationError,
   handleUserMutationSuccess
 } from './user-mutations'
+
+// Note mutation hooks
+export {
+  useCreateNote,
+  useUpdateNote,
+  useDeleteNote,
+  useMoveNote,
+  useDuplicateNote,
+  useReorderNotes
+} from './note-mutations'
+
+// Folder mutation hooks
+export {
+  useCreateFolder,
+  useUpdateFolder,
+  useDeleteFolder,
+  useMoveFolder,
+  useReorderFolders
+} from './folder-mutations'

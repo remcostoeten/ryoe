@@ -71,3 +71,24 @@ export function isPositiveNumber(num: number): boolean {
 export function isNonNegativeNumber(num: number): boolean {
   return typeof num === 'number' && num >= 0
 }
+
+export function validateNoteTitle(title: string): boolean {
+  if (!title || typeof title !== 'string') return false
+  const trimmed = title.trim()
+  return trimmed.length >= 1 && trimmed.length <= 100
+}
+
+export function validateNoteContent(content: string): boolean {
+  if (!content || typeof content !== 'string') return false
+  return content.trim().length > 0
+}
+
+export function validateFolderName(name: string): boolean {
+  if (!name || typeof name !== 'string') return false
+  const trimmed = name.trim()
+  if (trimmed.length < 1 || trimmed.length > 50) return false
+
+  // Check for invalid characters in folder names
+  const invalidChars = /[<>:"/\\|?*]/
+  return !invalidChars.test(trimmed)
+}

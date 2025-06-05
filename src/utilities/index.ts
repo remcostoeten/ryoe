@@ -38,7 +38,9 @@ export {
   slugify,
   formatNumber,
   formatBytes,
-  formatPercentage
+  formatPercentage,
+  countWords,
+  calculateReadingTime
 } from './formatting'
 
 // Validation utilities
@@ -54,7 +56,10 @@ export {
   hasMaxLength,
   isInRange,
   isPositiveNumber,
-  isNonNegativeNumber
+  isNonNegativeNumber,
+  validateNoteTitle,
+  validateNoteContent,
+  validateFolderName
 } from './validation'
 
 // Package reader utilities

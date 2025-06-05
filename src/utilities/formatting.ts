@@ -75,3 +75,13 @@ export function formatPercentage(value: number, total: number, decimals = 1): st
   const percentage = (value / total) * 100
   return `${percentage.toFixed(decimals)}%`
 }
+
+export function countWords(text: string): number {
+  if (!text || typeof text !== 'string') return 0
+  return text.trim().split(/\s+/).filter(word => word.length > 0).length
+}
+
+export function calculateReadingTime(text: string, wordsPerMinute: number = 200): number {
+  const wordCount = countWords(text)
+  return Math.ceil(wordCount / wordsPerMinute)
+}
