@@ -28,8 +28,8 @@ import {
     readPackageJson,
     type TechStackItem,
     type PackageInfo
-} from '@/lib/package-reader'
-import { cn } from '@/lib/utils'
+} from '@/utilities'
+import { cn } from '@/utilities'
 
 const CategoryIcon = ({
     category

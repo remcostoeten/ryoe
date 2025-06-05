@@ -108,33 +108,33 @@ export function DatabaseQueryTester() {
     function getStatusIcon(status: string) {
         switch (status) {
             case 'success':
-                return <CheckCircle className="h-4 w-4 text-green-500" />
+                return <CheckCircle className="h-4 w-4 text-emerald-400" />
             case 'error':
-                return <XCircle className="h-4 w-4 text-red-500" />
+                return <XCircle className="h-4 w-4 text-rose-400" />
             default:
-                return <Database className="h-4 w-4 text-gray-500" />
+                return <Database className="h-4 w-4 text-gray-400" />
         }
     }
 
     function getStatusBadge(status: string) {
         switch (status) {
             case 'success':
-                return <Badge variant="success">Success</Badge>
+                return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Success</Badge>
             case 'error':
-                return <Badge variant="error">Error</Badge>
+                return <Badge className="bg-rose-500/20 text-rose-400 border-rose-500/30">Error</Badge>
             default:
-                return <Badge variant="secondary">Unknown</Badge>
+                return <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">Unknown</Badge>
         }
     }
 
     return (
-        <Card className="w-full max-w-4xl">
+        <Card className="w-full max-w-4xl bg-gray-900/50 border-gray-700">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-200">
                     <Database className="h-5 w-5" />
                     Database Query Tester
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-400">
                     Test database queries and view results. Cycle through
                     predefined queries or run custom ones.
                 </CardDescription>
@@ -143,9 +143,9 @@ export function DatabaseQueryTester() {
             <CardContent className="space-y-6">
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">Test Queries</h3>
+                        <h3 className="text-lg font-semibold text-gray-200">Test Queries</h3>
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-gray-400">
                                 {currentQueryIndex + 1} of {TEST_QUERIES.length}
                             </span>
                             <Button
@@ -153,19 +153,21 @@ export function DatabaseQueryTester() {
                                 size="sm"
                                 onClick={cycleToNextQuery}
                                 disabled={isExecuting}
+                                className="bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-gray-200"
                             >
                                 <SkipForward className="h-4 w-4" />
                             </Button>
                         </div>
                     </div>
 
-                    <div className="p-4 border rounded-lg bg-muted/50">
+                    <div className="p-4 border border-gray-600 rounded-lg bg-gray-800/50">
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{currentQuery.name}</h4>
+                            <h4 className="font-medium text-gray-200">{currentQuery.name}</h4>
                             <Button
                                 onClick={executeCurrentTestQuery}
                                 disabled={isExecuting}
                                 size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
                             >
                                 {isExecuting ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -175,17 +177,17 @@ export function DatabaseQueryTester() {
                                 Execute
                             </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">
+                        <p className="text-sm text-gray-400 mb-3">
                             {currentQuery.description}
                         </p>
-                        <pre className="text-sm bg-background p-2 rounded border font-mono">
+                        <pre className="text-sm bg-gray-900/50 border border-gray-600 p-2 rounded font-mono text-gray-300">
                             {currentQuery.query}
                         </pre>
                     </div>
                 </div>
 
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Custom Query</h3>
+                    <h3 className="text-lg font-semibold text-gray-200">Custom Query</h3>
                     <div className="flex gap-2">
                         <Input
                             placeholder="Enter your SQL query here..."
@@ -198,11 +200,12 @@ export function DatabaseQueryTester() {
                                 }
                             }}
                             disabled={isExecuting}
-                            className="font-mono"
+                            className="font-mono bg-gray-800/50 border-gray-600 text-gray-200 placeholder:text-gray-500"
                         />
                         <Button
                             onClick={executeCustomQuery}
                             disabled={isExecuting || !customQuery.trim()}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
                         >
                             {isExecuting ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -217,142 +220,158 @@ export function DatabaseQueryTester() {
                 {lastResult && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold">
+                            <h3 className="text-lg font-semibold text-gray-200">
                                 Query Result
                             </h3>
                             <div className="flex items-center gap-2">
                                 {getStatusIcon(lastResult.status)}
                                 {getStatusBadge(lastResult.status)}
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-gray-400">
                                     {lastResult.responseTime}ms
                                 </span>
                             </div>
                         </div>
 
-                        <div className="space-y-3">
-                            <div className="p-3 border rounded-lg">
-                                <div className="text-sm font-medium text-muted-foreground mb-1">
-                                    Message
-                                </div>
-                                <div className="text-sm">
-                                    {lastResult.message}
-                                </div>
+                        <div className={`p-3 rounded-lg border ${
+                            lastResult.status === 'success'
+                                ? "bg-emerald-500/10 border-emerald-500/30"
+                                : lastResult.status === 'error'
+                                ? "bg-rose-500/10 border-rose-500/30"
+                                : "bg-gray-800/50 border-gray-600"
+                        }`}>
+                            <div className={`text-sm font-medium mb-1 ${
+                                lastResult.status === 'success'
+                                    ? "text-emerald-400"
+                                    : lastResult.status === 'error'
+                                    ? "text-rose-400"
+                                    : "text-gray-300"
+                            }`}>
+                                {lastResult.status === 'success' ? 'Success!' : lastResult.status === 'error' ? 'Error' : 'Result'}
                             </div>
+                            <div className={`text-xs opacity-90 ${
+                                lastResult.status === 'success'
+                                    ? "text-emerald-400"
+                                    : lastResult.status === 'error'
+                                    ? "text-rose-400"
+                                    : "text-gray-300"
+                            }`}>
+                                {lastResult.message}
+                            </div>
+                        </div>
 
-                            {lastResult.result && (
-                                <div className="p-3 border rounded-lg">
-                                    <div className="text-sm font-medium text-muted-foreground mb-2">
-                                        Result
-                                    </div>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-sm border-collapse">
-                                            {lastResult.result.includes(
-                                                '|'
-                                            ) && (
-                                                <>
-                                                    <thead>
-                                                        <tr className="bg-muted/50">
-                                                            {lastResult.result
-                                                                .split('\n')[0]
-                                                                .split(' | ')
-                                                                .map(
-                                                                    (
-                                                                        header,
-                                                                        i
-                                                                    ) => (
-                                                                        <th
-                                                                            key={
-                                                                                i
-                                                                            }
-                                                                            className="px-3 py-2 text-left font-medium text-muted-foreground border-b"
-                                                                        >
-                                                                            {
-                                                                                header
-                                                                            }
-                                                                        </th>
-                                                                    )
-                                                                )}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
+                        {lastResult.result && (
+                            <div className="p-3 border border-gray-600 rounded-lg bg-gray-800/50 mt-4">
+                                <div className="text-sm font-medium text-gray-300 mb-2">
+                                    Query Data
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm border-collapse">
+                                        {lastResult.result.includes(
+                                            '|'
+                                        ) && (
+                                            <>
+                                                <thead>
+                                                    <tr className="bg-gray-900/50">
                                                         {lastResult.result
-                                                            .split('\n')
-                                                            .slice(2) // Skip header and separator line
-                                                            .filter(
-                                                                (line) =>
-                                                                    line.trim() !==
-                                                                    ''
-                                                            )
+                                                            .split('\n')[0]
+                                                            .split(' | ')
                                                             .map(
                                                                 (
-                                                                    row,
-                                                                    rowIndex
+                                                                    header,
+                                                                    i
                                                                 ) => (
-                                                                    <tr
+                                                                    <th
                                                                         key={
-                                                                            rowIndex
+                                                                            i
                                                                         }
-                                                                        className={
-                                                                            rowIndex %
-                                                                                2 ===
-                                                                            0
-                                                                                ? 'bg-background'
-                                                                                : 'bg-muted/30'
-                                                                        }
+                                                                        className="px-3 py-2 text-left font-medium text-gray-400 border-b border-gray-600"
                                                                     >
-                                                                        {row
-                                                                            .split(
-                                                                                ' | '
-                                                                            )
-                                                                            .map(
-                                                                                (
-                                                                                    cell,
-                                                                                    cellIndex
-                                                                                ) => (
-                                                                                    <td
-                                                                                        key={
-                                                                                            cellIndex
-                                                                                        }
-                                                                                        className="px-3 py-2 border-t border-border/40"
-                                                                                    >
-                                                                                        {
-                                                                                            cell
-                                                                                        }
-                                                                                    </td>
-                                                                                )
-                                                                            )}
-                                                                    </tr>
+                                                                        {
+                                                                            header
+                                                                        }
+                                                                    </th>
                                                                 )
                                                             )}
-                                                    </tbody>
-                                                </>
-                                            )}
-                                            {!lastResult.result.includes(
-                                                '|'
-                                            ) && (
-                                                <tbody>
-                                                    <tr>
-                                                        <td className="px-3 py-2">
-                                                            <pre className="whitespace-pre-wrap">
-                                                                {
-                                                                    lastResult.result
-                                                                }
-                                                            </pre>
-                                                        </td>
                                                     </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {lastResult.result
+                                                        .split('\n')
+                                                        .slice(2) // Skip header and separator line
+                                                        .filter(
+                                                            (line) =>
+                                                                line.trim() !==
+                                                                ''
+                                                        )
+                                                        .map(
+                                                            (
+                                                                row,
+                                                                rowIndex
+                                                            ) => (
+                                                                <tr
+                                                                    key={
+                                                                        rowIndex
+                                                                    }
+                                                                    className={
+                                                                        rowIndex %
+                                                                            2 ===
+                                                                        0
+                                                                            ? 'bg-gray-800/30'
+                                                                            : 'bg-gray-900/30'
+                                                                    }
+                                                                >
+                                                                    {row
+                                                                        .split(
+                                                                            ' | '
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                cell,
+                                                                                cellIndex
+                                                                            ) => (
+                                                                                <td
+                                                                                    key={
+                                                                                        cellIndex
+                                                                                    }
+                                                                                    className="px-3 py-2 border-t border-gray-600/40 text-gray-300"
+                                                                                >
+                                                                                    {
+                                                                                        cell
+                                                                                    }
+                                                                                </td>
+                                                                            )
+                                                                        )}
+                                                                </tr>
+                                                            )
+                                                        )}
                                                 </tbody>
-                                            )}
-                                        </table>
-                                    </div>
+                                            </>
+                                        )}
+                                        {!lastResult.result.includes(
+                                            '|'
+                                        ) && (
+                                            <tbody>
+                                                <tr>
+                                                    <td className="px-3 py-2">
+                                                        <pre className="whitespace-pre-wrap text-gray-300 font-mono text-xs">
+                                                            {
+                                                                lastResult.result
+                                                            }
+                                                        </pre>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        )}
+                                    </table>
                                 </div>
-                            )}
-
-                            <div className="text-xs text-muted-foreground">
-                                Executed at:{' '}
-                                {new Date(
-                                    lastResult.lastExecuted
-                                ).toLocaleString()}
                             </div>
+                        )}
+
+                        <div className="text-xs text-gray-500 mt-4">
+                            Executed at:{' '}
+                            {new Date(
+                                lastResult.lastExecuted
+                            ).toLocaleString()}
                         </div>
                     </div>
                 )}

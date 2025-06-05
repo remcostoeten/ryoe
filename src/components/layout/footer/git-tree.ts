@@ -1,4 +1,4 @@
-import { createHttpClient } from "@/lib/http-client"
+import { createHttpClient } from "@/core/http-client"
 
 // Create a cached HTTP client specifically for GitHub API calls
 // Using a long TTL to avoid rate limiting

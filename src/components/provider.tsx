@@ -3,10 +3,10 @@ import AppErrorPage from '@/features/errors/app-error'
 import { ErrorBoundary } from 'react-error-boundary'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { initializeDatabase } from '@/api/db'
-import { initTheme } from '@/lib/theme'
+import { initTheme } from '@/core/theme'
 import { ToastProvider } from '@/components/ui/toast'
 import { Spinner } from '@/components/ui/loaders/spinner'
-import { debugEnvironment } from '@/lib/environment'
+import { debugEnvironment } from '@/utilities'
 
 export function Providers({ children }: { children: ReactNode }) {
     useEffect(() => {

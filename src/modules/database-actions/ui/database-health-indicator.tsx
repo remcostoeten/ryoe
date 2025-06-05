@@ -2,7 +2,7 @@ import { useDatabaseHealth } from '@/modules/database-actions/hooks/use-database
 import { Button } from '@/components/ui/button'
 import { Badge, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { RefreshCw } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 
 type TProps = {
     showRefresh?: boolean

@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { appConfig } from "@/app/config"
-import { fetchLatestCommitInfo, getLastCommitDate } from "@/lib/git-info"
+import { fetchLatestCommitInfo, getLastCommitDate } from "@/core/git/git-info"
 import { fetchGitTree, calculateTreePositions, getBranchTypeInfo, type GitCommit } from "@/lib/calculate-tree-positions"
 import { executeQuery } from "@/api/db"
 

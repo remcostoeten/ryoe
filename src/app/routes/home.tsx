@@ -5,11 +5,18 @@ import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-quer
 import { VersionTest } from '@/components/version-test'
 import { EnvironmentDebug } from '@/components/debug/environment-debug'
 import { FooterEnhanced } from '@/components/footer-enhanced'
+import { UserProfile } from '@/components/layout/UserProfile'
 
 export function HomePage() {
     return (
         <div className="min-h-screen p-6">
             <div className="max-w-6xl mx-auto space-y-8">
+                {/* Header with User Profile */}
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-gray-200">Ryoe Dashboard</h1>
+                    <UserProfile />
+                </div>
+
                 <div className="text-center space-y-6">
                     <main className="pt-20 space-y-4 pb-16">
                         <div className="flex justify-center">

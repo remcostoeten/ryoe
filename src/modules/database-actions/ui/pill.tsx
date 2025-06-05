@@ -14,7 +14,7 @@ import {
     RefreshCw,
     Database
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 
 interface DatabaseHealthIndicatorProps {
     /** Show refresh button. Default: true */

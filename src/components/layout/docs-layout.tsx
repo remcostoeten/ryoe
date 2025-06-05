@@ -20,7 +20,7 @@ import {
     BookOpen,
     Search
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { MobileTocSkeleton, TocSkeleton } from '../ui/loaders'

@@ -4,6 +4,9 @@ export const users = sqliteTable('users', {
     id: integer('id').primaryKey(),
     name: text('name').notNull(),
     snippetsPath: text('snippets_path').notNull(),
+    isSetupComplete: integer('is_setup_complete', { mode: 'boolean' }).notNull().default(false),
+    storageType: text('storage_type').notNull().default('turso'), // 'local' or 'turso'
+    preferences: text('preferences'), // JSON string for user preferences
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 })
 

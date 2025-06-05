@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { ChevronRight, ChevronDown, Folder, FolderOpen, Plus, MoreHorizontal, Edit2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 import { useKeyboardNavigation } from '../hooks/use-keyboard-navigation'
 import { useInlineEditing, validateFolderName } from '../hooks/use-inline-editing'
 import { useFolderDragDrop, customCollisionDetection } from '../hooks/use-folder-drag-drop'

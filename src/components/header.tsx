@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 import { Logo } from './logo'
 
 type TProps = {

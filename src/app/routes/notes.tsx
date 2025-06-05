@@ -8,7 +8,7 @@ import { NoteEditor } from '@/modules/notes/components/note-editor'
 import { useNotes } from '@/modules/notes/hooks/use-notes'
 import { Button } from '@/components/ui/button'
 import { PanelLeftClose, PanelLeft } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 
 export default function NotesPage() {
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null)

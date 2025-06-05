@@ -1,4 +1,4 @@
-import { getTursoClient } from '@/lib/database/turso-client'
+import { getTursoClient } from '@/core/database/clients/turso-client'
 import { BaseService } from '@/api/base/crud-interfaces'
 import type { 
   Note, 

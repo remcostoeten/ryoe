@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { appConfig } from "@/app/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { fetchCommitHistory, type GitCommitInfo } from "@/lib/git-info"
+import { fetchLatestCommitInfo, type GitCommitInfo } from "@/core/git/git-info"
 import { calculateTreePositions, getBranchTypeInfo } from "./git-tree"
 
 // Enhanced GitCommit type that includes visualization data

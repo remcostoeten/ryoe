@@ -1,9 +1,8 @@
 import {
     initializeTursoDatabase,
     checkTursoDatabaseHealth,
-    createUserInTurso,
-    executeQueryInTurso
-} from '@/lib/database/turso-client'
+    executeTursoQuery
+} from '@/core/database/clients/turso-client'
 
 export async function initializeDatabase() {
     try {
@@ -47,26 +46,10 @@ export async function checkDatabaseHealth(): Promise<DatabaseHealth> {
     }
 }
 
-export async function createUser(
-    name: string,
-    snippetsPath: string
-): Promise<number> {
-    console.debug('Create user attempt:', { name, snippetsPath })
-
-    try {
-        const userId = await createUserInTurso(name, snippetsPath)
-        console.log('User created with ID:', userId)
-        return userId
-    } catch (error) {
-        console.error('Failed to create user:', error)
-        throw error
-    }
-}
-
 export async function executeQuery(query: string) {
     try {
         console.debug('Executing query:', query)
-        const result = await executeQueryInTurso(query)
+        const result = await executeTursoQuery({ sql: query })
         return result
     } catch (error) {
         console.error('Failed to execute query:', error)

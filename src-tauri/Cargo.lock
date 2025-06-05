@@ -2681,7 +2681,7 @@ checksum = "eded382c5f5f786b989652c49544c4877d9f015cc22e145a5ea8ea66c2921cd2"
 
 [[package]]
 name = "ryoe"
-version = "0.6.0"
+version = "0.8.0"
 dependencies = [
  "serde",
  "serde_json",
