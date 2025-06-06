@@ -3,12 +3,13 @@
  * Pure functions only, no classes
  */
 
-import { 
-  findUserById, 
-  findUserByName, 
-  createUser, 
-  updateUser, 
-  getSetupCompleteUserCount 
+import {
+  findUserById,
+  findUserByName,
+  createUser,
+  updateUser,
+  getSetupCompleteUserCount,
+  markAllUsersSetupComplete
 } from '@/repositories/user-repository'
 import { getAppStorage } from '@/core/storage'
 import { STORAGE_KEYS, DEFAULT_MDX_STORAGE_PATH } from '@/core/config/constants'
@@ -283,6 +284,32 @@ export async function getCurrentUser(): Promise<TServiceResult<TUserProfile>> {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       code: 'GET_CURRENT_USER_ERROR'
+    }
+  }
+}
+
+/**
+ * Migration function to fix existing users that were created with is_setup_complete = 0
+ * This should be called during app initialization or as part of database maintenance
+ */
+export async function fixExistingUsersSetupStatus(): Promise<TServiceResult<boolean>> {
+  try {
+    const result = await markAllUsersSetupComplete()
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || 'Failed to fix existing users setup status',
+        code: 'FIX_USERS_FAILED'
+      }
+    }
+
+    console.log('Successfully fixed existing users setup status')
+    return { success: true, data: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: 'FIX_USERS_ERROR'
     }
   }
 }

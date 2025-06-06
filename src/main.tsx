@@ -1,20 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from '@/app'
-import { initTheme } from '@/core/theme'
-import { setupHMRErrorHandling, showConnectionStatus } from '@/utilities'
-
-// Initialize theme when the app starts
-initTheme()
-
-// Setup development server utilities
-if (import.meta.env.DEV) {
-    setupHMRErrorHandling()
-    showConnectionStatus()
-}
+import App from './app'
+import { Providers } from './components/provider'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+  <React.StrictMode>
+    <Providers>
+      <App />
+    </Providers>
+  </React.StrictMode>
 )

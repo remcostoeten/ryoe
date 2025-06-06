@@ -3,6 +3,7 @@
  */
 
 import { findById, findMany, create, update, deleteById } from './base-repository'
+import { getTursoClient } from '@/core/database/clients/turso-client'
 import type { 
   TUser, 
   TCreateUserData, 
@@ -84,9 +85,9 @@ export async function findSetupCompleteUsers(): Promise<TRepositoryListResult<TU
 export async function createUser(data: TCreateUserData): Promise<TRepositoryResult<TUser>> {
   const rowData = {
     ...mapUserDataToRow(data),
-    is_setup_complete: 0 // Default to not setup complete
+    is_setup_complete: 1 // Mark as setup complete when creating through onboarding
   }
-  
+
   return create(TABLE_NAME, rowData, mapRowToUser)
 }
 
@@ -96,7 +97,35 @@ export async function updateUser(id: number, data: TUpdateUserData): Promise<TRe
 }
 
 export async function markUserSetupComplete(id: number): Promise<TRepositoryResult<TUser>> {
-  return updateUser(id, { storageType: 'turso' }) // This will be overridden by the actual update
+  try {
+    const client = getTursoClient()
+    await client.execute({
+      sql: 'UPDATE users SET is_setup_complete = 1 WHERE id = ?',
+      args: [id]
+    })
+
+    // Return the updated user
+    return findUserById(id)
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to mark user setup complete'
+    }
+  }
+}
+
+export async function markAllUsersSetupComplete(): Promise<TRepositoryResult<boolean>> {
+  try {
+    const client = getTursoClient()
+    await client.execute('UPDATE users SET is_setup_complete = 1 WHERE is_setup_complete = 0')
+
+    return { success: true, data: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to mark all users setup complete'
+    }
+  }
 }
 
 export async function deleteUser(id: number): Promise<TRepositoryResult<boolean>> {

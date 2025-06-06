@@ -55,5 +55,27 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './src')
         }
+    },
+
+    // Build optimizations
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Separate vendor chunks
+                    'react-vendor': ['react', 'react-dom'],
+                    'ui-vendor': ['framer-motion', 'lucide-react'],
+                    'query-vendor': ['@tanstack/react-query'],
+                    'editor-vendor': ['@blocknote/core', '@blocknote/react'],
+                    'db-vendor': ['@libsql/client', 'drizzle-orm'],
+                    'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-store'],
+                    // Split large modules
+                    'three-vendor': ['three', '@react-three/fiber'],
+                    'mdx-vendor': ['@mdx-js/react', 'rehype-highlight', 'remark-gfm']
+                }
+            }
+        },
+        // Increase chunk size warning limit
+        chunkSizeWarningLimit: 1000
     }
 })

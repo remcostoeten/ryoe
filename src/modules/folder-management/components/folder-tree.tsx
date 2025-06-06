@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { ChevronRight, ChevronDown, Folder, FolderOpen, Plus, MoreHorizontal, Edit2 } from 'lucide-react'
+import { ChevronRight, ChevronDown, Folder, FolderOpen, Plus, MoreHorizontal, Edit2, Trash2 } from 'lucide-react'
 import { cn } from '@/utilities'
 import { useInlineEditing, validateFolderName } from '../hooks/use-inline-editing'
 
@@ -342,6 +342,22 @@ function FolderItem({
                 tabIndex={-1}
               >
                 <Plus className="h-3 w-3" />
+              </button>
+            )}
+
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (confirm(`Are you sure you want to delete the folder "${folder.name}"?\n\nThis action cannot be undone.`)) {
+                    handleDelete(e)
+                  }
+                }}
+                className="flex h-5 w-5 items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-1 focus:ring-destructive"
+                title="Delete folder (Delete key)"
+                tabIndex={-1}
+              >
+                <Trash2 className="h-3 w-3" />
               </button>
             )}
 

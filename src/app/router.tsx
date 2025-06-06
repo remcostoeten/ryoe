@@ -100,6 +100,13 @@ const router = createBrowserRouter([
                     }
                 },
                 {
+                    path: 'profile',
+                    lazy: async () => {
+                        const module = await import('@/app/routes/profile')
+                        return { Component: module.Component }
+                    }
+                },
+                {
                     path: '*',
                     lazy: async () => {
                         const module = await import('@/app/routes/not-found')

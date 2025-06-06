@@ -3,9 +3,10 @@
 import { Link, useLocation } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities'
-import { Home, FileText, Folder, BookOpen, LogIn } from 'lucide-react'
+import { Home, FileText, Folder, BookOpen, LogIn, User } from 'lucide-react'
+import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'
 
-const navigationItems = [
+const baseNavigationItems = [
     {
         label: 'Home',
         href: '/',
@@ -25,7 +26,18 @@ const navigationItems = [
         label: 'Docs',
         href: '/docs',
         icon: BookOpen
-    },
+    }
+]
+
+const authenticatedItems = [
+    {
+        label: 'Profile',
+        href: '/profile',
+        icon: User
+    }
+]
+
+const unauthenticatedItems = [
     {
         label: 'Sign In',
         href: '/sign-in',
@@ -35,6 +47,7 @@ const navigationItems = [
 
 export function Navigation() {
     const location = useLocation()
+    const { user, isLoading } = useCurrentUser()
 
     return (
         <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -53,11 +66,12 @@ export function Navigation() {
 
                     {/* Navigation Links */}
                     <div className="hidden md:flex items-center gap-1">
-                        {navigationItems.map((item) => {
+                        {/* Base navigation items (always visible) */}
+                        {baseNavigationItems.map((item) => {
                             const Icon = item.icon
-                            const isActive = location.pathname === item.href || 
+                            const isActive = location.pathname === item.href ||
                                            (item.href !== '/' && location.pathname.startsWith(item.href))
-                            
+
                             return (
                                 <Button
                                     key={item.href}
@@ -76,6 +90,60 @@ export function Navigation() {
                                 </Button>
                             )
                         })}
+
+                        {/* Profile link - always show when not loading */}
+                        {!isLoading && (
+                            authenticatedItems.map((item) => {
+                                const Icon = item.icon
+                                const isActive = location.pathname === item.href ||
+                                               (item.href !== '/' && location.pathname.startsWith(item.href))
+
+                                return (
+                                    <Button
+                                        key={item.href}
+                                        variant={isActive ? "secondary" : "ghost"}
+                                        size="sm"
+                                        asChild
+                                        className={cn(
+                                            "gap-2",
+                                            isActive && "bg-muted"
+                                        )}
+                                    >
+                                        <Link to={item.href}>
+                                            <Icon className="h-4 w-4" />
+                                            {item.label}
+                                        </Link>
+                                    </Button>
+                                )
+                            })
+                        )}
+
+                        {/* Sign in link - only show if no user */}
+                        {!isLoading && !user && (
+                            unauthenticatedItems.map((item) => {
+                                const Icon = item.icon
+                                const isActive = location.pathname === item.href ||
+                                               (item.href !== '/' && location.pathname.startsWith(item.href))
+
+                                return (
+                                    <Button
+                                        key={item.href}
+                                        variant={isActive ? "secondary" : "ghost"}
+                                        size="sm"
+                                        asChild
+                                        className={cn(
+                                            "gap-2",
+                                            isActive && "bg-muted"
+                                        )}
+                                    >
+                                        <Link to={item.href}>
+                                            <Icon className="h-4 w-4" />
+                                            {item.label}
+                                        </Link>
+                                    </Button>
+                                )
+                            })
+                        )}
                     </div>
 
                     {/* Mobile Navigation */}

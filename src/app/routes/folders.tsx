@@ -45,7 +45,7 @@ export default function FoldersPage() {
     refreshTree
   } = useFolderTree()
 
-  const { moveFolder } = useFolderOperations()
+  const { moveFolder, deleteFolder } = useFolderOperations()
 
   const handleFolderSelect = (folder: Folder) => {
     selectFolder(folder.id)
@@ -92,6 +92,23 @@ export default function FoldersPage() {
       toast.success('Folder tree refreshed')
     } catch (error) {
       toast.error('Failed to refresh folder tree')
+    }
+  }
+
+  const handleFolderDelete = async (folder: Folder) => {
+    try {
+      const success = await deleteFolder(folder.id)
+      if (success) {
+        toast.success(`Folder "${folder.name}" deleted successfully`)
+        refreshTree()
+        // Clear selection if deleted folder was selected
+        if (selectedId === folder.id) {
+          selectFolder(null)
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to delete folder')
+      console.error('Delete folder error:', error)
     }
   }
 
@@ -178,6 +195,7 @@ export default function FoldersPage() {
                 onFolderExpand={handleFolderExpand}
                 onFolderCreate={handleCreateFolder}
                 onFolderRename={renameFolder}
+                onFolderDelete={handleFolderDelete}
                 onFolderMove={async (folderId, newParentId, newPosition) => {
                   // Handle folder move without immediate refresh to prevent DOM reload
                   try {

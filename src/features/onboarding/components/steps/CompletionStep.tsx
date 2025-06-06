@@ -29,8 +29,14 @@ export function CompletionStep({ data, isLoading, onComplete }: CompletionStepPr
         transition={{ duration: 0.5, delay: 0.5 }}
         className="py-10"
       >
-        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-white to-white/70 flex items-center justify-center">
-          <CheckCircle className="h-8 w-8 text-black" />
+        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.8, type: "spring", stiffness: 200 }}
+          >
+            <CheckCircle className="h-8 w-8 text-white" />
+          </motion.div>
         </div>
       </motion.div>
 
@@ -68,7 +74,7 @@ export function CompletionStep({ data, isLoading, onComplete }: CompletionStepPr
         transition={{ delay: 1 }}
         onClick={onComplete}
         disabled={isLoading}
-        className="w-full rounded-full bg-white text-black font-medium py-3 hover:bg-white/90 transition-colors disabled:opacity-50"
+        className="w-full rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-blue-500/25"
       >
         {isLoading ? 'Finalizing setup...' : 'Enter Ryoe'}
       </motion.button>

@@ -1,14 +1,20 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { Navigation } from './navigation'
+import { AppGuard } from './AppGuard'
 
 export function RootLayout() {
+    const location = useLocation()
+    const isOnboarding = location.pathname === '/onboarding'
+
     return (
-        <div className="min-h-screen">
-            <Navigation />
-            <main className="min-h-screen">
-                <Outlet />
-            </main>
-        </div>
+        <AppGuard>
+            <div className="min-h-screen">
+                {!isOnboarding && <Navigation />}
+                <main className="min-h-screen">
+                    <Outlet />
+                </main>
+            </div>
+        </AppGuard>
     )
 }
 

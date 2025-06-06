@@ -5,12 +5,14 @@ interface SimpleCanvasEffectProps {
   className?: string
   dotSize?: number
   animationSpeed?: number
+  colorful?: boolean
 }
 
-export function SimpleCanvasEffect({ 
+export function SimpleCanvasEffect({
   className,
   dotSize = 6,
-  animationSpeed = 3
+  animationSpeed = 3,
+  colorful = false
 }: SimpleCanvasEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -36,6 +38,8 @@ export function SimpleCanvasEffect({
       y: number
       opacity: number
       delay: number
+      color: string
+      hue: number
     }> = []
 
     // Create dot grid
@@ -49,17 +53,27 @@ export function SimpleCanvasEffect({
         const centerY = canvas.height / 2
         const x = i * spacing
         const y = j * spacing
-        
+
         // Calculate distance from center for animation delay
         const distance = Math.sqrt(
           Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
         )
-        
+
+        // Generate color based on position and randomness
+        const hue = colorful
+          ? (distance * 0.1 + Math.random() * 60 + 200) % 360  // Blue to purple range
+          : 0
+        const color = colorful
+          ? `hsl(${hue}, 70%, 60%)`
+          : 'white'
+
         dots.push({
           x,
           y,
           opacity: 0,
-          delay: distance * 0.01 + Math.random() * 0.5
+          delay: distance * 0.01 + Math.random() * 0.5,
+          color,
+          hue
         })
       }
     }
@@ -68,17 +82,24 @@ export function SimpleCanvasEffect({
 
     const animate = () => {
       const currentTime = (Date.now() - startTime) / 1000
-      
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.fillStyle = 'white'
 
       dots.forEach(dot => {
         const timeSinceStart = currentTime * animationSpeed
-        
+
         if (timeSinceStart > dot.delay) {
           const progress = Math.min((timeSinceStart - dot.delay) * 2, 1)
           dot.opacity = progress * (0.3 + Math.random() * 0.7)
-          
+
+          // Add subtle color animation for colorful mode
+          if (colorful) {
+            const animatedHue = (dot.hue + currentTime * 10) % 360
+            ctx.fillStyle = `hsl(${animatedHue}, 70%, ${60 + Math.sin(currentTime * 2 + dot.delay) * 10}%)`
+          } else {
+            ctx.fillStyle = dot.color
+          }
+
           ctx.globalAlpha = dot.opacity
           ctx.beginPath()
           ctx.arc(dot.x, dot.y, dotSize / 2, 0, Math.PI * 2)

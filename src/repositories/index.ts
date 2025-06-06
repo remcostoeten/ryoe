@@ -42,6 +42,7 @@ export {
   createUser,
   updateUser,
   markUserSetupComplete,
+  markAllUsersSetupComplete,
   deleteUser,
   getUserCount,
   getSetupCompleteUserCount

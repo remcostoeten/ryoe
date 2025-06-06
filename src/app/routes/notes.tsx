@@ -1,14 +1,16 @@
-import { useState, useMemo } from 'react'
-import { FolderTree } from '@/modules/folder-management/components/folder-tree'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { useFolders } from '@/modules/folder-management/hooks/use-folders'
 import { useFolderOperations } from '@/modules/folder-management/hooks/use-folder-operations'
 import type { TFolder } from '@/types/notes'
 import type { FolderTreeNode } from '@/modules/folder-management/types'
 import { CreateNoteButton } from '@/modules/notes/components/create-note-button'
-import { NoteList } from '@/modules/notes/components/note-list'
 import { NoteEditor } from '@/modules/notes/components/note-editor'
 import { useNotes } from '@/modules/notes/hooks/use-notes'
 import { Button } from '@/components/ui/button'
+
+// Lazy load heavy components
+const FolderTree = lazy(() => import('@/modules/folder-management/components/folder-tree').then(module => ({ default: module.FolderTree })))
+const NoteList = lazy(() => import('@/modules/notes/components/note-list').then(module => ({ default: module.NoteList })))
 import { PanelLeftClose, PanelLeft } from 'lucide-react'
 import { cn } from '@/utilities'
 
@@ -185,19 +187,27 @@ export default function NotesPage() {
               {foldersLoading ? (
                 <div className="text-sm text-muted-foreground">Loading folders...</div>
               ) : (
-                <FolderTree
-                  folders={folderTree}
-                  selectedFolderId={selectedFolderId}
-                  expandedFolderIds={expandedFolderIds}
-                  onFolderSelect={handleFolderSelect}
-                  onFolderExpand={handleFolderExpand}
-                  onFolderCreate={handleFolderCreate}
-                  onFolderRename={handleFolderRename}
-                  onFolderDelete={handleFolderDelete}
-                  onFolderMove={moveFolder}
-                  enableDragDrop={true}
-                  className="mb-4"
-                />
+                <Suspense fallback={
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                }>
+                  <FolderTree
+                    folders={folderTree}
+                    selectedFolderId={selectedFolderId}
+                    expandedFolderIds={expandedFolderIds}
+                    onFolderSelect={handleFolderSelect}
+                    onFolderExpand={handleFolderExpand}
+                    onFolderCreate={handleFolderCreate}
+                    onFolderRename={handleFolderRename}
+                    onFolderDelete={handleFolderDelete}
+                    onFolderMove={moveFolder}
+                    enableDragDrop={true}
+                    className="mb-4"
+                  />
+                </Suspense>
               )}
             </div>
 
@@ -210,21 +220,29 @@ export default function NotesPage() {
                 {notesLoading ? (
                   <div className="text-sm text-muted-foreground">Loading notes...</div>
                 ) : (
-                  <NoteList
-                    notes={notes.map(note => ({
-                      ...note,
-                      folderId: note.folderId ?? undefined,
-                      wordCount: 0,
-                      characterCount: note.content?.length || 0,
-                      readingTime: Math.ceil((note.content?.length || 0) / 1000),
-                      lastModified: note.updatedAt.toISOString(),
-                      createdAt: note.createdAt.getTime(),
-                      updatedAt: note.updatedAt.getTime()
-                    }))}
-                    selectedNoteId={selectedNoteId}
-                    onNoteSelect={setSelectedNoteId}
-                    onNoteDelete={deleteNote}
-                  />
+                  <Suspense fallback={
+                    <div className="animate-pulse space-y-2">
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                    </div>
+                  }>
+                    <NoteList
+                      notes={notes.map(note => ({
+                        ...note,
+                        folderId: note.folderId ?? undefined,
+                        wordCount: 0,
+                        characterCount: note.content?.length || 0,
+                        readingTime: Math.ceil((note.content?.length || 0) / 1000),
+                        lastModified: note.updatedAt.toISOString(),
+                        createdAt: note.createdAt.getTime(),
+                        updatedAt: note.updatedAt.getTime()
+                      }))}
+                      selectedNoteId={selectedNoteId}
+                      onNoteSelect={setSelectedNoteId}
+                      onNoteDelete={deleteNote}
+                    />
+                  </Suspense>
                 )}
               </div>
             )}

@@ -23,6 +23,11 @@ export type {
   TBackupData
 } from './types'
 
+// Database reset types
+export type {
+  TDatabaseResetResult
+} from './database-reset-service'
+
 // User service functions
 export {
   registerUser,
@@ -31,7 +36,8 @@ export {
   checkOnboardingStatus,
   getCurrentUser,
   switchStorageType,
-  getDefaultMdxPath
+  getDefaultMdxPath,
+  fixExistingUsersSetupStatus
 } from './user-service'
 
 // Note service functions
@@ -60,3 +66,10 @@ export {
   getFolderHierarchyWithStats,
   getFolderPathWithStats
 } from './folder-service'
+
+// Database reset service functions
+export {
+  resetAllData,
+  hardResetDatabase,
+  validateReset
+} from './database-reset-service'

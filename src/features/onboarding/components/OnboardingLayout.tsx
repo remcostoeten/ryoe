@@ -27,8 +27,9 @@ export function OnboardingLayout({
           <SimpleCanvasEffect
             dotSize={6}
             animationSpeed={3}
+            colorful={true}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,1)_0%,_transparent_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.8)_0%,_transparent_100%)]" />
           <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-black to-transparent" />
         </div>
       )}
@@ -62,14 +63,16 @@ export function OnboardingProgress({ currentStep, totalSteps, className }: Onboa
           key={index}
           className={cn(
             'w-2 h-2 rounded-full transition-colors duration-300',
-            index <= currentStep 
-              ? 'bg-white' 
+            index <= currentStep
+              ? 'bg-gradient-to-r from-blue-400 to-purple-500'
               : 'bg-white/20'
           )}
           initial={{ scale: 0.8 }}
-          animate={{ 
+          animate={{
             scale: index === currentStep ? 1.2 : 1,
-            backgroundColor: index <= currentStep ? '#ffffff' : 'rgba(255, 255, 255, 0.2)'
+            background: index <= currentStep
+              ? 'linear-gradient(to right, #60a5fa, #a855f7)'
+              : 'rgba(255, 255, 255, 0.2)'
           }}
           transition={{ duration: 0.3 }}
         />
