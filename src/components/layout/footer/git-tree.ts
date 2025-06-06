@@ -59,7 +59,7 @@ function parseRepositoryUrl(url: string) {
 }
 
 // Detect branch type based on commit patterns
-function detectBranchType(commit: any, index: number, allCommits: any[]): GitCommit["branchType"] {
+function detectBranchType(commit: any, index: number, _allCommits: any[]): GitCommit["branchType"] {
   const message = commit.commit.message.toLowerCase()
 
   // Check for merge commits

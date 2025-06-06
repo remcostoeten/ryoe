@@ -1,8 +1,3 @@
-/**
- * Note mutations - React Query mutations for note operations
- * Pure functions only, no classes
- */
-
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { 
   createNoteWithValidation, 
@@ -132,7 +127,7 @@ export function useUpdateNote(
         }
 
         setNoteCache(queryClient, variables.id, optimisticNote)
-        updateNoteInFolderCache(queryClient, previousNote.folderId, variables.id, () => optimisticNote)
+        updateNoteInFolderCache(queryClient, previousNote.folderId || null, variables.id, () => optimisticNote)
       }
 
       options?.onMutate?.(variables)
@@ -143,7 +138,7 @@ export function useUpdateNote(
       // Rollback optimistic update
       if (context?.previousNote) {
         setNoteCache(queryClient, variables.id, context.previousNote)
-        updateNoteInFolderCache(queryClient, context.previousNote.folderId, variables.id, () => context.previousNote)
+        updateNoteInFolderCache(queryClient, context.previousNote.folderId ?? null, variables.id, () => context.previousNote!)
       }
 
       console.error('Failed to update note:', error)
@@ -152,7 +147,7 @@ export function useUpdateNote(
     onSuccess: (data, variables) => {
       // Update cache with server response
       setNoteCache(queryClient, variables.id, data)
-      updateNoteInFolderCache(queryClient, data.folderId, variables.id, () => data)
+      updateNoteInFolderCache(queryClient, data.folderId ?? null, variables.id, () => data)
       
       options?.onSuccess?.(data, variables)
     },
@@ -184,7 +179,7 @@ export function useDeleteNote(
 
       // Optimistically remove note
       if (noteToDelete) {
-        removeNoteFromFolderCache(queryClient, noteToDelete.folderId, variables.id)
+        removeNoteFromFolderCache(queryClient, noteToDelete.folderId || null, variables.id)
         queryClient.removeQueries({ queryKey: ['notes', variables.id] })
       }
 
@@ -195,7 +190,7 @@ export function useDeleteNote(
     onError: (error, variables, context) => {
       // Rollback optimistic update
       if (context?.noteToDelete) {
-        addNoteToFolderCache(queryClient, context.noteToDelete.folderId, context.noteToDelete)
+        addNoteToFolderCache(queryClient, context.noteToDelete.folderId ?? null, context.noteToDelete)
         setNoteCache(queryClient, variables.id, context.noteToDelete)
       }
 
@@ -207,7 +202,7 @@ export function useDeleteNote(
       queryClient.removeQueries({ queryKey: ['notes', variables.id] })
       
       if (context?.noteToDelete) {
-        removeNoteFromFolderCache(queryClient, context.noteToDelete.folderId, variables.id)
+        removeNoteFromFolderCache(queryClient, context.noteToDelete.folderId ?? null, variables.id)
       }
       
       options?.onSuccess?.(data, variables)
@@ -243,7 +238,7 @@ export function useMoveNote(
         moveNoteBetweenFoldersCache(
           queryClient,
           currentNote,
-          currentNote.folderId,
+          currentNote.folderId || null,
           variables.newFolderId
         )
       }
@@ -259,14 +254,14 @@ export function useMoveNote(
           queryClient,
           context.currentNote,
           variables.newFolderId,
-          context.currentNote.folderId
+          context.currentNote.folderId ?? null
         )
       }
 
       console.error('Failed to move note:', error)
       options?.onError?.(error, variables)
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, _context) => {
       // Update cache with server response
       setNoteCache(queryClient, variables.id, data)
       
@@ -299,7 +294,7 @@ export function useDuplicateNote(
     },
     onSuccess: (data, variables) => {
       // Add duplicated note to cache
-      addNoteToFolderCache(queryClient, data.folderId, data)
+      addNoteToFolderCache(queryClient, data.folderId ?? null, data)
       setNoteCache(queryClient, data.id, data)
       
       options?.onSuccess?.(data, variables)

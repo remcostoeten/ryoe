@@ -1,4 +1,4 @@
-import { Footer } from '@/components/footer'
+
 import { DatabaseHealthIndicator } from '@/modules/database-actions/ui/database-health-indicator'
 import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-form'
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
@@ -9,7 +9,7 @@ import { UserProfile } from '@/components/layout/UserProfile'
 
 export function HomePage() {
     return (
-        <div className="min-h-screen p-6">
+        <div className="min-h-screen p-6 pt-20">
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header with User Profile */}
                 <div className="flex justify-between items-center">
@@ -18,7 +18,7 @@ export function HomePage() {
                 </div>
 
                 <div className="text-center space-y-6">
-                    <main className="pt-20 space-y-4 pb-16">
+                    <main className="pt-4 space-y-4 pb-16">
                         <div className="flex justify-center">
                             <DatabaseHealthIndicator />
                         </div>

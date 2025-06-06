@@ -67,11 +67,11 @@ export function DatabaseQueryTester() {
         try {
             const result = await executeQuery(query)
             setLastResult({
-                status: result.status,
-                message: result.message,
-                result: result.result,
+                status: result.success ? 'success' : 'error',
+                message: result.success ? 'Query executed successfully' : result.error || 'Unknown error',
+                result: result.success ? result.result : undefined,
                 responseTime: result.responseTime,
-                lastExecuted: result.lastExecuted
+                lastExecuted: new Date().toISOString()
             })
         } catch (error) {
             setLastResult({

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import {
   useSortable
 } from '@dnd-kit/sortable'
@@ -7,7 +7,7 @@ import { ChevronRight, ChevronDown, Folder, FolderOpen, Plus, MoreHorizontal, Ed
 import { cn } from '@/utilities'
 import { useInlineEditing, validateFolderName } from '../hooks/use-inline-editing'
 import type { FolderItemProps } from '../types'
-import type { Folder as FolderType } from '@/types/notes'
+// import type { TFolder as FolderType } from '@/types/notes'
 
 interface SortableFolderItemProps extends FolderItemProps {
   isDragOverlay?: boolean

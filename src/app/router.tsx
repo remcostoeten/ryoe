@@ -1,19 +1,18 @@
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { RootLayout } from '@/components/layout'
 
-const createAppRouter = () =>
-    createBrowserRouter([
-        {
-            path: '/',
-            Component: RootLayout,
-            children: [
-                {
-                    index: true,
-                    lazy: async () => {
-                        const module = await import('@/app/routes/home')
-                        return { Component: module.Component }
-                    }
-                },
+const router = createBrowserRouter([
+    {
+        path: '/',
+        Component: RootLayout,
+        children: [
+            {
+                index: true,
+                lazy: async () => {
+                    const module = await import('@/app/routes/home')
+                    return { Component: module.Component }
+                }
+            },
                 {
                     path: 'sign-in',
                     lazy: async () => {
@@ -109,8 +108,8 @@ const createAppRouter = () =>
                 }
             ]
         }
-    ])
+])
 
 export default function AppRouter() {
-    return <RouterProvider router={createAppRouter()} />
+    return <RouterProvider router={router} />
 }

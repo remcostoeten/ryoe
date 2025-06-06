@@ -28,12 +28,12 @@ export function useUserProfile(
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: options?.staleTime ?? STALE_TIMES.MEDIUM,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+
+
   })
 }
 
@@ -49,12 +49,12 @@ export function useCurrentUser(options?: TQueryOptions<TUserProfile>) {
     },
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime ?? STALE_TIMES.MEDIUM,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+
+
   })
 }
 
@@ -70,12 +70,12 @@ export function useOnboardingStatus(options?: TQueryOptions<boolean>) {
     },
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime ?? STALE_TIMES.LONG,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.VERY_LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.VERY_LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+
+
   })
 }
 

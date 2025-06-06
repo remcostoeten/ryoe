@@ -1,12 +1,10 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { ChevronRight, ChevronDown, Folder, FolderOpen, Plus, MoreHorizontal, Edit2 } from 'lucide-react'
 import { cn } from '@/utilities'
-import { useKeyboardNavigation } from '../hooks/use-keyboard-navigation'
 import { useInlineEditing, validateFolderName } from '../hooks/use-inline-editing'
-import { useFolderDragDrop, customCollisionDetection } from '../hooks/use-folder-drag-drop'
-import { SortableFolderItem } from './sortable-folder-item'
+
 import type { FolderTreeProps, FolderItemProps } from '../types'
-import type { Folder as FolderType } from '@/types/notes'
+// import type { TFolder as FolderType } from '@/types/notes'
 
 export function FolderTree({
   folders = [],
@@ -27,64 +25,7 @@ export function FolderTree({
   showContextMenu = true,
   className
 }: FolderTreeProps) {
-  const treeRef = useRef<HTMLDivElement>(null)
-
-  // Drag and drop functionality
-  const {
-    draggedFolder,
-    isDragging,
-    sensors,
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-    DndContextComponent,
-    SortableContextComponent,
-    DragOverlayComponent
-  } = useFolderDragDrop({
-    folders,
-    onFoldersReorder: (reorderedFolders) => {
-      // This will be handled by the parent component through onFolderMove
-    },
-    onFolderMove
-  })
-
-  // Keyboard navigation
-  const {
-    focusedId,
-    handleKeyDown,
-    focusFolder
-  } = useKeyboardNavigation({
-    folders,
-    selectedId: selectedFolderId,
-    expandedIds: expandedFolderIds,
-    onSelect: (folderId) => {
-      if (folderId && onFolderSelect) {
-        const folder = findFolderById(folders, folderId)
-        if (folder) onFolderSelect(folder)
-      }
-    },
-    onExpand: (folderId) => {
-      if (onFolderExpand) onFolderExpand(folderId, true)
-    },
-    onCollapse: (folderId) => {
-      if (onFolderExpand) onFolderExpand(folderId, false)
-    },
-    onStartEditing,
-    onDelete: (folderId) => {
-      if (onFolderDelete) {
-        const folder = findFolderById(folders, folderId)
-        if (folder) onFolderDelete(folder)
-      }
-    },
-    onCreateChild: onFolderCreate
-  })
-
-  // Focus management
-  useEffect(() => {
-    if (selectedFolderId && focusFolder) {
-      focusFolder(selectedFolderId)
-    }
-  }, [selectedFolderId, focusFolder])
+  // Simplified without drag/drop and keyboard navigation
   if (folders.length === 0) {
     return (
       <div className={cn("p-4 text-center text-muted-foreground", className)}>
@@ -103,104 +44,13 @@ export function FolderTree({
     )
   }
 
-  // Get folder IDs for sortable context
-  const getFolderIds = (folders: typeof folders): string[] => {
-    const ids: string[] = []
-    const traverse = (items: typeof folders) => {
-      for (const item of items) {
-        ids.push(item.id.toString())
-        if (item.children) {
-          traverse(item.children)
-        }
-      }
-    }
-    traverse(folders)
-    return ids
-  }
 
-  const folderIds = getFolderIds(folders)
 
-  if (enableDragDrop) {
-    return (
-      <div
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onReset={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <DndContextComponent
-          sensors={sensors}
-          collisionDetection={customCollisionDetection}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-          onDragCancel={() => {
-            // Reset drag state on cancel
-          }}
-        >
-        <SortableContextComponent items={folderIds} strategy={undefined}>
-          <div
-            ref={treeRef}
-            className={cn("space-y-1 focus:outline-none", className)}
-            tabIndex={enableKeyboardNavigation ? 0 : -1}
-            onKeyDown={enableKeyboardNavigation ? handleKeyDown : undefined}
-            role="tree"
-            aria-label="Folder tree"
-          >
-            {folders.map((folder) => (
-              <SortableFolderItem
-                key={folder.id}
-                folder={folder}
-                isSelected={selectedFolderId === folder.id}
-                isExpanded={expandedFolderIds.has(folder.id)}
-                isEditing={editingFolderId === folder.id}
-                isFocused={focusedId === folder.id}
-                onSelect={onFolderSelect}
-                onExpand={onFolderExpand}
-                onEdit={onFolderEdit}
-                onRename={onFolderRename}
-                onDelete={onFolderDelete}
-                onCreateChild={onFolderCreate}
-                onMove={onFolderMove}
-                onStartEditing={onStartEditing}
-                onStopEditing={onStopEditing}
-                enableDragDrop={enableDragDrop}
-                enableKeyboardNavigation={enableKeyboardNavigation}
-                showContextMenu={showContextMenu}
-                selectedFolderId={selectedFolderId}
-                expandedFolderIds={expandedFolderIds}
-                editingFolderId={editingFolderId}
-                focusedId={focusedId}
-              />
-            ))}
-          </div>
-        </SortableContextComponent>
 
-        <DragOverlayComponent>
-          {draggedFolder && (
-            <div className="bg-background border-2 border-primary rounded-md shadow-xl p-2">
-              <div className="flex items-center gap-2">
-                <Folder className="h-4 w-4" />
-                <span className="text-sm font-medium">{draggedFolder.name}</span>
-              </div>
-            </div>
-          )}
-        </DragOverlayComponent>
-      </DndContextComponent>
-      </div>
-    )
-  }
 
   return (
     <div
-      ref={treeRef}
       className={cn("space-y-1 focus:outline-none", className)}
-      tabIndex={enableKeyboardNavigation ? 0 : -1}
-      onKeyDown={enableKeyboardNavigation ? handleKeyDown : undefined}
       role="tree"
       aria-label="Folder tree"
     >
@@ -209,9 +59,9 @@ export function FolderTree({
           key={folder.id}
           folder={folder}
           isSelected={selectedFolderId === folder.id}
-          isExpanded={expandedFolderIds.has(folder.id)}
+          isExpanded={expandedFolderIds?.has(folder.id) || false}
           isEditing={editingFolderId === folder.id}
-          isFocused={focusedId === folder.id}
+          isFocused={false}
           onSelect={onFolderSelect}
           onExpand={onFolderExpand}
           onEdit={onFolderEdit}
@@ -227,7 +77,7 @@ export function FolderTree({
           selectedFolderId={selectedFolderId}
           expandedFolderIds={expandedFolderIds}
           editingFolderId={editingFolderId}
-          focusedId={focusedId}
+          focusedId={null}
         />
       ))}
     </div>
@@ -547,16 +397,4 @@ function FolderItem({
   )
 }
 
-// Helper function to find folder by ID in tree
-function findFolderById(folders: FolderTreeNode[], id: number): FolderTreeNode | null {
-  for (const folder of folders) {
-    if (folder.id === id) {
-      return folder
-    }
-    if (folder.children) {
-      const found = findFolderById(folder.children, id)
-      if (found) return found
-    }
-  }
-  return null
-}
+

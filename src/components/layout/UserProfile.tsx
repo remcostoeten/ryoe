@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Settings, LogOut, Database, HardDrive } from 'lucide-react'
+import { Settings, LogOut, Database, HardDrive } from 'lucide-react'
 import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'
 import { updateUserPreferences } from '@/features/onboarding/api/onboarding-api'
 

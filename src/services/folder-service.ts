@@ -70,7 +70,11 @@ export async function createFolderWithValidation(data: TFolderCreationData): Pro
   try {
     const validation = validateFolderCreation(data)
     if (!validation.success) {
-      return validation
+      return {
+        success: false,
+        error: validation.error,
+        code: validation.code
+      }
     }
 
     const createData: TCreateFolderData = {

@@ -8,8 +8,8 @@ export { useNotes } from './hooks/use-notes'
 
 // Re-export types from the main types file
 export type {
-  Note,
-  CreateNoteInput,
-  UpdateNoteInput,
-  NoteWithFolder
+  TNote,
+  TCreateNoteInput,
+  TUpdateNoteInput,
+  TNoteWithFolder
 } from '@/types/notes'

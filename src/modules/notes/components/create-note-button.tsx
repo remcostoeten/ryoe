@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Plus, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import type { CreateNoteInput } from '@/types/notes'
+import { cn } from '@/utilities/styling'
+// import type { TCreateNoteInput } from '@/types/notes'
 
 interface CreateNoteButtonProps {
   selectedFolderId?: number | null
-  onCreateNote: (noteData: CreateNoteInput) => Promise<void>
+  onCreateNote: (noteData: any) => Promise<void>
   className?: string
   disabled?: boolean
 }
@@ -79,7 +79,7 @@ export function CreateNoteButton({
 interface CreateNoteInFolderProps {
   folderId: number
   folderName: string
-  onCreateNote: (noteData: CreateNoteInput) => Promise<void>
+  onCreateNote: (noteData: any) => Promise<void>
   className?: string
 }
 

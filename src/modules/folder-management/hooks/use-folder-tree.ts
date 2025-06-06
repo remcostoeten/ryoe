@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { FolderService } from '@/api/services/folder-service'
+import {
+  updateFolderWithValidation,
+  getFolderHierarchyWithStats
+} from '@/services/folder-service'
 import { toast } from '@/components/ui/toast'
-import type { Folder, FolderTreeNode } from '@/types/notes'
-import type { UseFolderTreeReturn, TreeBuildOptions } from '../types'
+import type { TFolder } from '@/types/notes'
+import type { TFolderWithStats } from '@/services/types'
+import type { UseFolderTreeReturn, TreeBuildOptions, FolderTreeNode } from '../types'
 
-const folderService = new FolderService()
+// Remove the old service instantiation - we use pure functions now
 
 export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
-  const [allFolders, setAllFolders] = useState<Folder[]>([])
+  const [allFolders, setAllFolders] = useState<TFolder[]>([])
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -23,11 +27,22 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
     try {
       setLoading(true)
       setError(null)
-      
-      const response = await folderService.list()
-      
+
+      // Use the new getFolderHierarchyWithStats function to get all folders
+      const response = await getFolderHierarchyWithStats()
+
       if (response.success && response.data) {
-        setAllFolders(response.data)
+        // Convert TFolderWithStats to TFolder for compatibility
+        const folderData = response.data.map((folder: TFolderWithStats): TFolder => ({
+          id: folder.id,
+          name: folder.name,
+          parentId: folder.parentId ?? null,
+          position: folder.position,
+          isPublic: true, // Default value - should be added to TFolderWithStats later
+          createdAt: new Date(folder.createdAt),
+          updatedAt: new Date(folder.updatedAt)
+        }))
+        setAllFolders(folderData)
       } else {
         setError(response.error || 'Failed to load folders')
         setAllFolders([])
@@ -78,8 +93,7 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
 
   const renameFolder = useCallback(async (folderId: number, newName: string): Promise<boolean> => {
     try {
-      const response = await folderService.update({
-        id: folderId,
+      const response = await updateFolderWithValidation(folderId, {
         name: newName
       })
 
@@ -87,7 +101,7 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
         // Update the folder in our local state
         setAllFolders(prev => prev.map(folder =>
           folder.id === folderId
-            ? { ...folder, name: newName, updatedAt: new Date() }
+            ? { ...folder, name: newName, updatedAt: new Date(response.data!.updatedAt) }
             : folder
         ))
         toast.success(`Folder renamed to "${newName}"`)
@@ -131,7 +145,7 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
 
 // Helper function to build tree structure
 function buildFolderTree(
-  folders: Folder[], 
+  folders: TFolder[],
   expandedIds: Set<number>,
   options?: TreeBuildOptions
 ): FolderTreeNode[] {
@@ -200,7 +214,7 @@ function buildFolderTree(
 }
 
 // Helper function to sort folders
-function sortFolders(folders: Folder[], options?: TreeBuildOptions): Folder[] {
+function sortFolders(folders: TFolder[], options?: TreeBuildOptions): TFolder[] {
   const sortBy = options?.sortBy || 'position'
   const sortOrder = options?.sortOrder || 'asc'
   

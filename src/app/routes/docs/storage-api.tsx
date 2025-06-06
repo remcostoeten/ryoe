@@ -44,7 +44,6 @@ export default function StorageApiPage() {
 
     return (
         <DocsLayout
-            title="Storage API Reference"
             previousPage={{
                 title: 'Database Operations',
                 path: '/docs/db-operations'

@@ -9,8 +9,10 @@ import {
   useFolderTree,
   useFolderOperations
 } from '@/modules/folder-management'
+import type { TFolder } from '@/types/notes'
+
+type Folder = TFolder
 import { testFolderCRUD } from '@/__tests__/test-folder-crud'
-import type { Folder } from '@/types/notes'
 
 // Helper function to get all folders from tree structure
 function getAllFolders(folder: any): any[] {

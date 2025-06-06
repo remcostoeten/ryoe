@@ -137,10 +137,10 @@ export async function moveNote(id: number, newFolderId: number | null, newPositi
     }
   }
 
-  return updateNote(id, { folderId: newFolderId, position })
+  return updateNote(id, { folderId: newFolderId || undefined, position })
 }
 
-export async function reorderNotes(folderId: number | null, noteIds: number[]): Promise<TRepositoryResult<boolean>> {
+export async function reorderNotes(noteIds: number[]): Promise<TRepositoryResult<boolean>> {
   try {
     // Update position for each note
     const updatePromises = noteIds.map((noteId, index) => 

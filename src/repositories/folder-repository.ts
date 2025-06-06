@@ -122,10 +122,10 @@ export async function moveFolder(id: number, newParentId: number | null, newPosi
     }
   }
 
-  return updateFolder(id, { parentId: newParentId, position })
+  return updateFolder(id, { parentId: newParentId || undefined, position })
 }
 
-export async function reorderFolders(parentId: number | null, folderIds: number[]): Promise<TRepositoryResult<boolean>> {
+export async function reorderFolders(_parentId: number | null, folderIds: number[]): Promise<TRepositoryResult<boolean>> {
   try {
     // Update position for each folder
     const updatePromises = folderIds.map((folderId, index) => 

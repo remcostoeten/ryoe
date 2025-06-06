@@ -3,13 +3,12 @@
  * Pure functions only, no classes
  */
 
-import { 
-  findNoteById, 
-  findNotes,
+import {
+  findNoteById,
   findNotesByFolderId,
   searchNotes as searchNotesRepo,
-  createNote, 
-  updateNote, 
+  createNote,
+  updateNote,
   deleteNote,
   moveNote,
   reorderNotes,
@@ -72,7 +71,11 @@ export async function createNoteWithValidation(data: TNoteCreationData): Promise
     // Validate input data
     const validation = validateNoteCreation(data)
     if (!validation.success) {
-      return validation
+      return {
+        success: false,
+        error: validation.error,
+        code: validation.code
+      }
     }
 
     // Convert to repository format
@@ -256,11 +259,11 @@ export async function moveNoteToFolder(
 }
 
 export async function reorderNotesInFolder(
-  folderId: number | null, 
+  _folderId: number | null,
   noteIds: number[]
 ): Promise<TServiceResult<boolean>> {
   try {
-    const result = await reorderNotes(folderId, noteIds)
+    const result = await reorderNotes(noteIds)
     if (!result.success) {
       return {
         success: false,

@@ -3,6 +3,8 @@ import {
     checkTursoDatabaseHealth,
     executeTursoQuery
 } from '@/core/database/clients/turso-client'
+import { createUser as createUserRepository } from '@/repositories/user-repository'
+import type { TCreateUserData } from '@/repositories/types'
 
 export async function initializeDatabase() {
     try {
@@ -53,6 +55,33 @@ export async function executeQuery(query: string) {
         return result
     } catch (error) {
         console.error('Failed to execute query:', error)
+        throw error
+    }
+}
+
+/**
+ * Simplified createUser function for compatibility with existing components
+ * @param name - User name
+ * @param snippetsPath - Path for storing user snippets
+ * @returns User ID
+ */
+export async function createUser(name: string, snippetsPath: string): Promise<number> {
+    try {
+        const userData: TCreateUserData = {
+            name,
+            snippetsPath,
+            storageType: 'turso',
+            preferences: {}
+        }
+
+        const result = await createUserRepository(userData)
+        if (!result.success || !result.data) {
+            throw new Error(result.error || 'Failed to create user')
+        }
+
+        return result.data.id
+    } catch (error) {
+        console.error('Failed to create user:', error)
         throw error
     }
 }

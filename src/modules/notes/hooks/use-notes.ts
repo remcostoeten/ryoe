@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { NoteService } from '@/api/services/note-service'
-import type { Note, CreateNoteInput, UpdateNoteInput } from '@/types/notes'
-
-const noteService = new NoteService()
+import {
+  createNoteWithValidation,
+  updateNoteWithValidation,
+  deleteNoteById,
+  getNotesByFolder
+} from '@/services/note-service'
+import type { TNote, TCreateNoteInput, TUpdateNoteInput } from '@/types/notes'
 
 export function useNotes(folderId?: number | null) {
-  const [notes, setNotes] = useState<Note[]>([])
+  const [notes, setNotes] = useState<TNote[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -15,10 +18,21 @@ export function useNotes(folderId?: number | null) {
     setError(null)
 
     try {
-      const response = await noteService.list({ folderId: targetFolderId })
+      const response = await getNotesByFolder(targetFolderId || null)
 
       if (response.success && response.data) {
-        setNotes(response.data)
+        // Convert TNoteWithMetadata to TNote
+        const notes = response.data.map(note => ({
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          folderId: note.folderId || null,
+          position: note.position,
+          isPublic: true, // Default value
+          createdAt: new Date(note.createdAt),
+          updatedAt: new Date(note.updatedAt)
+        }))
+        setNotes(notes)
       } else {
         setError(response.error || 'Failed to load notes')
         setNotes([])
@@ -32,19 +46,35 @@ export function useNotes(folderId?: number | null) {
   }, [])
 
   // Create a new note
-  const createNote = useCallback(async (noteData: CreateNoteInput): Promise<Note> => {
+  const createNote = useCallback(async (noteData: TCreateNoteInput): Promise<TNote> => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await noteService.create(noteData)
+      const response = await createNoteWithValidation({
+        title: noteData.title,
+        content: noteData.content,
+        folderId: noteData.folderId || undefined
+      })
 
       if (response.success && response.data) {
-        // Update local state if the note belongs to current folder
-        if (response.data.folderId === folderId) {
-          setNotes(prev => [...prev, response.data!])
+        // Convert TNoteWithMetadata to TNote
+        const note: TNote = {
+          id: response.data.id,
+          title: response.data.title,
+          content: response.data.content,
+          folderId: response.data.folderId || null,
+          position: response.data.position,
+          isPublic: true, // Default value
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt)
         }
-        return response.data
+
+        // Update local state if the note belongs to current folder
+        if (note.folderId === folderId) {
+          setNotes(prev => [...prev, note])
+        }
+        return note
       } else {
         throw new Error(response.error || 'Failed to create note')
       }
@@ -58,19 +88,35 @@ export function useNotes(folderId?: number | null) {
   }, [folderId])
 
   // Update a note
-  const updateNote = useCallback(async (noteData: UpdateNoteInput): Promise<Note> => {
+  const updateNote = useCallback(async (noteData: TUpdateNoteInput): Promise<TNote> => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await noteService.update(noteData)
+      const response = await updateNoteWithValidation(noteData.id, {
+        title: noteData.title,
+        content: noteData.content,
+        folderId: noteData.folderId || undefined
+      })
 
       if (response.success && response.data) {
+        // Convert TNoteWithMetadata to TNote
+        const note: TNote = {
+          id: response.data.id,
+          title: response.data.title,
+          content: response.data.content,
+          folderId: response.data.folderId || null,
+          position: response.data.position,
+          isPublic: true, // Default value
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt)
+        }
+
         // Update local state
-        setNotes(prev => prev.map(note =>
-          note.id === noteData.id ? response.data! : note
+        setNotes(prev => prev.map(n =>
+          n.id === noteData.id ? note : n
         ))
-        return response.data
+        return note
       } else {
         throw new Error(response.error || 'Failed to update note')
       }
@@ -89,7 +135,7 @@ export function useNotes(folderId?: number | null) {
     setError(null)
 
     try {
-      const response = await noteService.delete(noteId)
+      const response = await deleteNoteById(noteId)
 
       if (response.success) {
         // Update local state

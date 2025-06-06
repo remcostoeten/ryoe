@@ -136,7 +136,7 @@ export function useUpdateFolder(
         }
 
         setFolderCache(queryClient, variables.id, optimisticFolder)
-        updateFolderInParentCache(queryClient, previousFolder.parentId, variables.id, () => optimisticFolder)
+        updateFolderInParentCache(queryClient, previousFolder.parentId || null, variables.id, () => optimisticFolder)
       }
 
       options?.onMutate?.(variables)
@@ -147,7 +147,7 @@ export function useUpdateFolder(
       // Rollback optimistic update
       if (context?.previousFolder) {
         setFolderCache(queryClient, variables.id, context.previousFolder)
-        updateFolderInParentCache(queryClient, context.previousFolder.parentId, variables.id, () => context.previousFolder)
+        updateFolderInParentCache(queryClient, context.previousFolder.parentId ?? null, variables.id, () => context.previousFolder!)
       }
 
       console.error('Failed to update folder:', error)
@@ -156,7 +156,7 @@ export function useUpdateFolder(
     onSuccess: (data, variables) => {
       // Update cache with server response
       setFolderCache(queryClient, variables.id, data)
-      updateFolderInParentCache(queryClient, data.parentId, variables.id, () => data)
+      updateFolderInParentCache(queryClient, data.parentId ?? null, variables.id, () => data)
       
       options?.onSuccess?.(data, variables)
     },
@@ -188,7 +188,7 @@ export function useDeleteFolder(
 
       // Optimistically remove folder
       if (folderToDelete) {
-        removeFolderFromParentCache(queryClient, folderToDelete.parentId, variables.id)
+        removeFolderFromParentCache(queryClient, folderToDelete.parentId || null, variables.id)
         queryClient.removeQueries({ queryKey: ['folders', variables.id] })
       }
 
@@ -199,7 +199,7 @@ export function useDeleteFolder(
     onError: (error, variables, context) => {
       // Rollback optimistic update
       if (context?.folderToDelete) {
-        addFolderToParentCache(queryClient, context.folderToDelete.parentId, context.folderToDelete)
+        addFolderToParentCache(queryClient, context.folderToDelete.parentId ?? null, context.folderToDelete)
         setFolderCache(queryClient, variables.id, context.folderToDelete)
       }
 
@@ -211,7 +211,7 @@ export function useDeleteFolder(
       queryClient.removeQueries({ queryKey: ['folders', variables.id] })
       
       if (context?.folderToDelete) {
-        removeFolderFromParentCache(queryClient, context.folderToDelete.parentId, variables.id)
+        removeFolderFromParentCache(queryClient, context.folderToDelete.parentId ?? null, variables.id)
       }
       
       options?.onSuccess?.(data, variables)
@@ -247,7 +247,7 @@ export function useMoveFolder(
         moveFolderBetweenParentsCache(
           queryClient,
           currentFolder,
-          currentFolder.parentId,
+          currentFolder.parentId || null,
           variables.newParentId
         )
       }
@@ -263,14 +263,14 @@ export function useMoveFolder(
           queryClient,
           context.currentFolder,
           variables.newParentId,
-          context.currentFolder.parentId
+          context.currentFolder.parentId ?? null
         )
       }
 
       console.error('Failed to move folder:', error)
       options?.onError?.(error, variables)
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, _context) => {
       // Update cache with server response
       setFolderCache(queryClient, variables.id, data)
       
@@ -278,7 +278,7 @@ export function useMoveFolder(
     },
     onSettled: (data, error, variables, context) => {
       // Invalidate queries to ensure consistency
-      invalidateFolderQueries(queryClient, variables.id, variables.newParentId)
+      invalidateFolderQueries(queryClient, variables.id, variables.newParentId ?? undefined)
       if (context?.currentFolder?.parentId !== variables.newParentId) {
         invalidateFolderQueries(queryClient, undefined, context?.currentFolder?.parentId)
       }
@@ -341,7 +341,7 @@ export function useReorderFolders(
     },
     onSettled: (data, error, variables) => {
       // Invalidate queries to ensure consistency
-      invalidateFolderQueries(queryClient, undefined, variables.parentId)
+      invalidateFolderQueries(queryClient, undefined, variables.parentId ?? undefined)
       
       options?.onSettled?.(data, error, variables)
     }

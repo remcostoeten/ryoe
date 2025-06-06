@@ -28,12 +28,12 @@ export function useNote(
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: options?.staleTime ?? STALE_TIMES.SHORT,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.MEDIUM,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.MEDIUM,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+
+
   })
 }
 
@@ -52,12 +52,12 @@ export function useNotesByFolder(
     },
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime ?? STALE_TIMES.SHORT,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.MEDIUM,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.MEDIUM,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+
+
   })
 }
 
@@ -76,12 +76,12 @@ export function useSearchNotes(
     },
     enabled: !!searchOptions.query && searchOptions.query.length >= 2 && (options?.enabled !== false),
     staleTime: options?.staleTime ?? STALE_TIMES.MEDIUM,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.SHORT,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.SHORT,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? false,
     retry: options?.retry ?? 2,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+
+
   })
 }
 
@@ -191,8 +191,8 @@ export function moveNoteBetweenFoldersCache(
   
   // Add to new folder
   const updatedNote = { ...note, folderId: newFolderId }
-  addNoteToFolderCache(queryClient, newFolderId, updatedNote)
+  addNoteToFolderCache(queryClient, newFolderId, { ...updatedNote, folderId: updatedNote.folderId || undefined })
   
   // Update individual note cache
-  setNoteCache(queryClient, note.id, updatedNote)
+  setNoteCache(queryClient, note.id, { ...updatedNote, folderId: updatedNote.folderId || undefined })
 }

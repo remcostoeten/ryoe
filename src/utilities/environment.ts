@@ -79,7 +79,7 @@ export async function waitForTauri(timeoutMs = 3000): Promise<boolean> {
   })
 }
 
-export function debugEnvironment(): void {
+export function debugEnvironment() {
   const envInfo = {
     isTauri: isTauriEnvironment(),
     envType: getEnvironmentType(),

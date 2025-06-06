@@ -40,6 +40,18 @@ export function useToc() {
         // Initial scan
         const initialScan = () => {
             const headings = Array.from(document.querySelectorAll('h2, h3, h4'))
+            console.log('Found headings:', headings.length)
+            console.log('Headings with IDs:', headings.filter(h => h.id).length)
+
+            // Debug: log all headings
+            headings.forEach((heading, index) => {
+                console.log(`Heading ${index}:`, {
+                    tag: heading.tagName,
+                    id: heading.id,
+                    text: heading.textContent,
+                    hasId: !!heading.id
+                })
+            })
 
             const tocItems = headings
                 .filter((heading) => heading.id)
@@ -56,11 +68,15 @@ export function useToc() {
                     }
                 })
 
+            console.log('TOC items:', tocItems)
             setToc(tocItems)
             setIsLoading(false)
         }
 
-        // Run initial scan
+        // Run initial scan with a small delay to ensure MDX content is rendered
+        const timeoutId = setTimeout(initialScan, 100)
+
+        // Also run immediately in case content is already there
         initialScan()
 
         // Watch for changes in the document
@@ -73,6 +89,7 @@ export function useToc() {
 
         return () => {
             observer.disconnect()
+            clearTimeout(timeoutId)
         }
     }, [])
 

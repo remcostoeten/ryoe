@@ -1,5 +1,4 @@
 import { Providers } from '@/components/provider'
-import { AppGuard } from '@/components/AppGuard'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import './global.css'
 
@@ -9,9 +8,7 @@ export default function App() {
     return (
         <ErrorBoundary>
             <Providers>
-                <AppGuard>
-                    <AppRouter />
-                </AppGuard>
+                <AppRouter />
             </Providers>
         </ErrorBoundary>
     )

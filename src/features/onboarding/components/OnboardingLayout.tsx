@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/utilities'
 import { SimpleCanvasEffect } from '@/components/ui/SimpleCanvasEffect'
@@ -14,7 +14,7 @@ export function OnboardingLayout({
   children, 
   className,
   showCanvas = true,
-  canvasReverse = false
+  // canvasReverse = false
 }: OnboardingLayoutProps) {
   return (
     <div className={cn(

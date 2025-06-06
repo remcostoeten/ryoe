@@ -188,7 +188,7 @@ const LogoIcon = () => {
 export function Logo() {
     return (
         <div className="flex items-center justify-center py-4  scale-75">
-            <Link to="/dashboard">
+            <Link to="/">
                 <motion.div
                     className="group relative flex h-14 w-14 items-center justify-center"
                     initial={{ opacity: 0, scale: 0.9 }}

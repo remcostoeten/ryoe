@@ -3,16 +3,16 @@ import type { StorageValue } from '../types'
 
 let store: Store | null = null
 
-function getTauriStore(): Store {
+async function getTauriStore(): Promise<Store> {
   if (!store) {
-    store = new Store('app-storage.json')
+    store = await Store.load('app-storage.json')
   }
   return store
 }
 
 export async function getTauriValue<T = StorageValue>(key: string): Promise<T | null> {
   try {
-    const store = getTauriStore()
+    const store = await getTauriStore()
     const value = await store.get<T>(key)
     return value ?? null
   } catch (error) {
@@ -23,7 +23,7 @@ export async function getTauriValue<T = StorageValue>(key: string): Promise<T | 
 
 export async function setTauriValue(key: string, value: StorageValue): Promise<void> {
   try {
-    const store = getTauriStore()
+    const store = await getTauriStore()
     await store.set(key, value)
     await store.save()
   } catch (error) {
@@ -34,7 +34,7 @@ export async function setTauriValue(key: string, value: StorageValue): Promise<v
 
 export async function removeTauriValue(key: string): Promise<void> {
   try {
-    const store = getTauriStore()
+    const store = await getTauriStore()
     await store.delete(key)
     await store.save()
   } catch (error) {
@@ -45,7 +45,7 @@ export async function removeTauriValue(key: string): Promise<void> {
 
 export async function clearTauriStore(): Promise<void> {
   try {
-    const store = getTauriStore()
+    const store = await getTauriStore()
     await store.clear()
     await store.save()
   } catch (error) {
@@ -56,7 +56,7 @@ export async function clearTauriStore(): Promise<void> {
 
 export async function getTauriKeys(): Promise<string[]> {
   try {
-    const store = getTauriStore()
+    const store = await getTauriStore()
     return await store.keys()
   } catch (error) {
     console.error('Failed to get keys from Tauri store:', error)

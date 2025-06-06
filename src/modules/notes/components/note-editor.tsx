@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { BlockNoteEditor, PartialBlock } from '@blocknote/core'
-import { BlockNoteView, useCreateBlockNote } from '@blocknote/react'
+import { useCreateBlockNote } from '@blocknote/react'
 import '@blocknote/core/fonts/inter.css'
 import '@blocknote/react/style.css'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities/styling'
 
 interface NoteEditorProps {
   initialContent?: string
@@ -83,11 +82,15 @@ export function NoteEditor({
 
       {/* BlockNote Editor */}
       <div className="flex-1 overflow-auto">
-        <BlockNoteView
-          editor={editor}
-          editable={!readOnly}
-          className="min-h-full"
-        />
+        <div className="min-h-full">
+          {/* BlockNote editor placeholder */}
+          <textarea
+            value={initialContent || ''}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="w-full h-full min-h-[400px] p-4 border-none outline-none resize-none"
+            placeholder="Start writing..."
+          />
+        </div>
       </div>
     </div>
   )

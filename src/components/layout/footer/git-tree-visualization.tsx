@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 import { appConfig } from "@/app/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { fetchLatestCommitInfo, type GitCommitInfo } from "@/core/git/git-info"
-import { calculateTreePositions, getBranchTypeInfo } from "./git-tree"
+import { type GitCommitInfo } from "@/core/git/git-info"
+import { calculateTreePositions, getBranchTypeInfo, fetchGitTree } from "./git-tree"
 
 // Enhanced GitCommit type that includes visualization data
 interface GitCommit extends GitCommitInfo {
@@ -87,6 +87,28 @@ function enhanceCommitForVisualization(commit: GitCommitInfo, index: number): Gi
     parents: [], // We don't have parent info from git-info, so empty array
     branchType,
     branchColor: assignBranchColor(branchType, index)
+  }
+}
+
+// Fetch commit history using the existing fetchGitTree function
+async function fetchCommitHistory(owner: string, repo: string, branch: string, maxCommits: number): Promise<GitCommitInfo[]> {
+  try {
+    const repoUrl = `https://github.com/${owner}/${repo}`
+    const commits = await fetchGitTree(repoUrl, branch, maxCommits)
+
+    // Convert GitCommit from git-tree to GitCommitInfo format
+    return commits.map(commit => ({
+      commitHash: commit.sha,
+      commitMessage: commit.message,
+      commitDate: commit.date,
+      author: commit.author,
+      authorAvatar: commit.authorAvatar,
+      authorUsername: commit.authorUsername,
+      branch: branch
+    }))
+  } catch (error) {
+    console.error('Failed to fetch commit history:', error)
+    throw error
   }
 }
 

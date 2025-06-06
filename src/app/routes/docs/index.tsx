@@ -105,7 +105,7 @@ function DocsPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 pt-24 pb-10">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 pt-16 pb-10">
                 {/* Header */}
                 <div className="text-center space-y-4">
                     <div className="flex items-center justify-center gap-3">

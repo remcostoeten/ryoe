@@ -30,12 +30,10 @@ export function useFolder(
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: options?.staleTime ?? STALE_TIMES.MEDIUM,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
   })
 }
 
@@ -51,12 +49,10 @@ export function useRootFolders(options?: TQueryOptions<TFolderWithStats[]>) {
     },
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime ?? STALE_TIMES.MEDIUM,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
   })
 }
 
@@ -75,12 +71,10 @@ export function useChildFolders(
     },
     enabled: !!parentId && (options?.enabled !== false),
     staleTime: options?.staleTime ?? STALE_TIMES.MEDIUM,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
   })
 }
 
@@ -96,12 +90,10 @@ export function useFolderHierarchy(options?: TQueryOptions<TFolderWithStats[]>) 
     },
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime ?? STALE_TIMES.LONG,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.VERY_LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.VERY_LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
   })
 }
 
@@ -120,12 +112,10 @@ export function useFolderPath(
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: options?.staleTime ?? STALE_TIMES.LONG,
-    cacheTime: options?.cacheTime ?? CACHE_TIMES.LONG,
+    gcTime: options?.cacheTime ?? CACHE_TIMES.LONG,
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? false,
     retry: options?.retry ?? 3,
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
   })
 }
 
@@ -283,8 +273,8 @@ export function moveFolderBetweenParentsCache(
   
   // Add to new parent
   const updatedFolder = { ...folder, parentId: newParentId }
-  addFolderToParentCache(queryClient, newParentId, updatedFolder)
+  addFolderToParentCache(queryClient, newParentId, { ...updatedFolder, parentId: updatedFolder.parentId || undefined })
   
   // Update individual folder cache
-  setFolderCache(queryClient, folder.id, updatedFolder)
+  setFolderCache(queryClient, folder.id, { ...updatedFolder, parentId: updatedFolder.parentId || undefined })
 }

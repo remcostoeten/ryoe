@@ -591,7 +591,6 @@ export default function ArchitecturePage() {
 
     return (
         <DocsLayout
-            title="Architecture"
             previousPage={{
                 title: 'Technology Stack',
                 path: '/docs/tech-stack'

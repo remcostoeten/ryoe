@@ -1,7 +1,9 @@
 import React from 'react'
-import { FileText, MoreHorizontal, Edit2, Trash2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import type { Note } from '@/types/notes'
+import { FileText, Edit2, Trash2 } from 'lucide-react'
+import { cn } from '@/utilities/styling'
+import type { TNoteWithMetadata } from '@/services/types'
+
+export type Note = TNoteWithMetadata
 
 interface NoteListProps {
   notes: Note[]
@@ -103,7 +105,7 @@ function NoteItem({ note, isSelected, onSelect, onEdit, onDelete }: NoteItemProp
           <span>
             {new Date(note.updatedAt).toLocaleDateString()}
           </span>
-          {note.isPublic && (
+          {false && (
             <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">
               Public
             </span>

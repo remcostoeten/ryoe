@@ -72,7 +72,11 @@ export async function registerUser(data: TUserRegistrationData): Promise<TServic
     // Validate input data
     const validation = validateUserRegistration(data)
     if (!validation.success) {
-      return validation
+      return {
+        success: false,
+        error: validation.error,
+        code: validation.code
+      }
     }
 
     // Check if user already exists
