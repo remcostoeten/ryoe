@@ -74,7 +74,7 @@ export function CompletionStep({ data, isLoading, onComplete }: CompletionStepPr
         transition={{ delay: 1 }}
         onClick={onComplete}
         disabled={isLoading}
-        className="w-full rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-blue-500/25"
+        className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-slate-600 text-white font-medium py-3 hover:from-emerald-600 hover:to-slate-700 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-emerald-500/25"
       >
         {isLoading ? 'Finalizing setup...' : 'Enter Ryoe'}
       </motion.button>

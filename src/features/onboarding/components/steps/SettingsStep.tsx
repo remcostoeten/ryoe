@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FolderOpen, Database, HardDrive } from 'lucide-react'
+import { Database, HardDrive } from 'lucide-react'
+import { OnboardingDirectoryPicker } from '@/components/ui/directory-picker'
 import type { OnboardingStepProps, UserPreferences } from '../../types/onboarding'
 
 export function SettingsStep({ onNext, onBack, data, isLoading }: OnboardingStepProps) {
@@ -44,24 +45,13 @@ export function SettingsStep({ onNext, onBack, data, isLoading }: OnboardingStep
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* MDX Storage Path */}
-        <div className="space-y-3">
-          <label className="block text-white/80 text-sm font-medium text-left">
-            MDX Files Location
-          </label>
-          <div className="relative">
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/40">
-              <FolderOpen className="h-5 w-5" />
-            </div>
-            <input
-              type="text"
-              value={preferences.mdxStoragePath}
-              onChange={(e) => updatePreference('mdxStoragePath', e.target.value)}
-              className="w-full backdrop-blur-[1px] text-white border-1 border-white/10 rounded-full py-3 pl-12 pr-4 focus:outline-none focus:border focus:border-white/30"
-              placeholder="~/.config/ryoe"
-              disabled={isLoading}
-            />
-          </div>
-        </div>
+        <OnboardingDirectoryPicker
+          label="MDX Files Location"
+          value={preferences.mdxStoragePath}
+          onChange={(path) => updatePreference('mdxStoragePath', path)}
+          placeholder="~/.config/ryoe"
+          disabled={isLoading}
+        />
 
         {/* Storage Type Selection */}
         <div className="space-y-3">

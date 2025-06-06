@@ -1,7 +1,3 @@
-/**
- * User repository - pure functions for user data access
- */
-
 import { findById, findMany, create, update, deleteById } from './base-repository'
 import { getTursoClient } from '@/core/database/clients/turso-client'
 import type { 
@@ -14,6 +10,7 @@ import type {
   TSortOptions,
   TFilterOptions
 } from './types'
+import { QUERY_KEYS } from '@/queries'
 
 const TABLE_NAME = 'users'
 
@@ -83,16 +80,22 @@ export async function findSetupCompleteUsers(): Promise<TRepositoryListResult<TU
 }
 
 export async function createUser(data: TCreateUserData): Promise<TRepositoryResult<TUser>> {
+  const now = Date.now()
   const rowData = {
     ...mapUserDataToRow(data),
-    is_setup_complete: 1 // Mark as setup complete when creating through onboarding
+    is_setup_complete: 1, 
+    created_at: now,
+    updated_at: now
   }
 
   return create(TABLE_NAME, rowData, mapRowToUser)
 }
 
 export async function updateUser(id: number, data: TUpdateUserData): Promise<TRepositoryResult<TUser>> {
-  const rowData = mapUserDataToRow(data)
+  const rowData = {
+    ...mapUserDataToRow(data),
+    updated_at: Date.now()
+  }
   return update(TABLE_NAME, id, rowData, mapRowToUser)
 }
 
@@ -162,4 +165,5 @@ export async function getSetupCompleteUserCount(): Promise<TRepositoryResult<num
       error: error instanceof Error ? error.message : 'Unknown error'
     }
   }
+
 }

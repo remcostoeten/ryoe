@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
 
 export const users = sqliteTable('users', {
     id: integer('id').primaryKey(),
@@ -7,7 +8,8 @@ export const users = sqliteTable('users', {
     isSetupComplete: integer('is_setup_complete', { mode: 'boolean' }).notNull().default(false),
     storageType: text('storage_type').notNull().default('turso'), // 'local' or 'turso'
     preferences: text('preferences'), // JSON string for user preferences
-    createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`)
 })
 
 export const snippets = sqliteTable('snippets', {

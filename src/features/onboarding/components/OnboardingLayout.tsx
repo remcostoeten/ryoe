@@ -29,7 +29,10 @@ export function OnboardingLayout({
             animationSpeed={3}
             colorful={true}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.8)_0%,_transparent_100%)]" />
+          {/* Enhanced gradient circle effect - more dimmed in the middle */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.95)_0%,_rgba(0,0,0,0.7)_30%,_rgba(0,0,0,0.4)_60%,_transparent_100%)]" />
+          {/* Additional subtle green tint overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(34,40,34,0.3)_0%,_transparent_70%)]" />
           <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-black to-transparent" />
         </div>
       )}
@@ -64,14 +67,14 @@ export function OnboardingProgress({ currentStep, totalSteps, className }: Onboa
           className={cn(
             'w-2 h-2 rounded-full transition-colors duration-300',
             index <= currentStep
-              ? 'bg-gradient-to-r from-blue-400 to-purple-500'
+              ? 'bg-gradient-to-r from-emerald-400 to-slate-500'
               : 'bg-white/20'
           )}
           initial={{ scale: 0.8 }}
           animate={{
             scale: index === currentStep ? 1.2 : 1,
             background: index <= currentStep
-              ? 'linear-gradient(to right, #60a5fa, #a855f7)'
+              ? 'linear-gradient(to right, #34d399, #64748b)'
               : 'rgba(255, 255, 255, 0.2)'
           }}
           transition={{ duration: 0.3 }}

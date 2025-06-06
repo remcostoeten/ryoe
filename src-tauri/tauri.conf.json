@@ -21,6 +21,9 @@
   "plugins": {
     "process": {
       "active": true
+    },
+    "dialog": {
+      "active": true
     }
   },
   "app": {

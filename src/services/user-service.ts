@@ -1,8 +1,3 @@
-/**
- * User service - business logic for user operations
- * Pure functions only, no classes
- */
-
 import {
   findUserById,
   findUserByName,

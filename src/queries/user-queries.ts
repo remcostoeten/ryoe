@@ -32,8 +32,6 @@ export function useUserProfile(
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-
-
   })
 }
 
@@ -53,8 +51,6 @@ export function useCurrentUser(options?: TQueryOptions<TUserProfile>) {
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-
-
   })
 }
 
@@ -74,12 +70,9 @@ export function useOnboardingStatus(options?: TQueryOptions<boolean>) {
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
     refetchOnMount: options?.refetchOnMount ?? true,
     retry: options?.retry ?? 3,
-
-
   })
 }
 
-// Prefetch functions for performance optimization
 export function prefetchUserProfile(queryClient: any, id: number) {
   return queryClient.prefetchQuery({
     queryKey: QUERY_KEYS.USER_PROFILE(id),
