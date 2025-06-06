@@ -107,6 +107,13 @@ const router = createBrowserRouter([
                     }
                 },
                 {
+                    path: 'sidebar-test',
+                    lazy: async () => {
+                        const module = await import('@/app/routes/sidebar-test')
+                        return { Component: module.Component }
+                    }
+                },
+                {
                     path: '*',
                     lazy: async () => {
                         const module = await import('@/app/routes/not-found')

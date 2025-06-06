@@ -18,6 +18,10 @@ export { useFolderTree } from './hooks/use-folder-tree'
 export { useFolderOperations } from './hooks/use-folder-operations'
 export { useInlineEditing, validateFolderName } from './hooks/use-inline-editing'
 
+// Context
+export { FolderProvider, useFolderContext } from '@/contexts/folder-context'
+export type { TFolderContextValue } from '@/contexts/folder-context'
+
 // Components
 export { FolderTree } from './components/folder-tree'
 export { FolderCreateForm } from './components/folder-create-form'
