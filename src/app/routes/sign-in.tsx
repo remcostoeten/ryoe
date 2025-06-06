@@ -16,8 +16,8 @@ const AnimatedBackground = ({ reverse = false }: { reverse?: boolean }) => {
             <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
             <div className="absolute inset-0">
                 {Array.from({ length: 50 }).map((_, i) => {
-                    const hue = (i * 7 + 200) % 360 // Blue to purple range
-                    const color = `hsl(${hue}, 70%, 60%)`
+                    const hue = (i * 5 + 120) % 160 + 120 // Green to grey range (120-160)
+                    const color = `hsl(${hue}, 30%, 45%)`
                     return (
                         <motion.div
                             key={i}
@@ -33,7 +33,7 @@ const AnimatedBackground = ({ reverse = false }: { reverse?: boolean }) => {
                                 scale: [0.5, 1.5, 0.5],
                                 backgroundColor: [
                                     color,
-                                    `hsl(${(hue + 30) % 360}, 70%, 70%)`,
+                                    `hsl(${(hue + 20) % 160 + 120}, 35%, 50%)`,
                                     color
                                 ]
                             }}
@@ -462,7 +462,7 @@ const SignInPage = ({ className }: SignInPageProps) => {
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             transition={{ delay: 1 }}
-                                            className="w-full rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-blue-500/25"
+                                            className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-slate-600 text-white font-medium py-3 hover:from-emerald-600 hover:to-slate-700 transition-all duration-300 shadow-lg shadow-emerald-500/25"
                                         >
                                             Continue to Dashboard
                                         </motion.button>

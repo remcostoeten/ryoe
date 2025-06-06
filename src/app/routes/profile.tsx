@@ -1,7 +1,8 @@
 import { useState, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Settings, LogOut, Database, HardDrive, FolderOpen, Save, Trash2, AlertTriangle } from 'lucide-react'
+import { Settings, LogOut, Database, HardDrive, Save, Trash2, AlertTriangle } from 'lucide-react'
+import { DirectoryPicker } from '@/components/ui/directory-picker'
 import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'
 import { updateUserPreferences } from '@/features/onboarding/api/onboarding-api'
 import { resetAllData, validateReset } from '@/services/database-reset-service'
@@ -224,24 +225,21 @@ function ProfilePageContent() {
 
             {/* MDX Storage Path */}
             <div className="space-y-3">
-              <label className="block text-gray-300 text-sm font-medium">MDX Storage Path</label>
               {editMode ? (
-                <div className="relative max-w-md">
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <FolderOpen className="h-5 w-5" />
-                  </div>
-                  <input
-                    type="text"
-                    value={editedPreferences?.mdxStoragePath || ''}
-                    onChange={(e) => setEditedPreferences(prev => prev ? { ...prev, mdxStoragePath: e.target.value } : null)}
-                    className="w-full bg-gray-800 text-gray-200 border border-gray-600 rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:border-emerald-500"
-                    placeholder="~/.config/ryoe"
-                  />
-                </div>
+                <DirectoryPicker
+                  label="MDX Storage Path"
+                  value={editedPreferences?.mdxStoragePath || ''}
+                  onChange={(path) => setEditedPreferences(prev => prev ? { ...prev, mdxStoragePath: path } : null)}
+                  placeholder="~/.config/ryoe"
+                  className="max-w-md"
+                />
               ) : (
-                <div className="text-gray-400 text-sm bg-gray-800/50 p-3 rounded-lg border border-gray-600 font-mono max-w-md">
-                  {currentPreferences?.mdxStoragePath}
-                </div>
+                <>
+                  <label className="block text-gray-300 text-sm font-medium">MDX Storage Path</label>
+                  <div className="text-gray-400 text-sm bg-gray-800/50 p-3 rounded-lg border border-gray-600 font-mono max-w-md">
+                    {currentPreferences?.mdxStoragePath}
+                  </div>
+                </>
               )}
             </div>
 

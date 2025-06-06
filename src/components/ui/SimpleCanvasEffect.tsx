@@ -61,10 +61,10 @@ export function SimpleCanvasEffect({
 
         // Generate color based on position and randomness
         const hue = colorful
-          ? (distance * 0.1 + Math.random() * 60 + 200) % 360  // Blue to purple range
+          ? (distance * 0.05 + Math.random() * 40 + 120) % 360  // Green to grey range (120-160)
           : 0
         const color = colorful
-          ? `hsl(${hue}, 70%, 60%)`
+          ? `hsl(${hue}, 30%, 45%)`  // More muted, greyish-green
           : 'white'
 
         dots.push({
@@ -94,8 +94,10 @@ export function SimpleCanvasEffect({
 
           // Add subtle color animation for colorful mode
           if (colorful) {
-            const animatedHue = (dot.hue + currentTime * 10) % 360
-            ctx.fillStyle = `hsl(${animatedHue}, 70%, ${60 + Math.sin(currentTime * 2 + dot.delay) * 10}%)`
+            const animatedHue = (dot.hue + currentTime * 5) % 360  // Slower color animation
+            const saturation = 25 + Math.sin(currentTime + dot.delay) * 10  // Subtle saturation variation
+            const lightness = 40 + Math.sin(currentTime * 1.5 + dot.delay) * 8  // Subtle lightness variation
+            ctx.fillStyle = `hsl(${animatedHue}, ${saturation}%, ${lightness}%)`
           } else {
             ctx.fillStyle = dot.color
           }

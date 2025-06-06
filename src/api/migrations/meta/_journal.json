@@ -15,6 +15,34 @@
       "when": 1748987341045,
       "tag": "0001_perfect_fantastic_four",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1749250201974,
+      "tag": "0002_perfect_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1749250578639,
+      "tag": "0003_loud_thunderbolts",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1749250669907,
+      "tag": "0004_safe_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1749250853587,
+      "tag": "0005_fast_pretty_boy",
+      "breakpoints": true
     }
   ]
 }
