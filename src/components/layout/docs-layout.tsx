@@ -14,16 +14,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     ArrowLeft,
     ExternalLink,
-    Menu,
     ChevronUp,
-    Home,
-    BookOpen,
-    Search
+    BookOpen
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
-import { MobileTocSkeleton, TocSkeleton } from '../ui/loaders'
+import { cn } from '@/utilities'
+import { TocSkeleton } from '../ui/loaders'
 
 type TocItem = {
     title: string
@@ -33,7 +28,6 @@ type TocItem = {
 
 type DocsLayoutProps = {
     children: ReactNode
-    title: string
     previousPage?: {
         title: string
         path: string
@@ -46,7 +40,6 @@ type DocsLayoutProps = {
     isLoading?: boolean
 }
 
-// Enhanced content skeleton
 const ContentSkeleton = memo(() => (
     <main className="flex-1 min-w-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -104,7 +97,7 @@ const ContentSkeleton = memo(() => (
 const TableOfContents = memo(
     ({ toc, activeSection }: { toc: TocItem[]; activeSection: string }) => (
         <aside
-            className="hidden lg:block w-64 xl:w-72 shrink-0 border-r h-[calc(100vh-65px)] sticky top-[65px]"
+            className="hidden lg:block w-64 xl:w-72 shrink-0 border-r h-[calc(100vh-64px)] sticky top-16"
             role="complementary"
             aria-label="Table of contents"
         >
@@ -118,7 +111,7 @@ const TableOfContents = memo(
                         ON THIS PAGE
                     </h2>
                     <ScrollArea
-                        className="h-[calc(100vh-150px)]"
+                        className="h-[calc(100vh-200px)]"
                         aria-labelledby="toc-heading"
                     >
                         <ul className="space-y-1 pr-2" role="list">
@@ -160,147 +153,16 @@ const TableOfContents = memo(
     )
 )
 
-// Enhanced mobile navigation
-const MobileNavigation = memo(
-    ({
-        toc,
-        activeSection,
-        isLoading
-    }: {
-        toc: TocItem[]
-        activeSection: string
-        isLoading: boolean
-    }) => (
-        <Sheet>
-            <SheetTrigger asChild>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="md:hidden"
-                    aria-label="Open navigation menu"
-                >
-                    <Menu className="h-4 w-4" />
-                </Button>
-            </SheetTrigger>
-            <SheetContent
-                side="left"
-                className="w-[300px] sm:w-[400px]"
-                aria-label="Navigation menu"
-            >
-                <div className="flex flex-col h-full">
-                    <header className="px-2 py-4 border-b">
-                        <h2 className="text-lg font-semibold flex items-center gap-2">
-                            <BookOpen className="h-5 w-5" />
-                            Documentation
-                        </h2>
-                    </header>
-
-                    <div className="py-4">
-                        <div className="relative mb-4">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search documentation..."
-                                className="pl-10"
-                                aria-label="Search documentation"
-                            />
-                        </div>
-
-                        <nav className="space-y-1" aria-label="Main navigation">
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start"
-                                asChild
-                            >
-                                <Link to="/docs">Documentation Home</Link>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start"
-                                asChild
-                            >
-                                <Link to="/docs/storage">
-                                    Storage & File System
-                                </Link>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start"
-                                asChild
-                            >
-                                <Link to="/docs/db-operations">
-                                    Database Operations
-                                </Link>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start"
-                                asChild
-                            >
-                                <Link to="/docs/storage-api">
-                                    Storage API Reference
-                                </Link>
-                            </Button>
-                        </nav>
-                    </div>
-
-                    {isLoading ? (
-                        <MobileTocSkeleton />
-                    ) : toc.length > 0 ? (
-                        <div className="py-4 border-t">
-                            <h3 className="text-sm font-medium px-4 mb-2 flex items-center gap-2">
-                                <BookOpen className="h-3 w-3" />
-                                On This Page
-                            </h3>
-                            <ScrollArea className="h-[calc(100vh-300px)]">
-                                <nav
-                                    className="space-y-1 px-2"
-                                    aria-label="Page contents"
-                                >
-                                    {toc.map((item) => (
-                                        <a
-                                            key={item.id}
-                                            href={`#${item.id}`}
-                                            className={cn(
-                                                'block py-1.5 px-2 text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-                                                item.level === 2
-                                                    ? 'pl-2'
-                                                    : item.level === 3
-                                                      ? 'pl-4'
-                                                      : 'pl-6',
-                                                activeSection === item.id
-                                                    ? 'bg-primary/10 text-primary font-medium'
-                                                    : 'hover:bg-muted'
-                                            )}
-                                            aria-current={
-                                                activeSection === item.id
-                                                    ? 'location'
-                                                    : undefined
-                                            }
-                                        >
-                                            {item.title}
-                                        </a>
-                                    ))}
-                                </nav>
-                            </ScrollArea>
-                        </div>
-                    ) : null}
-                </div>
-            </SheetContent>
-        </Sheet>
-    )
-)
 
 // Main layout component
 export const DocsLayout = memo(
     ({
         children,
-        title,
         previousPage,
         nextPage,
         toc = [],
         isLoading = false
     }: DocsLayoutProps) => {
-        const [scrollProgress, setScrollProgress] = useState(0)
         const [activeSection, setActiveSection] = useState('')
         const [showScrollTop, setShowScrollTop] = useState(false)
 
@@ -311,15 +173,6 @@ export const DocsLayout = memo(
             return () => {
                 if (!ticking) {
                     requestAnimationFrame(() => {
-                        const totalHeight =
-                            document.documentElement.scrollHeight -
-                            document.documentElement.clientHeight
-                        const progress =
-                            totalHeight > 0
-                                ? (window.scrollY / totalHeight) * 100
-                                : 0
-                        setScrollProgress(progress)
-
                         setShowScrollTop(window.scrollY > 300)
 
                         const headings = Array.from(
@@ -330,8 +183,8 @@ export const DocsLayout = memo(
                             const heading = headings[i]
                             const rect = heading.getBoundingClientRect()
 
-                            // Adjust for global header (80px) + docs header (approx 80px) = 160px
-                            if (rect.top <= 160) {
+                            // Account for navigation header (64px)
+                            if (rect.top <= 80) {
                                 const id = heading.id
                                 if (id && id !== activeSection) {
                                     setActiveSection(id)
@@ -361,85 +214,6 @@ export const DocsLayout = memo(
 
         return (
             <div className="min-h-screen flex flex-col">
-                {/* Add padding to account for global header */}
-                <div className="h-20" aria-hidden="true" />
-                <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-20 z-40">
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Link to="/docs">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                                    >
-                                        <ArrowLeft
-                                            className="h-4 w-4 mr-2"
-                                            aria-hidden="true"
-                                        />
-                                        <span className="hidden sm:inline">
-                                            Back to Docs
-                                        </span>
-                                        <span className="sm:hidden">Back</span>
-                                    </Button>
-                                </Link>
-                                <div
-                                    className="h-6 w-px bg-border hidden sm:block"
-                                    aria-hidden="true"
-                                />
-                                <h1 className="text-lg sm:text-xl font-semibold truncate">
-                                    {title}
-                                </h1>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="hidden md:flex items-center gap-2">
-                                    <Button variant="outline" size="sm" asChild>
-                                        <Link
-                                            to="/"
-                                            className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                                        >
-                                            <Home
-                                                className="h-4 w-4 mr-2"
-                                                aria-hidden="true"
-                                            />
-                                            Home
-                                        </Link>
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="relative group focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                                        aria-label="Search documentation (Cmd+K)"
-                                    >
-                                        <Search
-                                            className="h-4 w-4 mr-2"
-                                            aria-hidden="true"
-                                        />
-                                        Search
-                                        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground opacity-60 group-hover:opacity-100">
-                                            ⌘K
-                                        </kbd>
-                                    </Button>
-                                </div>
-                                <MobileNavigation
-                                    toc={toc}
-                                    activeSection={activeSection}
-                                    isLoading={isLoading}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        className="h-0.5 bg-primary transition-all duration-150 ease-out"
-                        style={{ width: `${scrollProgress}%` }}
-                        role="progressbar"
-                        aria-label="Reading progress"
-                        aria-valuenow={Math.round(scrollProgress)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                    />
-                </header>
-
                 <div className="flex-1 flex">
                     {isLoading ? (
                         <TocSkeleton />

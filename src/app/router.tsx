@@ -1,21 +1,30 @@
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { RootLayout } from '@/components/layout'
 
-const createAppRouter = () =>
-    createBrowserRouter([
-        {
-            path: '/',
-            Component: RootLayout,
-            children: [
-                {
-                    index: true,
-                    lazy: () => import('@/app/routes/home')
-                },
+const router = createBrowserRouter([
+    {
+        path: '/',
+        Component: RootLayout,
+        children: [
+            {
+                index: true,
+                lazy: async () => {
+                    const module = await import('@/app/routes/home')
+                    return { Component: module.Component }
+                }
+            },
                 {
                     path: 'sign-in',
                     lazy: async () => {
                         const module = await import('@/app/routes/sign-in')
                         return { Component: module.SignInPage }
+                    }
+                },
+                {
+                    path: 'onboarding',
+                    lazy: async () => {
+                        const module = await import('@/app/routes/onboarding')
+                        return { Component: module.Component }
                     }
                 },
                 {
@@ -41,7 +50,10 @@ const createAppRouter = () =>
                 },
                 {
                     path: 'docs/db-operations',
-                    lazy: () => import('@/app/routes/docs/db-operations')
+                    lazy: async () => {
+                        const module = await import('@/app/routes/docs/db-operations')
+                        return { Component: module.Component }
+                    }
                 },
                 {
                     path: 'docs/storage-api',
@@ -81,13 +93,30 @@ const createAppRouter = () =>
                     }
                 },
                 {
+                    path: 'notes',
+                    lazy: async () => {
+                        const module = await import('@/app/routes/notes')
+                        return { Component: module.default }
+                    }
+                },
+                {
+                    path: 'profile',
+                    lazy: async () => {
+                        const module = await import('@/app/routes/profile')
+                        return { Component: module.Component }
+                    }
+                },
+                {
                     path: '*',
-                    lazy: () => import('@/app/routes/not-found')
+                    lazy: async () => {
+                        const module = await import('@/app/routes/not-found')
+                        return { Component: module.Component }
+                    }
                 }
             ]
         }
-    ])
+])
 
 export default function AppRouter() {
-    return <RouterProvider router={createAppRouter()} />
+    return <RouterProvider router={router} />
 }

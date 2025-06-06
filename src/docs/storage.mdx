@@ -1,7 +1,5 @@
 # Storage & File System Guide
 
-## Table of Contents
-
 ## Overview
 
 This guide covers how local storage and file system operations work in our Tauri application. Our app uses a combination of browser storage APIs and Tauri's file system capabilities to provide robust data persistence.
@@ -196,7 +194,7 @@ CREATE TABLE snippets (
 ### Configuration Manager
 
 ```typescript
-// src/lib/storage/config.ts
+// src/core/storage/config.ts
 export class ConfigManager {
     private configPath: string
 
@@ -222,7 +220,7 @@ export class ConfigManager {
 ### Usage Example
 
 ```typescript
-import { ConfigManager } from '@/lib/storage/config'
+import { ConfigManager } from '@/core/storage/config'
 
 const configManager = new ConfigManager(
     await join(await appDataDir(), 'config', 'settings.json')

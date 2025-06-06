@@ -1,6 +1,6 @@
 [package]
 name = "ryoe"
-version = "0.7.0"
+version = "0.8.0"
 description = "A Tauri App"
 authors = ["Remco Stoeten"]
 edition = "2021"
@@ -17,6 +17,7 @@ serde_json = "1"
 tauri-plugin-shell = "2"
 tauri-plugin-process = "2.2.0"
 tauri-plugin-window-state = "2.0.1"
+window-vibrancy = "0.5.2"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

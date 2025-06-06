@@ -28,8 +28,8 @@ import {
     readPackageJson,
     type TechStackItem,
     type PackageInfo
-} from '@/lib/package-reader'
-import { cn } from '@/lib/utils'
+} from '@/utilities'
+import { cn } from '@/utilities'
 
 const CategoryIcon = ({
     category
@@ -41,7 +41,7 @@ const CategoryIcon = ({
     switch (category) {
         case 'frontend':
             return <Code2 {...iconProps} />
-        case 'backend':
+        case 'database':
             return <Database {...iconProps} />
         case 'build':
             return <Wrench {...iconProps} />
@@ -49,8 +49,6 @@ const CategoryIcon = ({
             return <Wrench {...iconProps} />
         case 'ui':
             return <Palette {...iconProps} />
-        case 'database':
-            return <Database {...iconProps} />
         case 'desktop':
             return <Monitor {...iconProps} />
         default:
@@ -134,10 +132,10 @@ const TechStackCard = ({ item }: { item: TechStackItem }) => {
                             {item.version}
                         </Badge>
                     </div>
-                    {item.website && (
+                    {false && (
                         <Button variant="ghost" size="sm" asChild>
                             <a
-                                href={item.website}
+                                href="#"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
@@ -222,10 +220,8 @@ function TechStackContent() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [stack, pkg] = await Promise.all([
-                    getTechStack(),
-                    readPackageJson()
-                ])
+                const pkg = await readPackageJson()
+                const stack = getTechStack(pkg)
                 setTechStack(stack)
                 setPackageInfo(pkg)
             } catch (error) {
@@ -386,7 +382,6 @@ export default function TechStackPage() {
 
     return (
         <DocsLayout
-            title="Technology Stack"
             previousPage={{
                 title: 'Documentation Home',
                 path: '/docs'

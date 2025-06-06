@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import mdx from '@mdx-js/rollup'
 import remarkGfm from 'remark-gfm'
-import remarkToc from 'remark-toc'
+
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import { readFileSync } from 'fs'
@@ -18,8 +18,11 @@ export default defineConfig({
         react(),
         tailwindcss(),
         mdx({
-            remarkPlugins: [remarkGfm, remarkToc],
-            rehypePlugins: [rehypeHighlight, rehypeSlug]
+            remarkPlugins: [remarkGfm],
+            rehypePlugins: [
+                rehypeSlug,
+                rehypeHighlight
+            ]
         })
     ],
 
@@ -52,5 +55,27 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './src')
         }
+    },
+
+    // Build optimizations
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Separate vendor chunks
+                    'react-vendor': ['react', 'react-dom'],
+                    'ui-vendor': ['framer-motion', 'lucide-react'],
+                    'query-vendor': ['@tanstack/react-query'],
+                    'editor-vendor': ['@blocknote/core', '@blocknote/react'],
+                    'db-vendor': ['@libsql/client', 'drizzle-orm'],
+                    'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-store'],
+                    // Split large modules
+                    'three-vendor': ['three', '@react-three/fiber'],
+                    'mdx-vendor': ['@mdx-js/react', 'rehype-highlight', 'remark-gfm']
+                }
+            }
+        },
+        // Increase chunk size warning limit
+        chunkSizeWarningLimit: 1000
     }
 })

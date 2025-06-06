@@ -13,7 +13,7 @@ The storage system consists of:
 ## Quick Start
 
 ```typescript
-import { createStorageProvider } from '@/lib/storage'
+import { createStorageProvider } from '@/core/storage'
 
 // Create a storage provider
 const storage = await createStorageProvider('my-store.dat')
@@ -31,7 +31,7 @@ console.log(preferences) // { theme: 'dark', fontSize: 14 }
 The factory automatically selects the best storage implementation based on the current environment:
 
 ```typescript
-// In src/lib/storage.ts
+// In src/core/storage/index.ts
 export async function createStorageProvider(
     storeName: string = 'app-storage.dat'
 ): Promise<TStorageProvider> {
@@ -208,7 +208,7 @@ async function createFallbackProvider(
 ### Storing User Preferences
 
 ```typescript
-import { getAppStorage } from '@/lib/storage'
+import { getAppStorage } from '@/core/storage'
 
 async function saveUserPreferences(preferences: UserPreferences) {
     const storage = await getAppStorage()
@@ -224,7 +224,7 @@ async function getUserPreferences(): Promise<UserPreferences | null> {
 ### Managing Application State
 
 ```typescript
-import { createStorageProvider } from '@/lib/storage'
+import { createStorageProvider } from '@/core/storage'
 
 class AppStateManager {
     private storage: TStorageProvider
@@ -278,7 +278,7 @@ console.log(
 ### Storing Multiple Data Types
 
 ```typescript
-import { getAppStorage } from '@/lib/storage'
+import { getAppStorage } from '@/core/storage'
 
 async function storeMultipleItems() {
     const storage = await getAppStorage()

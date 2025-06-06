@@ -1,4 +1,4 @@
-import { createHttpClient } from "@/lib/http-client"
+import { createHttpClient } from "@/core/http-client"
 
 // Create a cached HTTP client specifically for GitHub API calls
 // Using a long TTL to avoid rate limiting
@@ -59,7 +59,7 @@ function parseRepositoryUrl(url: string) {
 }
 
 // Detect branch type based on commit patterns
-function detectBranchType(commit: any, index: number, allCommits: any[]): GitCommit["branchType"] {
+function detectBranchType(commit: any, index: number, _allCommits: any[]): GitCommit["branchType"] {
   const message = commit.commit.message.toLowerCase()
 
   // Check for merge commits

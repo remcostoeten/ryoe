@@ -1,7 +1,7 @@
 "use client"
 
 import { appConfig } from "@/app/config"
-import { fetchLatestCommitInfo } from "@/lib/git-info"
+import { fetchLatestCommitInfo } from "@/core/git/git-info"
 import { useEffect, useState } from "react"
 import { GitBranch, GitCommit, Clock } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"

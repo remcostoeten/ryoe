@@ -1,9 +1,14 @@
 // Test script for folder CRUD operations
-import { FolderService } from '@/api/services/folder-service'
+import {
+  createFolderWithValidation,
+  updateFolderWithValidation,
+  getRootFolders,
+  getChildFolders,
+  moveFolderToParent
+} from '@/services/folder-service'
 import { toast } from '@/components/ui/toast'
 
 async function testFolderCRUD() {
-  const folderService = new FolderService()
 
   console.log('🧪 Testing Folder CRUD Operations...')
   toast.info('Running folder CRUD tests...')
@@ -11,9 +16,8 @@ async function testFolderCRUD() {
   try {
     // Test 1: Create a root folder
     console.log('\n1. Creating root folder...')
-    const rootFolder = await folderService.create({
-      name: 'My Documents',
-      isPublic: false
+    const rootFolder = await createFolderWithValidation({
+      name: 'My Documents'
     })
     
     if (rootFolder.success && rootFolder.data) {
@@ -25,10 +29,9 @@ async function testFolderCRUD() {
     
     // Test 2: Create a subfolder
     console.log('\n2. Creating subfolder...')
-    const subFolder = await folderService.create({
+    const subFolder = await createFolderWithValidation({
       name: 'Projects',
-      parentId: rootFolder.data.id,
-      isPublic: true
+      parentId: rootFolder.data.id
     })
     
     if (subFolder.success && subFolder.data) {
@@ -40,17 +43,17 @@ async function testFolderCRUD() {
     
     // Test 3: List all folders
     console.log('\n3. Listing all folders...')
-    const allFolders = await folderService.list()
-    
+    const allFolders = await getRootFolders()
+
     if (allFolders.success && allFolders.data) {
       console.log('✅ All folders:', allFolders.data)
     } else {
       console.error('❌ Failed to list folders:', allFolders.error)
     }
-    
+
     // Test 4: Get children of root folder
     console.log('\n4. Getting children of root folder...')
-    const children = await folderService.getChildren(rootFolder.data.id)
+    const children = await getChildFolders(rootFolder.data.id)
     
     if (children.success && children.data) {
       console.log('✅ Root folder children:', children.data)
@@ -60,8 +63,7 @@ async function testFolderCRUD() {
     
     // Test 5: Update folder name
     console.log('\n5. Updating folder name...')
-    const updatedFolder = await folderService.update({
-      id: subFolder.data.id,
+    const updatedFolder = await updateFolderWithValidation(subFolder.data.id, {
       name: 'Work Projects'
     })
     
@@ -73,10 +75,9 @@ async function testFolderCRUD() {
     
     // Test 6: Create another subfolder for testing move
     console.log('\n6. Creating another subfolder...')
-    const anotherSubFolder = await folderService.create({
+    const anotherSubFolder = await createFolderWithValidation({
       name: 'Personal',
-      parentId: rootFolder.data.id,
-      isPublic: false
+      parentId: rootFolder.data.id
     })
     
     if (anotherSubFolder.success && anotherSubFolder.data) {
@@ -87,7 +88,7 @@ async function testFolderCRUD() {
     
     // Test 7: Move folder (change parent)
     console.log('\n7. Moving folder...')
-    const movedFolder = await folderService.move(
+    const movedFolder = await moveFolderToParent(
       anotherSubFolder.data!.id,
       subFolder.data.id,
       0
@@ -101,7 +102,7 @@ async function testFolderCRUD() {
     
     // Test 8: Get folder tree structure
     console.log('\n8. Final folder structure...')
-    const finalFolders = await folderService.list()
+    const finalFolders = await getRootFolders()
     
     if (finalFolders.success && finalFolders.data) {
       console.log('✅ Final folder structure:')

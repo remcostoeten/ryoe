@@ -1,6 +1,6 @@
 {
     "name": "ryoe",
-    "version": "0.07",
+    "version": "0.08",
     "description": "A  os native desktop app built with T auri, React/Rust",
     "keywords": [
         "shadcn",
@@ -24,6 +24,7 @@
         "format": "prettier --write .",
         "gen": "drizzle-kit generate",
         "push": "drizzle-kit push",
+        "seed": "tsx src/scripts/seed-folders.ts",
         "build:output:clipboard": "sh ./commands/build-output.sh",
         "build:output:file": "sh ./commands/build-output.sh file tmp/build.log",
         "run:tauri": "sh ./commands/run-tauri.sh",
@@ -34,6 +35,11 @@
         "**/*": "prettier --write --ignore-unknown"
     },
     "dependencies": {
+        "@blocknote/core": "^0.32.0-hackdays.0",
+        "@blocknote/react": "^0.32.0-hackdays.0",
+        "@dnd-kit/core": "^6.3.1",
+        "@dnd-kit/sortable": "^10.0.0",
+        "@dnd-kit/utilities": "^3.2.2",
         "@libsql/client": "^0.15.8",
         "@mdx-js/react": "^3.1.0",
         "@mdx-js/rollup": "^3.1.0",
@@ -41,6 +47,7 @@
         "@radix-ui/react-checkbox": "^1.3.2",
         "@radix-ui/react-dialog": "^1.1.14",
         "@radix-ui/react-label": "^2.1.7",
+        "@radix-ui/react-popover": "^1.1.14",
         "@radix-ui/react-scroll-area": "^1.2.9",
         "@radix-ui/react-select": "^2.2.5",
         "@radix-ui/react-separator": "^1.1.7",
@@ -49,6 +56,7 @@
         "@radix-ui/react-tooltip": "^1.2.4",
         "@react-three/fiber": "^9.1.2",
         "@tailwindcss/vite": "^4.1.5",
+        "@tanstack/react-query": "^5.80.6",
         "@tauri-apps/api": "^2.5.0",
         "@tauri-apps/plugin-process": "^2.2.1",
         "@tauri-apps/plugin-shell": "^2.2.1",

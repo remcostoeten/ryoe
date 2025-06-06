@@ -1,11 +1,19 @@
-import type { 
-  Folder, 
-  FolderTreeNode, 
-  CreateFolderInput, 
-  UpdateFolderInput,
-  DragItem,
-  DropTarget 
+import type {
+  TFolder,
+  TFolderTreeNode,
+  TCreateFolderInput,
+  TUpdateFolderInput,
+  TDragItem,
+  TDropTarget
 } from '@/types/notes'
+
+// Type aliases for backward compatibility within this module
+export type Folder = TFolder
+export type FolderTreeNode = TFolderTreeNode
+export type CreateFolderInput = TCreateFolderInput
+export type UpdateFolderInput = TUpdateFolderInput
+export type DragItem = TDragItem
+export type DropTarget = TDropTarget
 
 // Component prop types
 export interface FolderTreeProps {

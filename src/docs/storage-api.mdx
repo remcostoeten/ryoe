@@ -1,0 +1,254 @@
+# Storage API Reference
+
+Complete API reference for the storage system in the ryoe application.
+
+## Core Storage Interface
+
+### `TStorageProvider`
+
+The main interface for all storage operations.
+
+```typescript
+interface TStorageProvider {
+    get<T>(key: string): Promise<T | null>
+    set<T>(key: string, value: T): Promise<void>
+    delete(key: string): Promise<void>
+    clear(): Promise<void>
+}
+```
+
+## Factory Functions
+
+### `createStorageProvider(storeName?: string): Promise<TStorageProvider>`
+
+Creates a storage provider with automatic environment detection.
+
+**Parameters:**
+- `storeName` (optional): Name of the storage file. Defaults to `'app-storage.dat'`
+
+**Returns:** Promise that resolves to a `TStorageProvider` instance
+
+**Example:**
+```typescript
+import { createStorageProvider } from '@/core/storage'
+
+const storage = await createStorageProvider('user-data.dat')
+```
+
+### `getAppStorage(): Promise<TStorageProvider>`
+
+Gets the default application storage provider.
+
+**Returns:** Promise that resolves to the default `TStorageProvider` instance
+
+**Example:**
+```typescript
+import { getAppStorage } from '@/core/storage'
+
+const storage = await getAppStorage()
+await storage.set('user.preferences', { theme: 'dark' })
+```
+
+## Storage Methods
+
+### `get<T>(key: string): Promise<T | null>`
+
+Retrieves a value from storage.
+
+**Parameters:**
+- `key`: The storage key to retrieve
+
+**Returns:** Promise that resolves to the stored value or `null` if not found
+
+**Example:**
+```typescript
+const preferences = await storage.get<UserPreferences>('user.preferences')
+if (preferences) {
+    console.log('Theme:', preferences.theme)
+}
+```
+
+### `set<T>(key: string, value: T): Promise<void>`
+
+Stores a value in storage.
+
+**Parameters:**
+- `key`: The storage key
+- `value`: The value to store (must be JSON serializable)
+
+**Returns:** Promise that resolves when the operation completes
+
+**Example:**
+```typescript
+await storage.set('user.preferences', {
+    theme: 'dark',
+    fontSize: 14,
+    autoSave: true
+})
+```
+
+### `delete(key: string): Promise<void>`
+
+Removes a value from storage.
+
+**Parameters:**
+- `key`: The storage key to remove
+
+**Returns:** Promise that resolves when the operation completes
+
+**Example:**
+```typescript
+await storage.delete('user.preferences')
+```
+
+### `clear(): Promise<void>`
+
+Removes all values from storage.
+
+**Returns:** Promise that resolves when the operation completes
+
+**Example:**
+```typescript
+await storage.clear()
+```
+
+## Environment Detection
+
+### `isTauriEnvironment(): boolean`
+
+Checks if the application is running in a Tauri environment.
+
+**Returns:** `true` if running in Tauri, `false` otherwise
+
+**Example:**
+```typescript
+import { isTauriEnvironment } from '@/utilities/environment'
+
+if (isTauriEnvironment()) {
+    console.log('Running in desktop mode')
+} else {
+    console.log('Running in web mode')
+}
+```
+
+## Storage Providers
+
+### Tauri Store Provider
+
+Used in desktop environments with persistent file storage.
+
+**Features:**
+- Persistent storage across app restarts
+- File-based storage in app data directory
+- Automatic serialization/deserialization
+
+### LocalStorage Provider
+
+Used in web environments with browser localStorage.
+
+**Features:**
+- Browser-based storage
+- Synchronous operations (wrapped in async interface)
+- Limited storage capacity
+
+### Fallback Provider
+
+Automatically falls back to localStorage if Tauri storage fails.
+
+**Features:**
+- Automatic fallback mechanism
+- Transparent error handling
+- Consistent API across environments
+
+## Error Handling
+
+All storage operations include built-in error handling:
+
+```typescript
+try {
+    await storage.set('key', 'value')
+} catch (error) {
+    console.error('Storage operation failed:', error)
+}
+```
+
+**Common Error Scenarios:**
+- Storage quota exceeded
+- Permission denied
+- File system errors (Tauri)
+- JSON serialization errors
+
+## Best Practices
+
+### Key Naming
+
+Use namespaced keys with dot notation:
+
+```typescript
+// ✅ Good
+await storage.set('user.preferences', preferences)
+await storage.set('app.state', appState)
+await storage.set('cache.gitInfo', gitInfo)
+
+// ❌ Avoid
+await storage.set('preferences', preferences)
+await storage.set('state', appState)
+```
+
+### Type Safety
+
+Always use TypeScript generics for type safety:
+
+```typescript
+// ✅ Type-safe
+const preferences = await storage.get<UserPreferences>('user.preferences')
+
+// ❌ Untyped
+const preferences = await storage.get('user.preferences')
+```
+
+### Error Handling
+
+Wrap storage operations in try-catch blocks:
+
+```typescript
+async function saveUserData(data: UserData) {
+    try {
+        await storage.set('user.data', data)
+        console.log('Data saved successfully')
+    } catch (error) {
+        console.error('Failed to save data:', error)
+        // Handle error appropriately
+    }
+}
+```
+
+## Storage Constants
+
+Common storage keys are defined in constants:
+
+```typescript
+import { STORAGE_KEYS } from '@/core/config/constants'
+
+// Available keys:
+STORAGE_KEYS.USER_PREFERENCES    // 'user.preferences'
+STORAGE_KEYS.USER_ID            // 'user.id'
+STORAGE_KEYS.USER_NAME          // 'user.name'
+STORAGE_KEYS.ONBOARDING_COMPLETED // 'onboarding.completed'
+STORAGE_KEYS.THEME              // 'theme'
+STORAGE_KEYS.LAST_SYNC          // 'sync.lastSync'
+```
+
+## Migration Guide
+
+### From Old `@/lib/storage` to `@/core/storage`
+
+```typescript
+// Old import
+import { createStorageProvider } from '@/lib/storage'
+
+// New import
+import { createStorageProvider } from '@/core/storage'
+```
+
+The API remains the same, only the import path has changed.

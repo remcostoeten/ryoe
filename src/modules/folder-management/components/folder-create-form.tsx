@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities/styling'
 import { useFolderOperations } from '../hooks/use-folder-operations'
 import type { FolderCreateFormProps } from '../types'
-import type { CreateFolderInput } from '@/types/notes'
+import type { TCreateFolderInput } from '@/types/notes'
 
 export function FolderCreateForm({
   parentId = null,
@@ -14,7 +14,7 @@ export function FolderCreateForm({
   onCancel,
   className
 }: FolderCreateFormProps) {
-  const [formData, setFormData] = useState<CreateFolderInput>({
+  const [formData, setFormData] = useState<TCreateFolderInput>({
     name: '',
     parentId,
     isPublic: false

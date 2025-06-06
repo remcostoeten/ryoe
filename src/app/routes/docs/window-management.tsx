@@ -63,7 +63,6 @@ export default function WindowManagementPage() {
 
     return (
         <DocsLayout
-            title="Window Management & Screen Position Persistence"
             previousPage={{
                 title: 'Storage API Reference',
                 path: '/docs/storage-api'

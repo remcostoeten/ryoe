@@ -6,7 +6,7 @@ import {
     ErrorDescription,
     ErrorActions
 } from '@/features/errors/error-base'
-import { isTauriEnvironment } from '@/lib/environment'
+import { isTauriEnvironment } from '@/utilities'
 
 export default function AppErrorPage() {
     const handleRestart = () => {

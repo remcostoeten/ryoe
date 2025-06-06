@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { appConfig } from '@/app/config'
-import { fetchLatestCommitInfo } from '@/lib/git-info'
+import { fetchLatestCommitInfo } from '@/core/git/git-info'
 
 export function VersionTest() {
     const [commitInfo, setCommitInfo] = useState({

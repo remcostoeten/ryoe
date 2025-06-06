@@ -37,7 +37,6 @@ export default function StoragePage() {
 
     return (
         <DocsLayout
-            title="Storage & File System"
             previousPage={{
                 title: 'Documentation Home',
                 path: '/docs'

@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 
 import { useState, useRef, useCallback, useMemo } from "react"
@@ -165,7 +163,10 @@ const UploadedComponentRenderer = ({
         // Clean up extra spaces
         .replace(/\s+/g, " ")
         .replace(/className="\s+/g, 'className="')
-        .replace(/\s+"/g, '"')
+        .replace(/\s+"/g, '"');
+
+      // Use processedCode if needed (currently not used in this implementation)
+      console.log('Processed code length:', processedCode.length);
 
       // Create a static version of your uploaded logo
       return (

@@ -1,14 +1,20 @@
-import { Outlet } from 'react-router'
-import { Header } from './header'
+import { Outlet, useLocation } from 'react-router'
+import { Navigation } from './navigation'
+import { AppGuard } from './AppGuard'
 
 export function RootLayout() {
+    const location = useLocation()
+    const isOnboarding = location.pathname === '/onboarding'
+
     return (
-        <div className="min-h-screen">
-            <Header />
-            <main className="min-h-screen">
-                <Outlet />
-            </main>
-        </div>
+        <AppGuard>
+            <div className="min-h-screen">
+                {!isOnboarding && <Navigation />}
+                <main className="min-h-screen">
+                    <Outlet />
+                </main>
+            </div>
+        </AppGuard>
     )
 }
 
@@ -22,7 +28,6 @@ type TProps = {
 export function Layout({ children }: TProps) {
     return (
         <div className="min-h-screen flex flex-col">
-            <Header />
             <main className="flex-1 pb-12">{children}</main>
             <Footer />
         </div>

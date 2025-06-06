@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Copy, Check, Download, Play, Terminal } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utilities'
 
 type TProps =  {
     children: string

@@ -185,7 +185,7 @@ println!("Window state saved/restored");
 Window position persistence is only available in the Tauri desktop environment:
 
 ```typescript
-import { isTauriEnvironment } from '@/lib/environment'
+import { isTauriEnvironment } from '@/utilities/environment'
 
 if (isTauriEnvironment()) {
     // Window management features available
