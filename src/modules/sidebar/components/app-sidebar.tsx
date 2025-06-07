@@ -7,14 +7,30 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader
+  SidebarGroupContent
 } from "@/components/ui/sidebar"
-import { Archive, ChevronDown, ChevronRight, Command, FileText, Folder, Star } from "lucide-react"
+import { Archive, ChevronDown, ChevronRight, Command, FileText, Folder, Star, Home, BookOpen, User, LogIn } from "lucide-react"
 import * as React from "react"
-import { useLocation } from "react-router"
+import { useLocation, Link } from "react-router"
 import { TopActionBar } from "./top-action-bar"
 import { useFolderContext } from "@/modules/folder-management"
+import { useCurrentUser } from "@/features/onboarding/hooks/useOnboarding"
+
+// Navigation items configuration
+const navigationItems = [
+  { href: '/', icon: Home, label: 'Home' },
+  { href: '/notes', icon: FileText, label: 'Notes' },
+  { href: '/folders', icon: Folder, label: 'Folders' },
+  { href: '/docs', icon: BookOpen, label: 'Docs' },
+]
+
+const authenticatedItems = [
+  { href: '/profile', icon: User, label: 'Profile' }
+]
+
+const unauthenticatedItems = [
+  { href: '/sign-in', icon: LogIn, label: 'Sign In' }
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const {
@@ -27,51 +43,118 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     filteredTreeData
   } = useFolderContext()
   const location = useLocation()
+  const { user, isLoading } = useCurrentUser()
   const pathname = location.pathname
-  const isHomePage = pathname === "/"
 
   const displayFolders = searchFilter ? filteredTreeData : treeData
+
+  // Helper function to check if a route is active
+  const isActiveRoute = (href: string) => {
+    if (href === '/') {
+      return pathname === '/'
+    }
+    return pathname.startsWith(href)
+  }
 
   return (
     <Sidebar collapsible="icon" className="overflow-hidden border-r border-sidebar-border" style={{maxWidth: 'var(--sidebar-width)'}} {...props}>
       <Sidebar collapsible="none" className="!w-[48px] border-r border-sidebar-border bg-background AAA">
-        <SidebarHeader className="p-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`h-8 w-8 p-0 ${isHomePage ? 'bg-active AAA-ac text-sidebar-accent-foreground' : 'text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground'}`}
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
-        </SidebarHeader>
         <SidebarContent className="p-2 space-y-1">
+          {/* Main navigation items */}
+          {navigationItems.map((item) => {
+            const Icon = item.icon
+            const isActive = isActiveRoute(item.href)
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={`h-8 w-8 p-0 ${
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                }`}
+              >
+                <Link to={item.href}>
+                  <Icon className="h-4 w-4" />
+                </Link>
+              </Button>
+            )
+          })}
+
+          {/* Separator */}
+          <div className="h-px bg-sidebar-border my-2" />
+
+          {/* Additional utility buttons */}
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
-          >
-            <Folder className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
+            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <Star className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
+            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <Archive className="h-4 w-4" />
           </Button>
         </SidebarContent>
-        <SidebarFooter className="p-2">
+
+        <SidebarFooter className="p-2 space-y-1">
+          {/* Authentication-based items */}
+          {!isLoading && user && authenticatedItems.map((item) => {
+            const Icon = item.icon
+            const isActive = isActiveRoute(item.href)
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={`h-8 w-8 p-0 ${
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                }`}
+              >
+                <Link to={item.href}>
+                  <Icon className="h-4 w-4" />
+                </Link>
+              </Button>
+            )
+          })}
+
+          {/* Sign in button for unauthenticated users */}
+          {!isLoading && !user && unauthenticatedItems.map((item) => {
+            const Icon = item.icon
+            const isActive = isActiveRoute(item.href)
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={`h-8 w-8 p-0 ${
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                }`}
+              >
+                <Link to={item.href}>
+                  <Icon className="h-4 w-4" />
+                </Link>
+              </Button>
+            )
+          })}
+
+          {/* Settings/Command button */}
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
+            className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <Command className="h-4 w-4" />
           </Button>
@@ -94,14 +177,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <CollapsibleTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="w-full justify-between h-7 px-1 mx-0 text-sidebar-foreground hover:bg-background AAA-accent text-xs font-normal overflow-hidden"
+                        onClick={(e) => {
+                          // Handle folder selection separately from toggle
+                          e.preventDefault()
+                          selectFolder(folder.id)
+                        }}
+                        className={`w-full justify-between h-7 px-1 mx-0 text-xs font-normal overflow-hidden ${
+                          selectedFolderId === folder.id
+                            ? "bg-background AAA-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
+                        }`}
                       >
                         <div className="flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
-                          {expandedFolderIds.has(folder.id) ? (
-                            <ChevronDown className="h-3 w-3 text-sidebar-foreground flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3 text-sidebar-foreground flex-shrink-0" />
-                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleFolder(folder.id)
+                            }}
+                            className="flex items-center justify-center h-3 w-3 hover:bg-sidebar-accent rounded-sm"
+                          >
+                            {expandedFolderIds.has(folder.id) ? (
+                              <ChevronDown className="h-3 w-3 text-sidebar-foreground flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="h-3 w-3 text-sidebar-foreground flex-shrink-0" />
+                            )}
+                          </button>
                           <Folder className="h-3 w-3 text-sidebar-foreground flex-shrink-0" />
                           <span className="truncate text-xs">{folder.name}</span>
                         </div>

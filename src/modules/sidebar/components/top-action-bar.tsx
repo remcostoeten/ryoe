@@ -23,14 +23,24 @@ export function TopActionBar() {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   // const [showDebugger, setShowDebugger] = useState(false); // Temporarily disabled
   const [isSearching, setIsSearching] = useState(false);
-  const { createFolder, setSearchFilter } = useFolderContext();
+  const { createFolder, setSearchFilter, selectedFolderId, folders, expandFolder } = useFolderContext();
+
+  // Get the selected folder name for tooltip context
+  const selectedFolder = folders.find(f => f.id === selectedFolderId)
+  const selectedFolderName = selectedFolder?.name
 
   async function handleCreateFolder(folderName: string) {
     try {
-      await createFolder({
+      const newFolder = await createFolder({
         name: folderName,
-        parentId: null
+        parentId: selectedFolderId // Create as child of selected folder, or root if none selected
       });
+
+      // If we created a child folder, expand the parent to show it
+      if (newFolder && selectedFolderId) {
+        expandFolder(selectedFolderId);
+      }
+
       setTimeout(() => setIsCreatingFolder(false), 50);
     } catch (error) {
       console.error('Failed to create folder:', error);
@@ -43,6 +53,7 @@ export function TopActionBar() {
   }
 
   function handleCancelSearch() {
+    setSearchFilter(""); // Clear search filter when canceling
     setIsSearching(false);
   }
 
@@ -157,8 +168,13 @@ export function TopActionBar() {
                     side="bottom"
                     className="bg-background AAA-primary border-sidebar-border text-sidebar-foreground"
                   >
-                    <p>New folder</p>
-                    <kbd className="ml-2 text-xs opacity-70">⌘N</kbd>
+                    <div className="flex flex-col">
+                      <p>New folder</p>
+                      {selectedFolderName && (
+                        <p className="text-xs opacity-70">in "{selectedFolderName}"</p>
+                      )}
+                      <kbd className="ml-auto text-xs opacity-70 mt-1">⌘N</kbd>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
 

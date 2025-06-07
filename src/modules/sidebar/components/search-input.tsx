@@ -36,9 +36,10 @@ export function SearchInput({
   }
 
   function handleBlur() {
+    // Small delay to allow for potential click events before canceling
     setTimeout(() => {
       handleCancel();
-    }, 20220);
+    }, 150);
   }
 
   useEffect(() => {

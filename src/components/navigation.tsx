@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities'
 import { Home, FileText, Folder, BookOpen, LogIn, User } from 'lucide-react'
 import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'
+import { Logo } from './logo'
 
 const baseNavigationItems = [
     {
@@ -53,25 +54,12 @@ export function Navigation() {
         <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo/Brand */}
-                    <Link 
-                        to="/" 
-                        className="flex items-center gap-2 font-semibold text-lg hover:text-primary transition-colors"
-                    >
-                        <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                            <span className="text-primary-foreground font-bold text-sm">R</span>
-                        </div>
-                        Ryoe
-                    </Link>
-
-                    {/* Navigation Links */}
+                        <Logo/>
                     <div className="hidden md:flex items-center gap-1">
-                        {/* Base navigation items (always visible) */}
                         {baseNavigationItems.map((item) => {
                             const Icon = item.icon
                             const isActive = location.pathname === item.href ||
                                            (item.href !== '/' && location.pathname.startsWith(item.href))
-
                             return (
                                 <Button
                                     key={item.href}

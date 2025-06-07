@@ -37,7 +37,7 @@ export function Component() {
     const name = `Test Folder ${Date.now()}`
     await createFolder({
       name,
-      parentId: null
+      parentId: selectedFolderId // Use selected folder as parent
     })
   }
 
@@ -97,15 +97,23 @@ export function Component() {
           <div className="flex gap-2">
             <Button onClick={handleCreateTestFolder}>
               <Folder className="h-4 w-4 mr-2" />
-              Create Test Folder
+              {selectedFolderId ? 'Create Child Folder' : 'Create Root Folder'}
             </Button>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => setSearchFilter(searchFilter ? '' : 'test')}
             >
               <Search className="h-4 w-4 mr-2" />
               {searchFilter ? 'Clear Search' : 'Search "test"'}
             </Button>
+            {selectedFolderId && (
+              <Button
+                variant="outline"
+                onClick={() => selectFolder(null)}
+              >
+                Clear Selection
+              </Button>
+            )}
           </div>
           
           {searchFilter && (
