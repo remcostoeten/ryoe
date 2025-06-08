@@ -3,7 +3,7 @@
 import { Link, useLocation } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities'
-import { Home, FileText, Folder, BookOpen, LogIn, User } from 'lucide-react'
+import { Home, FileText, Folder, BookOpen, LogIn, User, Network } from 'lucide-react'
 import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'
 import { Logo } from './logo'
 
@@ -22,6 +22,11 @@ const baseNavigationItems = [
         label: 'Folders',
         href: '/folders',
         icon: Folder
+    },
+    {
+        label: 'Port Manager',
+        href: '/port-manager',
+        icon: Network
     },
     {
         label: 'Docs',

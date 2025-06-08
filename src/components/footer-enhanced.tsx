@@ -27,7 +27,7 @@ export function FooterEnhanced() {
   })
   const [isLoadingCommit, setIsLoadingCommit] = useState(true)
 
-  const currentYear = new Date().getFullYear()
+  // const currentYear = new Date().getFullYear()
   const environment = isTauriEnvironment() ? "Desktop" : "Web"
 
   // Database health check
@@ -92,11 +92,11 @@ export function FooterEnhanced() {
   const getStatusIcon = (status?: string) => {
     switch (status) {
       case "healthy":
-        return "●"
+        return "/"
       case "error":
-        return "●"
+        return "/"
       case "disconnected":
-        return "●"
+        return "/"
       default:
         return "○"
     }
@@ -109,9 +109,9 @@ export function FooterEnhanced() {
           {/* Left section - App info */}
           <div className="flex items-center space-x-2">
             <span className="font-medium text-gray-300">{appConfig.name}</span>
-            <span className="text-gray-500">●</span>
+            <span className="text-gray-500">/</span>
             <span>v{appConfig.version}</span>
-            <span className="text-gray-500">●</span>
+            <span className="text-gray-500">/</span>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -128,7 +128,7 @@ export function FooterEnhanced() {
             {/* Database status (only in Tauri environment) */}
             {isTauriEnvironment() && dbHealth && (
               <>
-                <span className="text-gray-500">●</span>
+                <span className="text-gray-500">/</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className={`flex items-center space-x-1 ${getStatusColor(dbHealth.status)}`}>
@@ -162,7 +162,7 @@ export function FooterEnhanced() {
               </TooltipContent>
             </Tooltip>
 
-            <span className="text-gray-500">●</span>
+            <span className="text-gray-500">/</span>
 
             <Popover>
               <PopoverTrigger asChild>
@@ -180,7 +180,7 @@ export function FooterEnhanced() {
               </PopoverContent>
             </Popover>
 
-            <span className="text-gray-500">●</span>
+            <span className="text-gray-500">/</span>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -189,7 +189,7 @@ export function FooterEnhanced() {
                   <span>{commitInfo.timestamp ? new Date(commitInfo.timestamp).toLocaleTimeString() : "..."}</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="top" className="bg-[#1f1f1f] border-[#333]">
+              <TooltipContent side="top">
                 <p>Last commit: {commitInfo.timestamp}</p>
                 <p className="text-xs text-gray-400">By: {commitInfo.author}</p>
               </TooltipContent>
@@ -207,8 +207,6 @@ export function FooterEnhanced() {
             >
               {appConfig.author.name}
             </a>
-            <span className="text-gray-500">●</span>
-            <span>© {currentYear}</span>
           </div>
         </div>
       </footer>

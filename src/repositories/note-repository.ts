@@ -23,6 +23,7 @@ function mapRowToNote(row: any): TNote {
     content: String(row.content),
     folderId: row.folder_id ? Number(row.folder_id) : undefined,
     position: Number(row.position || 0),
+    isFavorite: Boolean(row.is_favorite || false),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at)
   }
@@ -30,7 +31,7 @@ function mapRowToNote(row: any): TNote {
 
 function mapNoteDataToRow(data: TCreateNoteData | TUpdateNoteData): Record<string, any> {
   const row: Record<string, any> = {}
-  
+
   if ('title' in data && data.title !== undefined) {
     row.title = data.title
   }
@@ -43,7 +44,10 @@ function mapNoteDataToRow(data: TCreateNoteData | TUpdateNoteData): Record<strin
   if ('position' in data && data.position !== undefined) {
     row.position = data.position
   }
-  
+  if ('isFavorite' in data && data.isFavorite !== undefined) {
+    row.is_favorite = data.isFavorite
+  }
+
   return row
 }
 
@@ -183,4 +187,27 @@ export async function duplicateNote(id: number): Promise<TRepositoryResult<TNote
       error: error instanceof Error ? error.message : 'Unknown error'
     }
   }
+}
+
+export async function toggleNoteFavorite(id: number): Promise<TRepositoryResult<TNote>> {
+  try {
+    const note = await findNoteById(id)
+    if (!note.success || !note.data) {
+      return { success: false, error: 'Note not found' }
+    }
+
+    return updateNote(id, { isFavorite: !note.data.isFavorite })
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
+export async function findFavoriteNotes(): Promise<TRepositoryListResult<TNote>> {
+  return findNotes({
+    filters: { is_favorite: true },
+    sort: { field: 'title', direction: 'asc' }
+  })
 }

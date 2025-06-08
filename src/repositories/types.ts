@@ -29,6 +29,7 @@ export type TNote = {
   content: string
   folderId?: number
   position: number
+  isFavorite: boolean
   createdAt: number
   updatedAt: number
 }
@@ -47,6 +48,7 @@ export type TFolder = {
   name: string
   parentId?: number
   position: number
+  isFavorite: boolean
   createdAt: number
   updatedAt: number
 }

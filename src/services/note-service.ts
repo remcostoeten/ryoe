@@ -12,7 +12,9 @@ import {
   deleteNote,
   moveNote,
   reorderNotes,
-  duplicateNote
+  duplicateNote,
+  toggleNoteFavorite,
+  findFavoriteNotes
 } from '@/repositories'
 import { validateNoteTitle, validateNoteContent, calculateReadingTime, countWords } from '@/utilities'
 import type { 
@@ -347,6 +349,54 @@ export async function searchNotesWithOptions(options: TSearchOptions): Promise<T
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       code: 'SEARCH_ERROR'
+    }
+  }
+}
+
+export async function toggleNoteFavoriteStatus(id: number): Promise<TServiceResult<TNoteWithMetadata>> {
+  try {
+    const result = await toggleNoteFavorite(id)
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        error: result.error || 'Failed to toggle note favorite status',
+        code: 'TOGGLE_FAVORITE_FAILED'
+      }
+    }
+
+    const noteWithMetadata = mapNoteToMetadata(result.data)
+    return { success: true, data: noteWithMetadata }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: 'TOGGLE_FAVORITE_ERROR'
+    }
+  }
+}
+
+export async function getFavoriteNotesWithMetadata(): Promise<TServiceListResult<TNoteWithMetadata>> {
+  try {
+    const result = await findFavoriteNotes()
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || 'Failed to get favorite notes',
+        code: 'GET_FAVORITES_FAILED'
+      }
+    }
+
+    const notesWithMetadata = (result.data || []).map(mapNoteToMetadata)
+    return {
+      success: true,
+      data: notesWithMetadata,
+      total: notesWithMetadata.length
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: 'GET_FAVORITES_ERROR'
     }
   }
 }

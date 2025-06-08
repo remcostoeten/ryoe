@@ -25,7 +25,7 @@ type TFolderContextValue = {
   // Folder operations
   createFolder: (input: TCreateFolderInput) => Promise<TFolder | null>
   updateFolder: (input: TUpdateFolderInput) => Promise<TFolder | null>
-  deleteFolder: (id: number, deleteChildren?: boolean) => Promise<boolean>
+  deleteFolder: (id: number, options?: { deleteChildren?: boolean; force?: boolean }) => Promise<boolean>
   refreshFolders: () => Promise<void>
   
   // Tree operations
@@ -55,7 +55,7 @@ export function FolderProvider({ children, parentId = null }: TFolderProviderPro
   
   // Use the enterprise-grade hooks
   const folderHook = useFolders(parentId)
-  const treeHook = useFolderTree(parentId)
+  const treeHook = useFolderTree() // No options needed for basic tree functionality
   const operationsHook = useFolderOperations()
 
   // Filter folders based on search query
@@ -111,8 +111,8 @@ export function FolderProvider({ children, parentId = null }: TFolderProviderPro
     return result
   }, [operationsHook, folderHook, treeHook])
 
-  const deleteFolderWithRefresh = useCallback(async (id: number, deleteChildren?: boolean): Promise<boolean> => {
-    const result = await operationsHook.deleteFolder(id, { deleteChildren })
+  const deleteFolderWithRefresh = useCallback(async (id: number, options?: { deleteChildren?: boolean; force?: boolean }): Promise<boolean> => {
+    const result = await operationsHook.deleteFolder(id, options)
     if (result) {
       await folderHook.refreshFolders()
       await treeHook.refreshTree()

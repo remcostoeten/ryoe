@@ -92,13 +92,13 @@ export function useFolderOperations(): UseFolderOperationsReturn {
 
   const deleteFolder = useCallback(async (
     id: number,
-    _options?: { deleteChildren?: boolean }
+    options?: { deleteChildren?: boolean; force?: boolean }
   ): Promise<boolean> => {
     try {
       setLoading(true)
       setError(null)
 
-      const response = await deleteFolderById(id)
+      const response = await deleteFolderById(id, { force: options?.force || options?.deleteChildren })
 
       if (response.success) {
         toast.success('Folder deleted successfully')

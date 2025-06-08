@@ -60,7 +60,9 @@ export {
   deleteNote,
   moveNote,
   reorderNotes,
-  duplicateNote
+  duplicateNote,
+  toggleNoteFavorite,
+  findFavoriteNotes
 } from './note-repository'
 
 // Folder repository functions
@@ -76,5 +78,7 @@ export {
   moveFolder,
   reorderFolders,
   getFolderHierarchy,
-  getFolderPath
+  getFolderPath,
+  toggleFolderFavorite,
+  findFavoriteFolders
 } from './folder-repository'

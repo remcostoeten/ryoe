@@ -127,14 +127,12 @@ export function useFolders(parentId?: number | null): UseFoldersReturn {
 
   const deleteFolder = useCallback(async (
     id: number,
-    _deleteChildren: boolean = false
+    options?: { deleteChildren?: boolean; force?: boolean }
   ): Promise<boolean> => {
     try {
       setError(null)
 
-      // Note: The new deleteFolderById function doesn't support deleteChildren option yet
-      // It only deletes empty folders (no children or notes)
-      const response = await deleteFolderById(id)
+      const response = await deleteFolderById(id, { force: options?.force || options?.deleteChildren })
 
       if (response.success) {
         // Remove from local state

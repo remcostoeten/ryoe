@@ -22,6 +22,7 @@ function mapRowToFolder(row: any): TFolder {
     name: String(row.name),
     parentId: row.parent_id ? Number(row.parent_id) : undefined,
     position: Number(row.position || 0),
+    isFavorite: Boolean(row.is_favorite || false),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at)
   }
@@ -29,7 +30,7 @@ function mapRowToFolder(row: any): TFolder {
 
 function mapFolderDataToRow(data: TCreateFolderData | TUpdateFolderData): Record<string, any> {
   const row: Record<string, any> = {}
-  
+
   if ('name' in data && data.name !== undefined) {
     row.name = data.name
   }
@@ -39,7 +40,10 @@ function mapFolderDataToRow(data: TCreateFolderData | TUpdateFolderData): Record
   if ('position' in data && data.position !== undefined) {
     row.position = data.position
   }
-  
+  if ('isFavorite' in data && data.isFavorite !== undefined) {
+    row.is_favorite = data.isFavorite
+  }
+
   return row
 }
 
@@ -191,4 +195,27 @@ export async function getFolderPath(id: number): Promise<TRepositoryResult<TFold
       error: error instanceof Error ? error.message : 'Unknown error'
     }
   }
+}
+
+export async function toggleFolderFavorite(id: number): Promise<TRepositoryResult<TFolder>> {
+  try {
+    const folder = await findFolderById(id)
+    if (!folder.success || !folder.data) {
+      return { success: false, error: 'Folder not found' }
+    }
+
+    return updateFolder(id, { isFavorite: !folder.data.isFavorite })
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
+export async function findFavoriteFolders(): Promise<TRepositoryListResult<TFolder>> {
+  return findFolders({
+    filters: { is_favorite: true },
+    sort: { field: 'name', direction: 'asc' }
+  })
 }

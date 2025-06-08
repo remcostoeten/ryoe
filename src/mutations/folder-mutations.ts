@@ -176,7 +176,7 @@ export function useDeleteFolder(
 
   return useMutation({
     mutationFn: async (variables: TDeleteFolderVariables) => {
-      const result = await deleteFolderById(variables.id)
+      const result = await deleteFolderById(variables.id, { force: variables.force })
       if (!result.success) {
         throw new Error(result.error || 'Failed to delete folder')
       }

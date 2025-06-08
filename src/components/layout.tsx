@@ -1,44 +1,113 @@
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Outlet, useLocation } from "react-router"
+import { motion, AnimatePresence } from "framer-motion"
 import { AppGuard } from "./AppGuard"
 import { useCurrentUser } from "@/features/onboarding/hooks/useOnboarding"
 import { FolderProvider } from "@/contexts/folder-context"
 import { AppSidebar } from "@/modules/sidebar/components/app-sidebar"
+import { RightSidebar } from "@/modules/sidebar/components/right-sidebar"
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar"
 import { DocumentHeader } from "@/modules/sidebar/document-header"
+import { useMenuEvents } from "@/hooks/use-menu-events"
 
 // Component that uses the sidebar context
 function SidebarLayout() {
   const { toggleSidebar, open } = useSidebar()
+  const location = useLocation()
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false)
 
+  // Listen for menu events from Tauri
+  useMenuEvents()
+
+  // Check if we're on a docs page
+  const isDocsPage = location.pathname.startsWith('/docs')
+
   const handleToggleRightSidebar = () => {
-    setIsRightSidebarOpen((prev) => !prev)
+  setIsRightSidebarOpen((prev) => !prev)
   }
 
+function getDocumentTitle() {
+  const pathname = location.pathname
+    if (pathname === '/') return 'Home'
+    if (pathname.startsWith('/docs')) return 'Documentation'
+    if (pathname.startsWith('/notes')) return 'Notes'
+    if (pathname.startsWith('/folders')) return 'Folders'
+    if (pathname.startsWith('/profile')) return 'Profile'
+    return pathname.split('/').pop() || 'Untitled Document'
+  }
+
+  // Add keyboard shortcut for right sidebar toggle (Cmd+Shift+B) - only on docs pages
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key === "b" &&
+        (event.metaKey || event.ctrlKey) &&
+        event.shiftKey &&
+        isDocsPage // Only allow on docs pages
+      ) {
+        event.preventDefault()
+        handleToggleRightSidebar()
+      }
+    }
+
+    // Listen for right sidebar toggle from menu - only on docs pages
+    const handleRightSidebarToggle = () => {
+      if (isDocsPage) {
+        handleToggleRightSidebar()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("toggle-right-sidebar", handleRightSidebarToggle)
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("toggle-right-sidebar", handleRightSidebarToggle)
+    }
+  }, [isDocsPage])
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-1">
       <AppSidebar />
       <SidebarInset className="flex-1">
         <div className="min-h-screen flex flex-col">
           <DocumentHeader
-            documentTitle="README.md"
+            documentTitle={getDocumentTitle()}
             onNavigatePrevious={() => console.log("Navigate previous")}
             onNavigateNext={() => console.log("Navigate next")}
             onToggleRightSidebar={handleToggleRightSidebar}
             onToggleSidebar={toggleSidebar}
             showSidebarToggle={true}
             isSidebarOpen={open}
+            showRightSidebarToggle={isDocsPage}
           />
           <main className="flex-1 bg-main">
             <Outlet />
           </main>
         </div>
       </SidebarInset>
-      {/* Right sidebar */}
-      {isRightSidebarOpen && (
-        <div className="w-64 border-l border-border bg-background">{/* Right sidebar content */}</div>
+      {/* Right sidebar with smooth animation - only show on docs pages */}
+      {isDocsPage && (
+        <AnimatePresence mode="wait">
+          {isRightSidebarOpen && (
+            <motion.div
+              key="right-sidebar"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 256, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{
+                duration: 0.4,
+                ease: [0.68, -0.55, 0.265, 1.55], // Bouncy poppy bezier curve
+                width: { duration: 0.4, ease: [0.68, -0.55, 0.265, 1.55] },
+                opacity: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }
+              }}
+              className="overflow-hidden flex-shrink-0"
+            >
+              <RightSidebar documentTitle={getDocumentTitle()} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
     </div>
   )
@@ -73,8 +142,6 @@ export function RootLayout() {
 }
 
 // Keep the original Layout component for backward compatibility
-import { Footer } from "./footer"
-
 type TProps = {
   children: React.ReactNode
 }
@@ -83,7 +150,6 @@ export function Layout({ children }: TProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 pb-12">{children}</main>
-      <Footer />
     </div>
   )
 }

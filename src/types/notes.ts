@@ -1,19 +1,17 @@
-// Base entity types - using T prefix as per enterprise architecture
 export type TBaseEntity = {
   id: number
   createdAt: Date
   updatedAt: Date
 }
 
-// Privacy levels
 export type TPrivacyLevel = 'public' | 'private'
 
-// Folder types - using T prefix
 export type TFolder = TBaseEntity & {
   name: string
   parentId: number | null
   position: number
   isPublic: boolean
+  isFavorite: boolean
 }
 
 export type TFolderWithChildren = TFolder & {
@@ -35,6 +33,7 @@ export type TNote = TBaseEntity & {
   folderId: number | null
   position: number
   isPublic: boolean
+  isFavorite: boolean
 }
 
 export type TNoteWithFolder = TNote & {

@@ -120,6 +120,13 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
         }
     }
 
+    const handleDoubleClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (node.type === 'folder' && hasChildren) {
+            setIsOpen(!isOpen)
+        }
+    }
+
     return (
         <div className="select-none">
             <div
@@ -129,6 +136,7 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
                 )}
                 style={{ paddingLeft: `${level * 16 + 8}px` }}
                 onClick={handleToggle}
+                onDoubleClick={handleDoubleClick}
             >
                 {node.type === 'folder' && hasChildren && (
                     <span className="text-muted-foreground text-xs">

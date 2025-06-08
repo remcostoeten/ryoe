@@ -88,7 +88,7 @@ export interface UseFoldersReturn {
   error: string | null
   createFolder: (input: CreateFolderInput) => Promise<Folder | null>
   updateFolder: (input: UpdateFolderInput) => Promise<Folder | null>
-  deleteFolder: (id: number, deleteChildren?: boolean) => Promise<boolean>
+  deleteFolder: (id: number, options?: { deleteChildren?: boolean; force?: boolean }) => Promise<boolean>
   refreshFolders: () => Promise<void>
 }
 

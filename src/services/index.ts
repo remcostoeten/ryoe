@@ -50,7 +50,9 @@ export {
   moveNoteToFolder,
   reorderNotesInFolder,
   duplicateNoteById,
-  searchNotesWithOptions
+  searchNotesWithOptions,
+  toggleNoteFavoriteStatus,
+  getFavoriteNotesWithMetadata
 } from './note-service'
 
 // Folder service functions
@@ -64,7 +66,9 @@ export {
   moveFolderToParent,
   reorderFoldersInParent,
   getFolderHierarchyWithStats,
-  getFolderPathWithStats
+  getFolderPathWithStats,
+  toggleFolderFavoriteStatus,
+  getFavoriteFoldersWithStats
 } from './folder-service'
 
 // Database reset service functions

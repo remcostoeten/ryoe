@@ -108,6 +108,7 @@ export type TUpdateFolderVariables = {
 
 export type TDeleteFolderVariables = {
   id: number
+  force?: boolean
 }
 
 export type TMoveFolderVariables = {

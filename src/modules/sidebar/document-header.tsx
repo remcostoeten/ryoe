@@ -14,7 +14,15 @@ import {
   LayoutGrid,
   FileText,
 } from "lucide-react"
+import { PortManagerTray } from "@/modules/port-manager/components/port-manager-tray"
 import { cn } from "@/utilities"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut"
 
 interface DocumentHeaderProps {
   documentTitle?: string
@@ -24,6 +32,7 @@ interface DocumentHeaderProps {
   onToggleSidebar?: () => void
   showSidebarToggle?: boolean
   isSidebarOpen?: boolean
+  showRightSidebarToggle?: boolean
 }
 
 export function DocumentHeader({
@@ -34,6 +43,7 @@ export function DocumentHeader({
   onToggleSidebar,
   showSidebarToggle = true,
   isSidebarOpen = true,
+  showRightSidebarToggle = false,
 }: DocumentHeaderProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -50,21 +60,73 @@ export function DocumentHeader({
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      toggleSearch()
+    }
+  }
+
+  const handleBlur = () => {
+    // Small delay to allow for potential click events before closing
+    setTimeout(() => {
+      if (isSearchOpen) {
+        toggleSearch()
+      }
+    }, 150)
+  }
+
+  // Keyboard shortcuts
+  useKeyboardShortcut(
+    { key: "f", metaKey: true },
+    () => {
+      toggleSearch()
+    }
+  )
+
+  useKeyboardShortcut(
+    { key: "b", metaKey: true },
+    () => {
+      if (onToggleSidebar) {
+        onToggleSidebar()
+      }
+    }
+  )
+
+  useKeyboardShortcut(
+    { key: "b", metaKey: true, shiftKey: true },
+    () => {
+      if (onToggleRightSidebar) {
+        onToggleRightSidebar()
+      }
+    }
+  )
+
   return (
-    <header className="border-b border-border bg-background">
-      <div className="flex h-14 items-center px-4">
+    <TooltipProvider>
+      <header className="border-b border-border bg-background">
+      <div className="flex h-12 items-center px-4">
         <div className="flex items-center gap-2">
           {showSidebarToggle && (
             <>
-              <button
-                onClick={onToggleSidebar}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Toggle sidebar"
-              >
-                <div className="transition-transform duration-200">
-                  {isSidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
-                </div>
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onToggleSidebar}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-all duration-300 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label="Toggle sidebar"
+                  >
+                    <div className="transition-transform duration-300 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]">
+                      {isSidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <div className="flex items-center gap-2">
+                    <span>Toggle sidebar</span>
+                    <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted border rounded">⌘B</kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
               <div className="h-5 w-px bg-border mx-1" />
             </>
           )}
@@ -91,6 +153,11 @@ export function DocumentHeader({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Port Manager Tray */}
+          <PortManagerTray />
+
+          <div className="h-5 w-px bg-border mx-1" />
+
           <button
             onClick={togglePreviewMode}
             className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -99,21 +166,43 @@ export function DocumentHeader({
             {isPreviewMode ? <FileText className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
           </button>
 
-          <button
-            onClick={toggleSearch}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Toggle search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={toggleSearch}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Toggle search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <div className="flex items-center gap-2">
+                <span>Search</span>
+                <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted border rounded">⌘F</kbd>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-          <button
-            onClick={onToggleRightSidebar}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Toggle right sidebar"
-          >
-            <PanelRight className="h-5 w-5" />
-          </button>
+          {showRightSidebarToggle && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={onToggleRightSidebar}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-all duration-300 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Toggle right sidebar"
+                >
+                  <PanelRight className="h-5 w-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <div className="flex items-center gap-2">
+                  <span>Toggle right sidebar</span>
+                  <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted border rounded">⌘⇧B</kbd>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -133,6 +222,8 @@ export function DocumentHeader({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={handleBlur}
               placeholder="Find"
               className="w-full h-10 pl-9 pr-4 rounded-md bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus={isSearchOpen}
@@ -163,5 +254,6 @@ export function DocumentHeader({
         </div>
       </div>
     </header>
+    </TooltipProvider>
   )
 }

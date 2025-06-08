@@ -28,6 +28,7 @@ export const folders = sqliteTable('folders', {
     parentId: integer('parent_id').references(() => folders.id), // Self-referencing for hierarchy
     position: integer('position').notNull().default(0), // For ordering within same parent
     isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(false), // Privacy setting
+    isFavorite: integer('is_favorite', { mode: 'boolean' }).notNull().default(false), // Favorite status
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
@@ -40,6 +41,7 @@ export const notes = sqliteTable('notes', {
     folderId: integer('folder_id').references(() => folders.id), // Can be null for root notes
     position: integer('position').notNull().default(0), // For ordering within folder
     isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(false), // Privacy setting
+    isFavorite: integer('is_favorite', { mode: 'boolean' }).notNull().default(false), // Favorite status
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })

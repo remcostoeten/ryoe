@@ -107,12 +107,13 @@ const router = createBrowserRouter([
                     }
                 },
                 {
-                    path: 'sidebar-test',
+                    path: 'port-manager',
                     lazy: async () => {
-                        const module = await import('@/app/routes/sidebar-test')
+                        const module = await import('@/app/routes/port-manager')
                         return { Component: module.Component }
                     }
                 },
+
                 {
                     path: '*',
                     lazy: async () => {

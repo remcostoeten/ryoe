@@ -10,7 +10,6 @@ import type {
   TSortOptions,
   TFilterOptions
 } from './types'
-import { QUERY_KEYS } from '@/queries'
 
 const TABLE_NAME = 'users'
 
