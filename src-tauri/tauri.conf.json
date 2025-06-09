@@ -20,8 +20,7 @@
   "version": "0.8.0",
   "identifier": "com.remcostoeten.ryoe",
   "plugins": {
-    "process": {},
-    "dialog": {}
+    "process": {}
   },
   "app": {
     "security": {
