@@ -1,8 +1,5 @@
-import { useEffect } from 'react'
-import { useCreateBlockNote, BlockNoteView } from '@blocknote/react'
-import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core'
-import '@blocknote/core/fonts/inter.css'
-import '@blocknote/react/style.css'
+
+import { useState, useRef, useEffect } from 'react'
 
 interface BlockNoteEditorProps {
   initialContent?: string
@@ -10,124 +7,200 @@ interface BlockNoteEditorProps {
   readOnly?: boolean
 }
 
-// Enhanced schema with more block types
-const schema = BlockNoteSchema.create({
-  blockSpecs: {
-    ...defaultBlockSpecs,
-    // Add more block types as needed
-  },
-})
-
 function BlockNoteEditor({
   initialContent = '',
   onChange,
   readOnly = false
 }: BlockNoteEditorProps) {
-  // Create the BlockNote editor with enhanced configuration
-  const editor = useCreateBlockNote({
-    schema,
-    initialContent: initialContent ? JSON.parse(initialContent) : [
-      {
-        type: "paragraph",
-        content: "",
-      },
-    ],
-    // Enable animations for better UX
-    animations: true,
-    // Enable drag and drop
-    dragAndDrop: true,
+  const [content, setContent] = useState(() => {
+    // Try to extract text content from JSON if it's BlockNote format
+    try {
+      if (initialContent) {
+        const parsed = JSON.parse(initialContent)
+        if (Array.isArray(parsed)) {
+          // Extract text from BlockNote blocks
+          return parsed.map(block => {
+            if (block.content && Array.isArray(block.content)) {
+              return block.content.map((item: any) => item.text || '').join('')
+            }
+            return ''
+          }).join('\n')
+        }
+      }
+    } catch (error) {
+      // If parsing fails, use as plain text
+      return initialContent
+    }
+    return initialContent
   })
 
-  // Handle content changes
-  useEffect(() => {
-    if (!onChange) return
+  const editorRef = useRef<HTMLDivElement>(null)
+  const [isComposing, setIsComposing] = useState(false)
 
-    const handleChange = () => {
-      const content = JSON.stringify(editor.document)
-      onChange(content)
-    }
+  // Convert markdown to HTML with inline styling
+  const convertMarkdownToHTML = (text: string): string => {
+    let html = text
+      // Headers (must be at start of line)
+      .replace(/^#### (.*$)/gm, '<h4 style="font-size: 1.125rem; font-weight: 600; margin: 0.5rem 0; color: inherit;">$1</h4>')
+      .replace(/^### (.*$)/gm, '<h3 style="font-size: 1.25rem; font-weight: 600; margin: 0.5rem 0; color: inherit;">$1</h3>')
+      .replace(/^## (.*$)/gm, '<h2 style="font-size: 1.5rem; font-weight: 600; margin: 0.75rem 0; color: inherit;">$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1 style="font-size: 1.875rem; font-weight: 700; margin: 1rem 0; color: inherit;">$1</h1>')
+      // Lists
+      .replace(/^[\*\-\+] (.*$)/gm, '<li style="margin-left: 1rem; list-style-type: disc;">$1</li>')
+      .replace(/^(\d+)\. (.*$)/gm, '<li style="margin-left: 1rem; list-style-type: decimal;">$2</li>')
+      // Blockquotes
+      .replace(/^> (.*$)/gm, '<blockquote style="border-left: 4px solid #e5e7eb; padding-left: 1rem; margin: 0.5rem 0; color: #6b7280; font-style: italic;">$1</blockquote>')
+      // Code blocks
+      .replace(/```([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.875em; overflow-x: auto; margin: 0.5rem 0;"><code>$1</code></pre>')
+      // Bold
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>')
+      .replace(/__(.*?)__/g, '<strong style="font-weight: 600;">$1</strong>')
+      // Italic
+      .replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>')
+      .replace(/_(.*?)_/g, '<em style="font-style: italic;">$1</em>')
+      // Code inline
+      .replace(/`(.*?)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875em;">$1</code>')
+      // Strikethrough
+      .replace(/~~(.*?)~~/g, '<del style="text-decoration: line-through;">$1</del>')
+      // Links
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #3b82f6; text-decoration: underline;" target="_blank" rel="noopener noreferrer">$1</a>')
+      // Horizontal rule
+      .replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e5e7eb; margin: 1rem 0;">')
+      // Line breaks
+      .replace(/\n/g, '<br>')
 
-    editor.onChange(handleChange)
-  }, [editor, onChange])
+    return html
+  }
 
-  // Add markdown shortcuts for instant conversion
-  useEffect(() => {
-    if (!editor) return
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    if (isComposing) return
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Only handle space key for markdown shortcuts
-      if (event.key !== ' ') return
+    const target = e.currentTarget
+    const text = target.innerText || ''
+    setContent(text)
 
-      const selection = editor.getTextCursorPosition()
-      if (!selection) return
+    // Convert plain text to BlockNote format for compatibility
+    const blockNoteFormat = text.split('\n').map((line, index) => ({
+      id: `block-${index}`,
+      type: 'paragraph',
+      content: [{ type: 'text', text: line }]
+    }))
+    onChange?.(JSON.stringify(blockNoteFormat))
 
-      const currentBlock = selection.block
-      const currentText = currentBlock.content?.[0]?.text || ''
+    // Trigger immediate markdown conversion
+    setTimeout(() => {
+      if (editorRef.current && !isComposing) {
+        const html = convertMarkdownToHTML(text)
+        if (editorRef.current.innerHTML !== html) {
+          // Save cursor position
+          const selection = window.getSelection()
+          const range = selection?.rangeCount ? selection.getRangeAt(0) : null
+          const startOffset = range?.startOffset || 0
 
-      // Markdown shortcuts mapping
-      const shortcuts: Record<string, { type: string; props: any }> = {
-        '#': { type: 'heading', props: { level: 1 } },
-        '##': { type: 'heading', props: { level: 2 } },
-        '###': { type: 'heading', props: { level: 3 } },
-        '####': { type: 'heading', props: { level: 4 } },
-        '#####': { type: 'heading', props: { level: 5 } },
-        '######': { type: 'heading', props: { level: 6 } },
-        '-': { type: 'bulletListItem', props: {} },
-        '*': { type: 'bulletListItem', props: {} },
-        '1.': { type: 'numberedListItem', props: {} },
-        '>': { type: 'paragraph', props: {} }, // Will be enhanced to quote later
-        '```': { type: 'codeBlock', props: {} },
-      }
+          editorRef.current.innerHTML = html
 
-      // Check if current text matches any markdown shortcut
-      for (const [shortcut, blockConfig] of Object.entries(shortcuts)) {
-        if (currentText.trim() === shortcut) {
-          event.preventDefault()
-
-          try {
-            // Update the current block to the new type
-            editor.updateBlock(currentBlock, {
-              type: blockConfig.type as any,
-              props: blockConfig.props,
-              content: [] // Clear content after conversion
-            })
-
-            console.log(`Converted "${shortcut}" to ${blockConfig.type}`)
-          } catch (error) {
-            console.error('Markdown conversion error:', error)
+          // Restore cursor position
+          if (range && editorRef.current.lastChild) {
+            try {
+              const newRange = document.createRange()
+              const lastNode = editorRef.current.lastChild
+              const textNode = lastNode.nodeType === Node.TEXT_NODE ? lastNode : lastNode.lastChild || lastNode
+              const maxOffset = textNode.textContent?.length || 0
+              newRange.setStart(textNode, Math.min(startOffset, maxOffset))
+              newRange.setEnd(textNode, Math.min(startOffset, maxOffset))
+              selection?.removeAllRanges()
+              selection?.addRange(newRange)
+            } catch (error) {
+              // Ignore cursor positioning errors
+            }
           }
+        }
+      }
+    }, 10)
+  }
 
-          return
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+
+      // Get current selection
+      const selection = window.getSelection()
+      if (!selection || selection.rangeCount === 0) return
+
+      const range = selection.getRangeAt(0)
+
+      // Insert line break
+      const br = document.createElement('br')
+      range.deleteContents()
+      range.insertNode(br)
+
+      // Move cursor after the br
+      range.setStartAfter(br)
+      range.setEndAfter(br)
+      selection.removeAllRanges()
+      selection.addRange(range)
+
+      // Trigger input event to update content
+      handleInput({ currentTarget: e.currentTarget } as React.FormEvent<HTMLDivElement>)
+    }
+  }
+
+  // Update the display when content changes
+  useEffect(() => {
+    if (editorRef.current && !isComposing) {
+      const html = convertMarkdownToHTML(content)
+      if (editorRef.current.innerHTML !== html) {
+        const selection = window.getSelection()
+        const range = selection?.rangeCount ? selection.getRangeAt(0) : null
+        const startOffset = range?.startOffset || 0
+
+        editorRef.current.innerHTML = html
+
+        // Try to restore cursor position
+        if (range && editorRef.current.firstChild) {
+          try {
+            const newRange = document.createRange()
+            const textNode = editorRef.current.firstChild
+            newRange.setStart(textNode, Math.min(startOffset, textNode.textContent?.length || 0))
+            newRange.setEnd(textNode, Math.min(startOffset, textNode.textContent?.length || 0))
+            selection?.removeAllRanges()
+            selection?.addRange(newRange)
+          } catch (error) {
+            // Ignore cursor positioning errors
+          }
         }
       }
     }
-
-    // Add event listener to the editor's DOM element
-    const editorElement = editor.domElement
-    if (editorElement) {
-      editorElement.addEventListener('keydown', handleKeyDown)
-      return () => {
-        editorElement.removeEventListener('keydown', handleKeyDown)
-      }
-    }
-  }, [editor])
+  }, [content, isComposing])
 
   return (
     <div className="h-full">
-      <BlockNoteView
-        editor={editor}
-        editable={!readOnly}
-        className="h-full"
-        theme="light"
-        // Enable slash menu
-        slashMenu={true}
-        // Enable formatting toolbar
-        formattingToolbar={true}
-        // Enable link toolbar
-        linkToolbar={true}
-        // Enable side menu (block handles)
-        sideMenu={true}
+      <div
+        ref={editorRef}
+        contentEditable={!readOnly}
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
+        className="markdown-editor w-full h-full min-h-[400px] p-4 border-none outline-none resize-none bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-sm leading-relaxed"
+        style={{
+          fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word'
+        }}
+        data-placeholder={content ? '' : 'Start writing... Try # heading, **bold**, *italic*, `code`, - lists, > quotes, ```code blocks```'}
+        suppressContentEditableWarning={true}
       />
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .markdown-editor[data-placeholder]:empty::before {
+            content: attr(data-placeholder);
+            color: rgb(156 163 175);
+            pointer-events: none;
+          }
+        `
+      }} />
     </div>
   )
 }
