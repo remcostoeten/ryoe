@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, unique } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 
 export const users = sqliteTable('users', {
@@ -45,3 +45,24 @@ export const notes = sqliteTable('notes', {
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 })
+
+// Tags table for organizing notes
+export const tags = sqliteTable('tags', {
+    id: integer('id').primaryKey(),
+    name: text('name').notNull().unique(),
+    color: text('color').notNull().default('#6b7280'),
+    description: text('description'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+})
+
+// Note-Tag junction table for many-to-many relationship
+export const noteTags = sqliteTable('note_tags', {
+    id: integer('id').primaryKey(),
+    noteId: integer('note_id').notNull().references(() => notes.id, { onDelete: 'cascade' }),
+    tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
+}, (table) => ({
+    // Ensure a note can't have the same tag twice
+    uniqueNoteTag: unique().on(table.noteId, table.tagId)
+}))

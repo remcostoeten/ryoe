@@ -63,6 +63,7 @@ export function useCreateFolder(
         name: variables.name,
         parentId: variables.parentId,
         position: previousFolders?.length || 0,
+        isFavorite: false,
         noteCount: 0,
         subfolderCount: 0,
         totalSize: 0,

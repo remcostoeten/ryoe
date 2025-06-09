@@ -55,6 +55,7 @@ export function useCreateNote(
         content: variables.content,
         folderId: variables.folderId,
         position: previousNotes?.length || 0,
+        isFavorite: false,
         wordCount: variables.content.split(/\s+/).length,
         characterCount: variables.content.length,
         readingTime: Math.ceil(variables.content.split(/\s+/).length / 200),

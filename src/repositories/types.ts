@@ -39,6 +39,7 @@ export type TCreateNoteData = {
   content: string
   folderId?: number
   position?: number
+  isFavorite?: boolean
 }
 
 export type TUpdateNoteData = Partial<TCreateNoteData>
@@ -57,6 +58,7 @@ export type TCreateFolderData = {
   name: string
   parentId?: number
   position?: number
+  isFavorite?: boolean
 }
 
 export type TUpdateFolderData = Partial<TCreateFolderData>

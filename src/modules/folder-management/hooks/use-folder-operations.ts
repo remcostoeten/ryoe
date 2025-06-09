@@ -23,6 +23,7 @@ function mapStatsToFolder(stats: TFolderWithStats): TFolder {
     parentId: stats.parentId ?? null,
     position: stats.position,
     isPublic: true, // Default value - this should be added to TFolderWithStats
+    isFavorite: stats.isFavorite,
     createdAt: new Date(stats.createdAt),
     updatedAt: new Date(stats.updatedAt)
   }

@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { cn } from "@/utilities"
 import { useFavorites } from "@/queries/use-favorites"
 import type { TNote } from "@/types/notes"
+import type { TNoteWithMetadata } from "@/services/types"
 
 type TFavoritesPanelProps = {
   isOpen: boolean
@@ -49,8 +50,21 @@ export function FavoritesPanel({
     onClose()
   }
 
-  function handleNoteClick(note: TNote) {
-    onNoteSelect?.(note)
+  function handleNoteClick(note: TNoteWithMetadata) {
+    // Convert TNoteWithMetadata to TNote for the callback
+    const noteForCallback: TNote = {
+      id: note.id,
+      title: note.title,
+      content: note.content,
+      folderId: note.folderId || null,
+      position: note.position,
+      isPublic: true, // Default value
+      isFavorite: note.isFavorite,
+      createdAt: new Date(note.createdAt * 1000),
+      updatedAt: new Date(note.updatedAt * 1000)
+    }
+
+    onNoteSelect?.(noteForCallback)
     onClose()
   }
 

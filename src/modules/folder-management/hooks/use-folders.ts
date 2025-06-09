@@ -37,6 +37,7 @@ export function useFolders(parentId?: number | null): UseFoldersReturn {
           parentId: folder.parentId ?? null,
           position: folder.position,
           isPublic: true, // Default value - should be added to TFolderWithStats later
+          isFavorite: folder.isFavorite,
           createdAt: new Date(folder.createdAt),
           updatedAt: new Date(folder.updatedAt)
         }))
@@ -70,6 +71,7 @@ export function useFolders(parentId?: number | null): UseFoldersReturn {
           parentId: response.data.parentId ?? null,
           position: response.data.position,
           isPublic: true, // Default value - should be added to TFolderWithStats later
+          isFavorite: response.data.isFavorite,
           createdAt: new Date(response.data.createdAt),
           updatedAt: new Date(response.data.updatedAt)
         }
@@ -106,6 +108,7 @@ export function useFolders(parentId?: number | null): UseFoldersReturn {
           parentId: response.data.parentId ?? null,
           position: response.data.position,
           isPublic: true, // Default value - should be added to TFolderWithStats later
+          isFavorite: response.data.isFavorite,
           createdAt: new Date(response.data.createdAt),
           updatedAt: new Date(response.data.updatedAt)
         }

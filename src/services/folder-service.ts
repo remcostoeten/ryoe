@@ -60,6 +60,7 @@ async function mapFolderToStats(folder: TFolder): Promise<TFolderWithStats> {
     name: folder.name,
     parentId: folder.parentId,
     position: folder.position,
+    isFavorite: folder.isFavorite,
     noteCount,
     subfolderCount,
     totalSize,

@@ -6,8 +6,6 @@ import { CSS } from '@dnd-kit/utilities'
 import { ChevronRight, ChevronDown, Folder, FolderOpen, Plus, MoreHorizontal, Edit2, GripVertical } from 'lucide-react'
 import { cn } from '@/utilities'
 import { useInlineEditing, validateFolderName } from '../hooks/use-inline-editing'
-import { FolderDeleteConfirmation } from "@/components/ui/folder-delete-confirmation"
-import { getFolderDeletionStats } from "@/services/folder-service"
 import type { FolderItemProps } from '../types'
 // import type { TFolder as FolderType } from '@/types/notes'
 
@@ -46,10 +44,7 @@ export function SortableFolderItem({
   const hasChildren = folder.hasChildren
   const indentLevel = folder.depth * 16
 
-  // Delete confirmation state
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-  const [deletionStats, setDeletionStats] = useState<{ childFoldersCount: number; notesCount: number } | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+
 
   // Sortable hook
   const {
@@ -150,39 +145,10 @@ export function SortableFolderItem({
   }
 
   async function handleDeleteClick() {
-    try {
-      const stats = await getFolderDeletionStats(folder.id)
-      if (stats.success && stats.data) {
-        setDeletionStats(stats.data)
-        setShowDeleteConfirmation(true)
-      } else {
-        // Fallback to simple confirm if stats fail
-        if (window.confirm(`Are you sure you want to delete "${folder.name}"?`)) {
-          handleDelete({ stopPropagation: () => {} } as React.MouseEvent)
-        }
-      }
-    } catch (error) {
-      // Fallback to simple confirm on error
-      if (window.confirm(`Are you sure you want to delete "${folder.name}"?`)) {
-        handleDelete({ stopPropagation: () => {} } as React.MouseEvent)
-      }
-    }
+    handleDelete({ stopPropagation: () => {} } as React.MouseEvent)
   }
 
-  async function handleConfirmDelete() {
-    setIsDeleting(true)
-    try {
-      await handleDelete({ stopPropagation: () => {} } as React.MouseEvent)
-      setShowDeleteConfirmation(false)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
 
-  function handleCancelDelete() {
-    setShowDeleteConfirmation(false)
-    setDeletionStats(null)
-  }
 
   const handleMoreOptions = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -408,15 +374,7 @@ export function SortableFolderItem({
       )}
       </div>
 
-      <FolderDeleteConfirmation
-        isOpen={showDeleteConfirmation}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        folderName={folder.name}
-        childFoldersCount={deletionStats?.childFoldersCount || 0}
-        notesCount={deletionStats?.notesCount || 0}
-        isLoading={isDeleting}
-      />
+
     </>
   )
 }

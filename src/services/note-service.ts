@@ -52,13 +52,14 @@ function mapNoteToMetadata(note: TNote): TNoteWithMetadata {
   const wordCount = countWords(note.content)
   const characterCount = note.content.length
   const readingTime = calculateReadingTime(note.content)
-  
+
   return {
     id: note.id,
     title: note.title,
     content: note.content,
     folderId: note.folderId,
     position: note.position,
+    isFavorite: note.isFavorite,
     wordCount,
     characterCount,
     readingTime,

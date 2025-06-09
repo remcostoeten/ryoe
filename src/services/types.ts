@@ -63,6 +63,7 @@ export type TNoteWithMetadata = {
   content: string
   folderId?: number
   position: number
+  isFavorite: boolean
   wordCount: number
   characterCount: number
   readingTime: number // in minutes
@@ -88,6 +89,7 @@ export type TFolderWithStats = {
   name: string
   parentId?: number
   position: number
+  isFavorite: boolean
   noteCount: number
   subfolderCount: number
   totalSize: number // in bytes

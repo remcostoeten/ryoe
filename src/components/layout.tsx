@@ -20,8 +20,9 @@ function SidebarLayout() {
   // Listen for menu events from Tauri
   useMenuEvents()
 
-  // Check if we're on a docs page
+  // Check if we're on a docs page or individual note page
   const isDocsPage = location.pathname.startsWith('/docs')
+  const isNotePage = location.pathname.match(/^\/notes\/\d+$/)
 
   const handleToggleRightSidebar = () => {
   setIsRightSidebarOpen((prev) => !prev)
@@ -37,23 +38,23 @@ function getDocumentTitle() {
     return pathname.split('/').pop() || 'Untitled Document'
   }
 
-  // Add keyboard shortcut for right sidebar toggle (Cmd+Shift+B) - only on docs pages
+  // Add keyboard shortcut for right sidebar toggle (Cmd+Shift+B) - on docs and note pages
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
         event.key === "b" &&
         (event.metaKey || event.ctrlKey) &&
         event.shiftKey &&
-        isDocsPage // Only allow on docs pages
+        (isDocsPage || isNotePage) // Allow on docs and note pages
       ) {
         event.preventDefault()
         handleToggleRightSidebar()
       }
     }
 
-    // Listen for right sidebar toggle from menu - only on docs pages
+    // Listen for right sidebar toggle from menu - on docs and note pages
     const handleRightSidebarToggle = () => {
-      if (isDocsPage) {
+      if (isDocsPage || isNotePage) {
         handleToggleRightSidebar()
       }
     }
@@ -65,7 +66,7 @@ function getDocumentTitle() {
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("toggle-right-sidebar", handleRightSidebarToggle)
     }
-  }, [isDocsPage])
+  }, [isDocsPage, isNotePage])
 
   return (
     <div className="min-h-screen flex flex-1">
@@ -80,15 +81,15 @@ function getDocumentTitle() {
             onToggleSidebar={toggleSidebar}
             showSidebarToggle={true}
             isSidebarOpen={open}
-            showRightSidebarToggle={isDocsPage}
+            showRightSidebarToggle={isDocsPage || !!isNotePage}
           />
           <main className="flex-1 bg-main">
             <Outlet />
           </main>
         </div>
       </SidebarInset>
-      {/* Right sidebar with smooth animation - only show on docs pages */}
-      {isDocsPage && (
+      {/* Right sidebar with smooth animation - show on docs and note pages */}
+      {(isDocsPage || isNotePage) && (
         <AnimatePresence mode="wait">
           {isRightSidebarOpen && (
             <motion.div

@@ -29,6 +29,7 @@ export function useNotes(folderId?: number | null) {
           folderId: note.folderId || null,
           position: note.position,
           isPublic: true, // Default value
+          isFavorite: note.isFavorite || false,
           createdAt: new Date(note.createdAt),
           updatedAt: new Date(note.updatedAt)
         }))
@@ -66,6 +67,7 @@ export function useNotes(folderId?: number | null) {
           folderId: response.data.folderId || null,
           position: response.data.position,
           isPublic: true, // Default value
+          isFavorite: response.data.isFavorite || false,
           createdAt: new Date(response.data.createdAt),
           updatedAt: new Date(response.data.updatedAt)
         }
@@ -108,6 +110,7 @@ export function useNotes(folderId?: number | null) {
           folderId: response.data.folderId || null,
           position: response.data.position,
           isPublic: true, // Default value
+          isFavorite: response.data.isFavorite || false,
           createdAt: new Date(response.data.createdAt),
           updatedAt: new Date(response.data.updatedAt)
         }

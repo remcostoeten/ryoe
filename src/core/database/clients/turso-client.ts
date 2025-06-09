@@ -105,6 +105,44 @@ export async function initializeTursoDatabase(): Promise<string> {
       CREATE INDEX IF NOT EXISTS idx_notes_position ON notes(folder_id, position)
     `)
 
+    // Create tags table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS tags (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        color TEXT NOT NULL DEFAULT '#6b7280',
+        description TEXT,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    `)
+
+    // Create note_tags junction table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS note_tags (
+        id INTEGER PRIMARY KEY,
+        note_id INTEGER NOT NULL,
+        tag_id INTEGER NOT NULL,
+        created_at INTEGER NOT NULL,
+        FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+        UNIQUE(note_id, tag_id)
+      )
+    `)
+
+    // Create indexes for tags
+    await client.execute(`
+      CREATE INDEX IF NOT EXISTS idx_note_tags_note_id ON note_tags(note_id)
+    `)
+
+    await client.execute(`
+      CREATE INDEX IF NOT EXISTS idx_note_tags_tag_id ON note_tags(tag_id)
+    `)
+
+    await client.execute(`
+      CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)
+    `)
+
     console.log('Turso database tables initialized successfully')
     return 'Turso database initialized successfully'
   } catch (error) {

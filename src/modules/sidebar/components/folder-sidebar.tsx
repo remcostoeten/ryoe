@@ -6,13 +6,15 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronDown, ChevronRight, Folder, FolderOpen, Edit, Trash2, FileText, FolderPlus, Move, Star } from "lucide-react"
 import React, { useState, useRef, useEffect } from "react"
+import { useNavigate } from "react-router"
 import { useFolderContext } from "@/modules/folder-management"
 import { NoteItem } from "./note-item"
 import { useFolderNotes } from "../hooks/use-folder-notes"
-import { useMoveFolder } from "@/mutations/folder-mutations"
+import { useMoveFolder, useDeleteFolder } from "@/mutations/folder-mutations"
 import { useUpdateNote } from "@/mutations/note-mutations"
 import { useToggleFolderFavorite } from "@/mutations/use-toggle-folder-favorite"
 import { useToggleNoteFavorite } from "@/mutations/use-toggle-note-favorite"
+import { useDeleteNote } from "@/mutations/note-mutations"
 import { useKeyboardShortcut, KeyboardDebugger } from "@/hooks/use-keyboard-shortcut"
 import { cn } from "@/utilities"
 import type { TNote } from "@/types/notes"
@@ -270,6 +272,7 @@ export function FolderSidebar({
   onNoteSelect,
   selectedNoteId
 }: TFolderSidebarProps) {
+  const navigate = useNavigate()
 
   const {
     treeData,
@@ -278,20 +281,24 @@ export function FolderSidebar({
     selectedFolderId,
     selectFolder,
     filteredTreeData,
-    deleteFolder,
     startEditing,
     stopEditing,
     editingFolderId,
     renameFolder,
-    createFolder: createFolderFromContext
+    createFolder: createFolderFromContext,
+    refreshFolders
   } = useFolderContext()
 
 
 
   const moveFolderMutation = useMoveFolder()
+  const deleteFolderMutation = useDeleteFolder()
   const updateNoteMutation = useUpdateNote()
+  const deleteNoteMutation = useDeleteNote()
   const toggleFolderFavoriteMutation = useToggleFolderFavorite()
   const toggleNoteFavoriteMutation = useToggleNoteFavorite()
+
+
 
   const [editingName, setEditingName] = useState("")
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
@@ -323,6 +330,7 @@ export function FolderSidebar({
   const {
     getNotesForFolder,
     addNoteToFolder,
+    updateNoteInFolder,
     removeNoteFromFolder
   } = useFolderNotes(showNotes ? allFolderIds : [])
 
@@ -377,14 +385,15 @@ export function FolderSidebar({
   }
 
   const handleDelete = async (folder: any) => {
-    if (confirm(`Are you sure you want to delete the folder "${folder.name}"?`)) {
-      try {
-        await deleteFolder(folder.id, { force: true })
-        console.log('Folder deleted successfully:', folder.name)
-      } catch (error) {
-        console.error('Failed to delete folder:', error)
-        alert('Failed to delete folder. Please try again.')
-      }
+    try {
+      await deleteFolderMutation.mutateAsync({ id: folder.id, force: true })
+      console.log('Folder deleted successfully:', folder.name)
+      // Force refresh the folder tree data
+      await refreshFolders()
+    } catch (error) {
+      console.error('Failed to delete folder:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to delete folder: ${errorMessage}. Please try again.`)
     }
   }
 
@@ -433,6 +442,66 @@ export function FolderSidebar({
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       alert(`Failed to toggle favorite status: ${errorMessage}. Please try again.`)
     }
+  }
+
+  const handleNoteDuplicate = async (note: TNote) => {
+    try {
+      const { createNoteWithValidation } = await import('@/services/note-service')
+      const response = await createNoteWithValidation({
+        title: `${note.title} (Copy)`,
+        content: note.content,
+        folderId: note.folderId || undefined
+      })
+
+      if (response.success && response.data) {
+        const duplicatedNote: TNote = {
+          id: response.data.id,
+          title: response.data.title,
+          content: response.data.content,
+          folderId: response.data.folderId || null,
+          position: response.data.position,
+          isPublic: note.isPublic,
+          isFavorite: false,
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt)
+        }
+
+        if (note.folderId) {
+          addNoteToFolder(note.folderId, duplicatedNote)
+        }
+        console.log('Note duplicated successfully:', duplicatedNote.title)
+      }
+    } catch (error) {
+      console.error('Failed to duplicate note:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to duplicate note: ${errorMessage}. Please try again.`)
+    }
+  }
+
+  const handleNoteMove = (note: TNote) => {
+    // Simple implementation - show available folders to move to
+    const availableFolders = treeData.filter(f => f.id !== note.folderId)
+    const folderNames = availableFolders.map(f => `${f.id}: ${f.name}`).join('\n')
+    const targetId = prompt(`Move "${note.title}" to which folder?\n\nAvailable folders:\n${folderNames}\n\nEnter folder ID:`)
+
+    if (targetId !== null && targetId.trim() !== '') {
+      const newFolderId = parseInt(targetId.trim())
+
+      if (!availableFolders.some(f => f.id === newFolderId)) {
+        alert('Invalid folder ID')
+        return
+      }
+
+      // TODO: Implement note move mutation
+      console.log('Moving note to folder:', newFolderId)
+      alert('Note move functionality not yet implemented')
+    }
+  }
+
+  const handleNoteToggleVisibility = async (note: TNote) => {
+    // TODO: Implement visibility toggle when isPublic is added to mutation types
+    console.log('Toggle visibility for note:', note.title, 'Current isPublic:', note.isPublic)
+    alert('Note visibility toggle functionality not yet implemented')
   }
 
   const handleCreateChild = async (parentId: number) => {
@@ -520,6 +589,8 @@ export function FolderSidebar({
 
   // Note handlers
   const handleNoteSelect = (note: TNote) => {
+    // Navigate to individual note page
+    navigate(`/notes/${note.id}`)
     onNoteSelect?.(note)
   }
 
@@ -529,7 +600,7 @@ export function FolderSidebar({
 
   const handleNoteUpdate = async (note: TNote, newTitle: string) => {
     const trimmedTitle = newTitle.trim()
-    if (!trimmedTitle || trimmedTitle === note.title) {
+    if (!trimmedTitle || (trimmedTitle === note.title && note.title !== "Untitled")) {
       setEditingNoteId(null)
       return
     }
@@ -539,6 +610,13 @@ export function FolderSidebar({
         id: note.id,
         title: trimmedTitle
       })
+
+      // Update the local state to reflect the change immediately
+      if (note.folderId) {
+        const updatedNote = { ...note, title: trimmedTitle, updatedAt: new Date() }
+        updateNoteInFolder(note.folderId, updatedNote)
+      }
+
       console.log('Note title updated successfully:', note.title, '->', trimmedTitle)
     } catch (error) {
       console.error('Failed to update note title:', error)
@@ -553,21 +631,24 @@ export function FolderSidebar({
   }
 
   const handleNoteDelete = async (note: TNote) => {
-    if (!note.folderId) return
+    try {
+      await deleteNoteMutation.mutateAsync({ id: note.id })
 
-    if (confirm(`Are you sure you want to delete the note "${note.title}"?`)) {
-      try {
-        const { deleteNoteById } = await import('@/services/note-service')
-        const response = await deleteNoteById(note.id)
-
-        if (response.success) {
-          removeNoteFromFolder(note.folderId, note.id)
-          console.log('Note deleted successfully:', note.title)
-        }
-      } catch (error) {
-        console.error('Failed to delete note:', error)
-        alert('Failed to delete note. Please try again.')
+      // Update the local state to reflect the deletion immediately
+      if (note.folderId) {
+        removeNoteFromFolder(note.folderId, note.id)
       }
+
+      // Clear selection if the deleted note was selected
+      if (selectedNoteId === note.id) {
+        onNoteSelect?.(null as any) // Clear selection
+      }
+
+      console.log('Note deleted successfully:', note.title)
+    } catch (error) {
+      console.error('Failed to delete note:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to delete note: ${errorMessage}. Please try again.`)
     }
   }
 
@@ -831,6 +912,9 @@ export function FolderSidebar({
                   onUpdate={handleNoteUpdate}
                   onCancelEdit={handleNoteCancelEdit}
                   onDelete={handleNoteDelete}
+                  onDuplicate={handleNoteDuplicate}
+                  onMove={handleNoteMove}
+                  onToggleVisibility={handleNoteToggleVisibility}
                   onToggleFavorite={handleToggleNoteFavorite}
                   enableDragDrop={enableDragDrop}
                 />
@@ -913,6 +997,69 @@ export function FolderSidebar({
 
       {/* Temporary keyboard debugger for testing */}
       {contextMenu.visible && <KeyboardDebugger visible={true} />}
+
+      {/* Debug buttons for testing deletion */}
+      {process.env.NODE_ENV === 'development' && treeData.length > 0 && (
+        <div className="fixed bottom-4 right-4 bg-background border rounded p-2 space-y-2 z-50">
+          <div className="text-xs text-muted-foreground mb-2">Debug Controls</div>
+          <button
+            onClick={async () => {
+              const firstFolder = treeData[0]
+              if (firstFolder) {
+                console.log('Testing folder deletion:', firstFolder)
+                try {
+                  console.log('Calling deleteFolderMutation.mutateAsync directly...')
+                  const result = await deleteFolderMutation.mutateAsync({ id: firstFolder.id, force: true })
+                  console.log('Direct mutation result:', result)
+                  alert('Folder deleted successfully!')
+                } catch (error) {
+                  console.error('Direct mutation error:', error)
+                  alert('Failed to delete folder: ' + (error instanceof Error ? error.message : 'Unknown error'))
+                }
+              } else {
+                alert('No folders to delete')
+              }
+            }}
+            className="block w-full text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+          >
+            Test Delete First Folder
+          </button>
+          <button
+            onClick={async () => {
+              const firstFolder = treeData[0]
+              if (firstFolder) {
+                const notes = getNotesForFolder(firstFolder.id)
+                const firstNote = notes[0]
+                if (firstNote) {
+                  console.log('Testing note deletion:', firstNote)
+                  try {
+                    console.log('Calling deleteNoteMutation.mutateAsync directly...')
+                    const result = await deleteNoteMutation.mutateAsync({ id: firstNote.id })
+                    console.log('Direct note mutation result:', result)
+
+                    // Update local state
+                    if (firstNote.folderId) {
+                      removeNoteFromFolder(firstNote.folderId, firstNote.id)
+                    }
+
+                    alert('Note deleted successfully!')
+                  } catch (error) {
+                    console.error('Direct note mutation error:', error)
+                    alert('Failed to delete note: ' + (error instanceof Error ? error.message : 'Unknown error'))
+                  }
+                } else {
+                  alert('No notes to delete in first folder')
+                }
+              } else {
+                alert('No folders available')
+              }
+            }}
+            className="block w-full text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+          >
+            Test Delete First Note
+          </button>
+        </div>
+      )}
     </>
   )
 }

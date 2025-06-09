@@ -32,6 +32,7 @@ export function useFolderNotes(folderIds: number[]) {
             folderId: note.folderId || null,
             position: note.position,
             isPublic: true, // Default value
+            isFavorite: note.isFavorite || false,
             createdAt: new Date(note.createdAt),
             updatedAt: new Date(note.updatedAt)
           }))

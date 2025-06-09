@@ -39,6 +39,7 @@ export function useFolderTree(options?: TreeBuildOptions): UseFolderTreeReturn {
           parentId: folder.parentId ?? null,
           position: folder.position,
           isPublic: true, // Default value - should be added to TFolderWithStats later
+          isFavorite: folder.isFavorite,
           createdAt: new Date(folder.createdAt),
           updatedAt: new Date(folder.updatedAt)
         }))

@@ -87,10 +87,23 @@ export async function searchNotes(searchTerm: string): Promise<TRepositoryListRe
       return result
     }
 
-    const filteredNotes = result.data.filter(note => 
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase())
+    const searchLower = searchTerm.toLowerCase()
+    const filteredNotes = result.data.filter(note =>
+      note.title.toLowerCase().includes(searchLower) ||
+      note.content.toLowerCase().includes(searchLower)
     )
+
+    // Sort by relevance (title matches first, then content matches)
+    filteredNotes.sort((a, b) => {
+      const aTitleMatch = a.title.toLowerCase().includes(searchLower)
+      const bTitleMatch = b.title.toLowerCase().includes(searchLower)
+
+      if (aTitleMatch && !bTitleMatch) return -1
+      if (!aTitleMatch && bTitleMatch) return 1
+
+      // If both or neither match title, sort by updated date
+      return b.updatedAt - a.updatedAt
+    })
 
     return { success: true, data: filteredNotes }
   } catch (error) {

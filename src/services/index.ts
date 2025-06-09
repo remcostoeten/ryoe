@@ -77,3 +77,24 @@ export {
   hardResetDatabase,
   validateReset
 } from './database-reset-service'
+
+// Export service functions
+export {
+  exportNote,
+  exportNotes,
+  printNote,
+  shareNote
+} from './export-service'
+
+// Note history service functions
+export {
+  addNoteHistoryEntry,
+  getNoteHistory,
+  getRecentChanges,
+  getNoteHistoryStats,
+  clearNoteHistory,
+  exportNoteHistory,
+  initializeNoteHistory,
+  trackNoteChange
+} from './note-history-service'
+export type { TNoteHistoryEntry } from './note-history-service'
