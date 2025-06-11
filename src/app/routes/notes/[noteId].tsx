@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
-import { ArrowLeft, Save, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Save, MoreHorizontal, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { NoteEditor } from '@/modules/notes/components/note-editor'
 import { useUpdateNote } from '@/mutations/note-mutations'
+import { useFolderPath } from '@/queries/folder-queries'
 import type { TNote } from '@/types/notes'
 
 function useNote(noteId: number) {
@@ -59,6 +60,11 @@ export default function NotePage() {
   const noteIdNumber = noteId ? parseInt(noteId, 10) : null
   const { note, loading, error, setNote } = useNote(noteIdNumber!)
   const updateNoteMutation = useUpdateNote()
+
+  // Get folder path for breadcrumbs
+  const { data: folderPath = [] } = useFolderPath(note?.folderId || 0, {
+    enabled: !!note?.folderId
+  })
 
   // Auto-save functionality
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null)
@@ -173,9 +179,22 @@ export default function NotePage() {
               Back
             </Button>
             <div className="h-4 w-px bg-border" />
-            <span className="text-sm text-muted-foreground">
-              {note.title}
-            </span>
+            <div className="flex items-center text-sm text-muted-foreground">
+              {folderPath.length > 0 ? (
+                <>
+                  {folderPath.map((folder, index) => (
+                    <span key={folder.id} className="flex items-center">
+                      <span className="text-muted-foreground/70">{folder.name}</span>
+                      {index < folderPath.length - 1 && (
+                        <ChevronRight className="w-4 h-4 mx-1 text-muted-foreground/50" />
+                      )}
+                    </span>
+                  ))}
+                  <ChevronRight className="w-4 h-4 mx-1 text-muted-foreground/50" />
+                </>
+              ) : null}
+              <span className="font-medium text-foreground">{note.title}</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">

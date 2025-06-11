@@ -1,5 +1,4 @@
 {
-{
     "name": "ryoe",
     "version": "0.08",
     "description": "A  os native desktop app built with T auri, React/Rust",
