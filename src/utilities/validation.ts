@@ -80,6 +80,18 @@ export function validateNoteTitle(title: string): boolean {
 
 export function validateNoteContent(content: string): boolean {
   if (!content || typeof content !== 'string') return false
+  
+  // If it's a BlockNote JSON content
+  if (content.startsWith('[') && content.endsWith(']')) {
+    try {
+      const blocks = JSON.parse(content)
+      return Array.isArray(blocks) && blocks.length > 0
+    } catch {
+      return false
+    }
+  }
+  
+  // For plain text content
   return content.trim().length > 0
 }
 

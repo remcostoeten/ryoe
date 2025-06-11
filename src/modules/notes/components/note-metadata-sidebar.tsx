@@ -33,6 +33,7 @@ type TNoteMetadataSidebarProps = {
   onToggleFavorite?: (note: TNote) => void
   onToggleVisibility?: (note: TNote) => void
   className?: string
+  onClose: () => void
 }
 
 // Note metadata component
@@ -442,14 +443,24 @@ export function NoteMetadataSidebar({
   note, 
   onToggleFavorite, 
   onToggleVisibility,
-  className 
+  className,
+  onClose
 }: TNoteMetadataSidebarProps) {
   return (
     <aside className={cn("w-64 border-l border-border bg-background flex flex-col h-full flex-shrink-0", className)}>
       {/* Header */}
       <div className="p-4 border-b border-border">
-        <h2 className="text-sm font-medium text-foreground">Note Details</h2>
-        <p className="text-xs text-muted-foreground mt-1">⌘⇧B to toggle</p>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium">Note Info</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            title="Close metadata"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className="flex-1">

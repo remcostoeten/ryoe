@@ -27,13 +27,32 @@ export type TFolderTreeNode = TFolder & {
 }
 
 // Note types - using T prefix
-export type TNote = TBaseEntity & {
+export interface TNote {
+  id: number
   title: string
-  content: string // MDX content
+  content: string
   folderId: number | null
   position: number
   isPublic: boolean
   isFavorite: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface TNoteWithMetadata extends TNote {
+  wordCount: number
+  characterCount: number
+  readingTime: number
+  lastModified: Date
+}
+
+export interface TNoteUpdateData {
+  title?: string
+  content?: string
+  folderId?: number | null
+  position?: number
+  isPublic?: boolean
+  isFavorite?: boolean
 }
 
 export type TNoteWithFolder = TNote & {

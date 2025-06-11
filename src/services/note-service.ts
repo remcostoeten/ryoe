@@ -26,9 +26,9 @@ import type {
   TSearchOptions,
   TSearchResult
 } from './types'
-import type { TCreateNoteData, TUpdateNoteData, TNote } from '@/repositories/types'
+import type { TCreateNoteData, TUpdateNoteData, TNote, TRepositoryResult, TRepositoryListResult } from '@/repositories/types'
 
-function validateNoteCreation(data: TNoteCreationData): TServiceResult<null> {
+function validateNoteCreation(data: TNoteCreationData): TServiceResult<TNoteWithMetadata> {
   if (!data.title || !validateNoteTitle(data.title)) {
     return {
       success: false,
@@ -45,7 +45,11 @@ function validateNoteCreation(data: TNoteCreationData): TServiceResult<null> {
     }
   }
 
-  return { success: true }
+  return {
+    success: false,
+    error: 'Validation successful but no data available',
+    code: 'VALIDATION_ONLY'
+  }
 }
 
 function mapNoteToMetadata(note: TNote): TNoteWithMetadata {
@@ -69,335 +73,343 @@ function mapNoteToMetadata(note: TNote): TNoteWithMetadata {
   }
 }
 
+// Create a new note
 export async function createNoteWithValidation(data: TNoteCreationData): Promise<TServiceResult<TNoteWithMetadata>> {
-  try {
-    // Validate input data
-    const validation = validateNoteCreation(data)
-    if (!validation.success) {
-      return {
-        success: false,
-        error: validation.error,
-        code: validation.code
-      }
-    }
+  const validation = validateNoteCreation(data)
+  if (!validation.success) {
+    return validation
+  }
 
-    // Convert to repository format
+  try {
     const createData: TCreateNoteData = {
-      title: data.title.trim(),
-      content: data.content.trim(),
+      title: data.title,
+      content: data.content,
       folderId: data.folderId
     }
 
-    // Create note in repository
     const result = await createNote(createData)
     if (!result.success || !result.data) {
       return {
         success: false,
         error: result.error || 'Failed to create note',
-        code: 'CREATE_NOTE_FAILED'
+        code: 'CREATE_NOTE_ERROR'
       }
     }
 
-    const noteWithMetadata = mapNoteToMetadata(result.data)
-    return { success: true, data: noteWithMetadata }
+    return {
+      success: true,
+      data: mapNoteToMetadata(result.data)
+    }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to create note',
       code: 'CREATE_NOTE_ERROR'
     }
   }
 }
 
+// Update an existing note
 export async function updateNoteWithValidation(
-  id: number, 
+  noteId: number,
   data: TNoteUpdateData
 ): Promise<TServiceResult<TNoteWithMetadata>> {
+  if (data.title && !validateNoteTitle(data.title)) {
+    return {
+      success: false,
+      error: 'Note title must be 1-100 characters long',
+      code: 'INVALID_TITLE'
+    }
+  }
+
+  if (data.content && !validateNoteContent(data.content)) {
+    return {
+      success: false,
+      error: 'Note content cannot be empty',
+      code: 'INVALID_CONTENT'
+    }
+  }
+
   try {
-    // Validate input data
-    if (data.title !== undefined && !validateNoteTitle(data.title)) {
-      return {
-        success: false,
-        error: 'Note title must be 1-100 characters long',
-        code: 'INVALID_TITLE'
-      }
-    }
-
-    if (data.content !== undefined && !validateNoteContent(data.content)) {
-      return {
-        success: false,
-        error: 'Note content cannot be empty',
-        code: 'INVALID_CONTENT'
-      }
-    }
-
-    // Convert to repository format
-    const updateData: TUpdateNoteData = {}
-    if (data.title !== undefined) updateData.title = data.title.trim()
-    if (data.content !== undefined) updateData.content = data.content.trim()
-    if (data.folderId !== undefined) updateData.folderId = data.folderId
-
-    // Update note in repository
-    const result = await updateNote(id, updateData)
+    const result = await updateNote(noteId, data)
     if (!result.success || !result.data) {
       return {
         success: false,
         error: result.error || 'Failed to update note',
-        code: 'UPDATE_NOTE_FAILED'
+        code: 'UPDATE_NOTE_ERROR'
       }
     }
 
-    const noteWithMetadata = mapNoteToMetadata(result.data)
-    return { success: true, data: noteWithMetadata }
+    return {
+      success: true,
+      data: mapNoteToMetadata(result.data)
+    }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to update note',
       code: 'UPDATE_NOTE_ERROR'
     }
   }
 }
 
-export async function getNoteById(id: number): Promise<TServiceResult<TNoteWithMetadata>> {
+// Get a note by ID
+export async function getNoteById(noteId: number): Promise<TServiceResult<TNoteWithMetadata>> {
   try {
-    const result = await findNoteById(id)
-    if (!result.success) {
+    const result = await findNoteById(noteId)
+    if (!result.success || !result.data) {
       return {
         success: false,
-        error: result.error,
-        code: 'FETCH_NOTE_FAILED'
+        error: result.error || 'Note not found',
+        code: 'GET_NOTE_ERROR'
       }
     }
 
-    if (!result.data) {
-      return {
-        success: false,
-        error: 'Note not found',
-        code: 'NOTE_NOT_FOUND'
-      }
+    return {
+      success: true,
+      data: mapNoteToMetadata(result.data)
     }
-
-    const noteWithMetadata = mapNoteToMetadata(result.data)
-    return { success: true, data: noteWithMetadata }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to get note',
       code: 'GET_NOTE_ERROR'
     }
   }
 }
 
-export async function getNotesByFolder(folderId: number | null): Promise<TServiceListResult<TNoteWithMetadata>> {
+// Get notes by folder ID
+export async function getNotesByFolderId(folderId: number | null): Promise<TServiceListResult<TNoteWithMetadata>> {
   try {
     const result = await findNotesByFolderId(folderId)
-    if (!result.success) {
+    if (!result.success || !result.data) {
       return {
         success: false,
-        error: result.error,
-        code: 'FETCH_NOTES_FAILED'
+        error: result.error || 'Failed to get notes',
+        code: 'GET_NOTES_ERROR'
       }
     }
 
-    const notesWithMetadata = (result.data || []).map(mapNoteToMetadata)
-    return { 
-      success: true, 
-      data: notesWithMetadata,
-      total: notesWithMetadata.length
+    return {
+      success: true,
+      data: result.data.map(mapNoteToMetadata)
     }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to get notes',
       code: 'GET_NOTES_ERROR'
     }
   }
 }
 
-export async function deleteNoteById(id: number): Promise<TServiceResult<boolean>> {
+// Get notes by folder
+export async function getNotesByFolder(folderId: number | null): Promise<TServiceListResult<TNoteWithMetadata>> {
+  return getNotesByFolderId(folderId)
+}
+
+// Search notes
+export async function searchNotes(query: string): Promise<TServiceResult<TSearchResult>> {
   try {
-    const result = await deleteNote(id)
+    const result = await searchNotesRepo(query)
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        error: result.error || 'Failed to search notes',
+        code: 'SEARCH_NOTES_ERROR'
+      }
+    }
+
+    const notes = result.data.map(mapNoteToMetadata)
+    return {
+      success: true,
+      data: {
+        notes,
+        folders: [],
+        total: notes.length
+      }
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to search notes',
+      code: 'SEARCH_NOTES_ERROR'
+    }
+  }
+}
+
+// Search notes with options
+export async function searchNotesWithOptions(query: string, options?: TSearchOptions): Promise<TServiceResult<TSearchResult>> {
+  return searchNotes(query)
+}
+
+// Delete a note
+export async function deleteNoteById(noteId: number): Promise<TServiceResult<null>> {
+  try {
+    const result = await deleteNote(noteId)
     if (!result.success) {
       return {
         success: false,
         error: result.error || 'Failed to delete note',
-        code: 'DELETE_NOTE_FAILED'
+        code: 'DELETE_NOTE_ERROR'
       }
     }
 
-    return { success: true, data: result.data }
+    return { success: true, data: null }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to delete note',
       code: 'DELETE_NOTE_ERROR'
     }
   }
 }
 
+// Move a note to a different folder
 export async function moveNoteToFolder(
-  id: number, 
-  newFolderId: number | null, 
+  noteId: number,
+  folderId: number | null,
   newPosition?: number
 ): Promise<TServiceResult<TNoteWithMetadata>> {
   try {
-    const result = await moveNote(id, newFolderId, newPosition)
+    const result = await moveNote(noteId, folderId, newPosition)
     if (!result.success || !result.data) {
       return {
         success: false,
         error: result.error || 'Failed to move note',
-        code: 'MOVE_NOTE_FAILED'
+        code: 'MOVE_NOTE_ERROR'
       }
     }
 
-    const noteWithMetadata = mapNoteToMetadata(result.data)
-    return { success: true, data: noteWithMetadata }
+    return {
+      success: true,
+      data: mapNoteToMetadata(result.data)
+    }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to move note',
       code: 'MOVE_NOTE_ERROR'
     }
   }
 }
 
+// Reorder notes within a folder
 export async function reorderNotesInFolder(
-  _folderId: number | null,
+  folderId: number | null,
   noteIds: number[]
-): Promise<TServiceResult<boolean>> {
+): Promise<TServiceListResult<TNoteWithMetadata>> {
   try {
     const result = await reorderNotes(noteIds)
     if (!result.success) {
       return {
         success: false,
         error: result.error || 'Failed to reorder notes',
-        code: 'REORDER_NOTES_FAILED'
+        code: 'REORDER_NOTES_ERROR'
       }
     }
 
-    return { success: true, data: result.data }
+    // After reordering, fetch the updated notes
+    const updatedNotes = await findNotesByFolderId(folderId)
+    if (!updatedNotes.success || !updatedNotes.data) {
+      return {
+        success: false,
+        error: 'Failed to fetch updated notes',
+        code: 'REORDER_NOTES_ERROR'
+      }
+    }
+
+    return {
+      success: true,
+      data: updatedNotes.data.map(mapNoteToMetadata)
+    }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to reorder notes',
       code: 'REORDER_NOTES_ERROR'
     }
   }
 }
 
-export async function duplicateNoteById(id: number): Promise<TServiceResult<TNoteWithMetadata>> {
+// Duplicate a note
+export async function duplicateNoteById(noteId: number): Promise<TServiceResult<TNoteWithMetadata>> {
   try {
-    const result = await duplicateNote(id)
+    const result = await duplicateNote(noteId)
     if (!result.success || !result.data) {
       return {
         success: false,
         error: result.error || 'Failed to duplicate note',
-        code: 'DUPLICATE_NOTE_FAILED'
+        code: 'DUPLICATE_NOTE_ERROR'
       }
     }
 
-    const noteWithMetadata = mapNoteToMetadata(result.data)
-    return { success: true, data: noteWithMetadata }
+    return {
+      success: true,
+      data: mapNoteToMetadata(result.data)
+    }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to duplicate note',
       code: 'DUPLICATE_NOTE_ERROR'
     }
   }
 }
 
-export async function searchNotesWithOptions(options: TSearchOptions): Promise<TServiceResult<TSearchResult>> {
+// Toggle note favorite status
+export async function toggleNoteFavoriteStatus(noteId: number): Promise<TServiceResult<TNoteWithMetadata>> {
   try {
-    if (!options.query || options.query.trim().length < 2) {
-      return {
-        success: false,
-        error: 'Search query must be at least 2 characters long',
-        code: 'INVALID_SEARCH_QUERY'
-      }
-    }
-
-    const result = await searchNotesRepo(options.query.trim())
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Search failed',
-        code: 'SEARCH_FAILED'
-      }
-    }
-
-    let notes = (result.data || []).map(mapNoteToMetadata)
-
-    // Apply folder filter if specified
-    if (options.folderId !== undefined) {
-      notes = notes.filter(note => note.folderId === options.folderId)
-    }
-
-    // Apply limit if specified
-    if (options.limit && options.limit > 0) {
-      notes = notes.slice(0, options.limit)
-    }
-
-    const searchResult: TSearchResult = {
-      notes,
-      folders: [], // TODO: Implement folder search
-      total: notes.length
-    }
-
-    return { success: true, data: searchResult }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'SEARCH_ERROR'
-    }
-  }
-}
-
-export async function toggleNoteFavoriteStatus(id: number): Promise<TServiceResult<TNoteWithMetadata>> {
-  try {
-    const result = await toggleNoteFavorite(id)
+    const result = await toggleNoteFavorite(noteId)
     if (!result.success || !result.data) {
       return {
         success: false,
-        error: result.error || 'Failed to toggle note favorite status',
-        code: 'TOGGLE_FAVORITE_FAILED'
+        error: result.error || 'Failed to toggle note favorite',
+        code: 'TOGGLE_FAVORITE_ERROR'
       }
     }
 
-    const noteWithMetadata = mapNoteToMetadata(result.data)
-    return { success: true, data: noteWithMetadata }
+    return {
+      success: true,
+      data: mapNoteToMetadata(result.data)
+    }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to toggle note favorite',
       code: 'TOGGLE_FAVORITE_ERROR'
     }
   }
 }
 
-export async function getFavoriteNotesWithMetadata(): Promise<TServiceListResult<TNoteWithMetadata>> {
+// Get favorite notes
+export async function getFavoriteNotes(): Promise<TServiceListResult<TNoteWithMetadata>> {
   try {
     const result = await findFavoriteNotes()
-    if (!result.success) {
+    if (!result.success || !result.data) {
       return {
         success: false,
         error: result.error || 'Failed to get favorite notes',
-        code: 'GET_FAVORITES_FAILED'
+        code: 'GET_FAVORITES_ERROR'
       }
     }
 
-    const notesWithMetadata = (result.data || []).map(mapNoteToMetadata)
     return {
       success: true,
-      data: notesWithMetadata,
-      total: notesWithMetadata.length
+      data: result.data.map(mapNoteToMetadata)
     }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to get favorite notes',
       code: 'GET_FAVORITES_ERROR'
     }
   }
 }
+
+// Get favorite notes with metadata
+export async function getFavoriteNotesWithMetadata(): Promise<TServiceListResult<TNoteWithMetadata>> {
+  return getFavoriteNotes()
+}
+
+

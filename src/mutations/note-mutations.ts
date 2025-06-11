@@ -5,7 +5,8 @@ import {
   deleteNoteById,
   moveNoteToFolder,
   reorderNotesInFolder,
-  duplicateNoteById
+  duplicateNoteById,
+  toggleNoteFavoriteStatus
 } from '@/services/note-service'
 import { 
   invalidateNoteQueries,
@@ -26,193 +27,58 @@ import type {
   TReorderNotesVariables,
   TDuplicateNoteVariables
 } from './types'
+import type { TNoteCreationData, TNoteUpdateData } from '@/services/types'
 import type { TNoteWithMetadata } from '@/services/types'
 
-export function useCreateNote(
-  options?: TMutationOptions<TNoteWithMetadata, TCreateNoteVariables>
-) {
+export function useCreateNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (variables: TCreateNoteVariables) => {
-      const result = await createNoteWithValidation(variables)
+    mutationFn: async (data: TNoteCreationData) => {
+      const result = await createNoteWithValidation(data)
       if (!result.success) {
         throw new Error(result.error || 'Failed to create note')
       }
-      return result.data!
+      return result.data
     },
-    onMutate: async (variables) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['notes', 'folder', variables.folderId] })
-
-      // Snapshot previous value
-      const previousNotes = getNotesByFolderFromCache(queryClient, variables.folderId || null)
-
-      // Optimistically add note
-      const optimisticNote: TNoteWithMetadata = {
-        id: Date.now(), // Temporary ID
-        title: variables.title,
-        content: variables.content,
-        folderId: variables.folderId,
-        position: previousNotes?.length || 0,
-        isFavorite: false,
-        wordCount: variables.content.split(/\s+/).length,
-        characterCount: variables.content.length,
-        readingTime: Math.ceil(variables.content.split(/\s+/).length / 200),
-        lastModified: new Date().toISOString(),
-        createdAt: Math.floor(Date.now() / 1000),
-        updatedAt: Math.floor(Date.now() / 1000)
-      }
-
-      addNoteToFolderCache(queryClient, variables.folderId || null, optimisticNote)
-
-      options?.onMutate?.(variables)
-
-      return { previousNotes, optimisticNote }
-    },
-    onError: (error, variables, context) => {
-      // Rollback optimistic update
-      if (context?.previousNotes) {
-        queryClient.setQueryData(['notes', 'folder', variables.folderId], context.previousNotes)
-      }
-
-      console.error('Failed to create note:', error)
-      options?.onError?.(error, variables)
-    },
-    onSuccess: (data, variables, context) => {
-      // Replace optimistic note with real data
-      if (context?.optimisticNote) {
-        removeNoteFromFolderCache(queryClient, variables.folderId || null, context.optimisticNote.id)
-      }
-      addNoteToFolderCache(queryClient, variables.folderId || null, data)
-      setNoteCache(queryClient, data.id, data)
-      
-      options?.onSuccess?.(data, variables)
-    },
-    onSettled: (data, error, variables) => {
-      // Invalidate queries to ensure consistency
-      invalidateNoteQueries(queryClient, data?.id, variables.folderId || null)
-      
-      options?.onSettled?.(data, error, variables)
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
     }
   })
 }
 
-export function useUpdateNote(
-  options?: TMutationOptions<TNoteWithMetadata, TUpdateNoteVariables>
-) {
+export function useUpdateNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (variables: TUpdateNoteVariables) => {
-      const result = await updateNoteWithValidation(variables.id, variables)
+    mutationFn: async ({ id, data }: { id: number; data: TNoteUpdateData }) => {
+      const result = await updateNoteWithValidation(id, data)
       if (!result.success) {
         throw new Error(result.error || 'Failed to update note')
       }
-      return result.data!
+      return result.data
     },
-    onMutate: async (variables) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['notes', variables.id] })
-
-      // Snapshot previous value
-      const previousNote = getNoteFromCache(queryClient, variables.id)
-
-      // Optimistically update note
-      if (previousNote) {
-        const optimisticNote = {
-          ...previousNote,
-          ...variables,
-          lastModified: new Date().toISOString(),
-          updatedAt: Math.floor(Date.now() / 1000)
-        }
-
-        setNoteCache(queryClient, variables.id, optimisticNote)
-        updateNoteInFolderCache(queryClient, previousNote.folderId || null, variables.id, () => optimisticNote)
-      }
-
-      options?.onMutate?.(variables)
-
-      return { previousNote }
-    },
-    onError: (error, variables, context) => {
-      // Rollback optimistic update
-      if (context?.previousNote) {
-        setNoteCache(queryClient, variables.id, context.previousNote)
-        updateNoteInFolderCache(queryClient, context.previousNote.folderId ?? null, variables.id, () => context.previousNote!)
-      }
-
-      console.error('Failed to update note:', error)
-      options?.onError?.(error, variables)
-    },
-    onSuccess: (data, variables) => {
-      // Update cache with server response
-      setNoteCache(queryClient, variables.id, data)
-      updateNoteInFolderCache(queryClient, data.folderId ?? null, variables.id, () => data)
-      
-      options?.onSuccess?.(data, variables)
-    },
-    onSettled: (data, error, variables) => {
-      // Invalidate queries to ensure consistency
-      invalidateNoteQueries(queryClient, variables.id, data?.folderId)
-      
-      options?.onSettled?.(data, error, variables)
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['note', variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
     }
   })
 }
 
-export function useDeleteNote(
-  options?: TMutationOptions<boolean, TDeleteNoteVariables>
-) {
+export function useDeleteNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (variables: TDeleteNoteVariables) => {
-      const result = await deleteNoteById(variables.id)
+    mutationFn: async (id: number) => {
+      const result = await deleteNoteById(id)
       if (!result.success) {
         throw new Error(result.error || 'Failed to delete note')
       }
-      return result.data!
+      return result.data
     },
-    onMutate: async (variables) => {
-      // Get note before deletion for rollback
-      const noteToDelete = getNoteFromCache(queryClient, variables.id)
-
-      // Optimistically remove note
-      if (noteToDelete) {
-        removeNoteFromFolderCache(queryClient, noteToDelete.folderId || null, variables.id)
-        queryClient.removeQueries({ queryKey: ['notes', variables.id] })
-      }
-
-      options?.onMutate?.(variables)
-
-      return { noteToDelete }
-    },
-    onError: (error, variables, context) => {
-      // Rollback optimistic update
-      if (context?.noteToDelete) {
-        addNoteToFolderCache(queryClient, context.noteToDelete.folderId ?? null, context.noteToDelete)
-        setNoteCache(queryClient, variables.id, context.noteToDelete)
-      }
-
-      console.error('Failed to delete note:', error)
-      options?.onError?.(error, variables)
-    },
-    onSuccess: (data, variables, context) => {
-      // Ensure note is removed from all caches
-      queryClient.removeQueries({ queryKey: ['notes', variables.id] })
-      
-      if (context?.noteToDelete) {
-        removeNoteFromFolderCache(queryClient, context.noteToDelete.folderId ?? null, variables.id)
-      }
-      
-      options?.onSuccess?.(data, variables)
-    },
-    onSettled: (data, error, variables, context) => {
-      // Invalidate queries to ensure consistency
-      invalidateNoteQueries(queryClient, variables.id, context?.noteToDelete?.folderId)
-      
-      options?.onSettled?.(data, error, variables)
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      queryClient.invalidateQueries({ queryKey: ['note', id] })
     }
   })
 }
@@ -280,87 +146,72 @@ export function useMoveNote(
   })
 }
 
-export function useDuplicateNote(
-  options?: TMutationOptions<TNoteWithMetadata, TDuplicateNoteVariables>
-) {
+export function useMoveNoteToFolder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (variables: TDuplicateNoteVariables) => {
-      const result = await duplicateNoteById(variables.id)
+    mutationFn: async (variables: { id: number; newFolderId: number | null; newPosition?: number }) => {
+      const result = await moveNoteToFolder(variables.id, variables.newFolderId, variables.newPosition)
       if (!result.success) {
-        throw new Error(result.error || 'Failed to duplicate note')
+        throw new Error(result.error || 'Failed to move note')
       }
-      return result.data!
+      return result.data
     },
-    onSuccess: (data, variables) => {
-      // Add duplicated note to cache
-      addNoteToFolderCache(queryClient, data.folderId ?? null, data)
-      setNoteCache(queryClient, data.id, data)
-      
-      options?.onSuccess?.(data, variables)
-    },
-    onError: (error, variables) => {
-      console.error('Failed to duplicate note:', error)
-      options?.onError?.(error, variables)
-    },
-    onSettled: (data, error, variables) => {
-      // Invalidate queries to ensure consistency
-      invalidateNoteQueries(queryClient, data?.id, data?.folderId)
-
-      options?.onSettled?.(data, error, variables)
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      queryClient.invalidateQueries({ queryKey: ['note', variables.id] })
     }
   })
 }
 
-export function useReorderNotes(
-  options?: TMutationOptions<boolean, TReorderNotesVariables>
-) {
+export function useReorderNotes() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (variables: TReorderNotesVariables) => {
+    mutationFn: async (variables: { folderId: number | null; noteIds: number[] }) => {
       const result = await reorderNotesInFolder(variables.folderId, variables.noteIds)
       if (!result.success) {
         throw new Error(result.error || 'Failed to reorder notes')
       }
-      return result.data!
+      return result.data
     },
-    onMutate: async (variables) => {
-      // Get current notes
-      const currentNotes = getNotesByFolderFromCache(queryClient, variables.folderId)
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+}
 
-      if (currentNotes) {
-        // Optimistically reorder notes
-        const reorderedNotes = variables.noteIds.map((noteId, index) => {
-          const note = currentNotes.find(n => n.id === noteId)
-          return note ? { ...note, position: index } : null
-        }).filter(Boolean) as TNoteWithMetadata[]
+export function useDuplicateNote() {
+  const queryClient = useQueryClient()
 
-        queryClient.setQueryData(['notes', 'folder', variables.folderId], reorderedNotes)
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const result = await duplicateNoteById(id)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to duplicate note')
       }
-
-      options?.onMutate?.(variables)
-
-      return { currentNotes }
+      return result.data
     },
-    onError: (error, variables, context) => {
-      // Rollback optimistic update
-      if (context?.currentNotes) {
-        queryClient.setQueryData(['notes', 'folder', variables.folderId], context.currentNotes)
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+}
+
+export function useToggleNoteFavorite() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const result = await toggleNoteFavoriteStatus(id)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to toggle note favorite')
       }
-
-      console.error('Failed to reorder notes:', error)
-      options?.onError?.(error, variables)
+      return result.data
     },
-    onSuccess: (data, variables) => {
-      options?.onSuccess?.(data, variables)
-    },
-    onSettled: (data, error, variables) => {
-      // Invalidate queries to ensure consistency
-      invalidateNoteQueries(queryClient, undefined, variables.folderId)
-
-      options?.onSettled?.(data, error, variables)
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      queryClient.invalidateQueries({ queryKey: ['note', id] })
     }
   })
 }

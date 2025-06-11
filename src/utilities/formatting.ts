@@ -78,6 +78,31 @@ export function formatPercentage(value: number, total: number, decimals = 1): st
 
 export function countWords(text: string): number {
   if (!text || typeof text !== 'string') return 0
+  
+  // If it's a BlockNote JSON content
+  if (text.startsWith('[') && text.endsWith(']')) {
+    try {
+      const blocks = JSON.parse(text)
+      if (Array.isArray(blocks)) {
+        return blocks.reduce((count, block) => {
+          if (block.content && Array.isArray(block.content)) {
+            return count + block.content.reduce((textCount: number, item: any) => {
+              if (item.text) {
+                return textCount + item.text.split(/\s+/).filter(Boolean).length
+              }
+              return textCount
+            }, 0)
+          }
+          return count
+        }, 0)
+      }
+    } catch {
+      // Fallback for plain text
+      return text.trim().split(/\s+/).filter(word => word.length > 0).length
+    }
+  }
+  
+  // For plain text
   return text.trim().split(/\s+/).filter(word => word.length > 0).length
 }
 

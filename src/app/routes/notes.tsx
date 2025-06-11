@@ -270,10 +270,8 @@ export default function NotesPage() {
           {selectedNote ? (
             <NoteEditor
               key={selectedNote.id}
-              title={selectedNote.title}
-              initialContent={selectedNote.content}
-              onChange={handleNoteContentChange}
-              onTitleChange={handleNoteTitleChange}
+              noteId={selectedNote.id}
+              readOnly={false}
               className="h-full"
             />
           ) : (

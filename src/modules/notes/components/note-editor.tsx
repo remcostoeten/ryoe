@@ -1,129 +1,75 @@
-import React, { useState, lazy, Suspense, memo } from 'react'
-import { Type, FileText } from 'lucide-react'
+import BlockNoteEditor from './BlockNoteEditor'
+import { NoteEditorToolbar } from './note-editor-toolbar'
+import { NoteMetadataSidebar } from './note-metadata-sidebar'
+import { NoteTitle } from './note-title'
+import { useNoteContent } from '../hooks/use-note-content'
+import { useNoteMetadata } from '../hooks/use-note-metadata'
+import { useNoteTitle } from '../hooks/use-note-title'
+import { useNoteEditorConfig } from '../hooks/use-note-editor-config'
 import { cn } from '@/utilities/styling'
-
-// Lazy load the heavy BlockNote editor
-const BlockNoteEditor = lazy(() => import('./BlockNoteEditor'))
+import { useQuery } from '@tanstack/react-query'
+import { getNoteById } from '@/services/note-service'
+import type { TNote } from '@/types/notes'
 
 interface NoteEditorProps {
-  initialContent?: string
-  onChange?: (content: string) => void
-  onTitleChange?: (title: string) => void
-  title?: string
-  className?: string
+  noteId: number
   readOnly?: boolean
-  useRichEditor?: boolean
+  className?: string
 }
 
-export const NoteEditor = memo(function NoteEditor({
-  initialContent = '',
-  onChange,
-  onTitleChange,
-  title = 'Untitled',
-  className,
-  readOnly = false,
-  useRichEditor = false
-}: NoteEditorProps) {
-  const [noteTitle, setNoteTitle] = useState(title)
-  const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [isRichEditor, setIsRichEditor] = useState(useRichEditor)
+export function NoteEditor({ noteId, readOnly = false, className }: NoteEditorProps) {
+  const { title, updateTitle } = useNoteTitle(noteId)
+  const { content, updateContent } = useNoteContent(noteId)
+  const { metadata } = useNoteMetadata(noteId)
+  const { showMetadata, toggleMetadata } = useNoteEditorConfig()
 
-  const handleTitleSubmit = () => {
-    setIsEditingTitle(false)
-    onTitleChange?.(noteTitle)
-  }
+  // Get the full note data for the sidebar
+  const { data: noteResult } = useQuery({
+    queryKey: ['note', noteId],
+    queryFn: () => getNoteById(noteId)
+  })
 
-  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleTitleSubmit()
-    }
-    if (e.key === 'Escape') {
-      setNoteTitle(title)
-      setIsEditingTitle(false)
-    }
-  }
+  // Convert TNoteWithMetadata to TNote
+  const note: TNote | undefined = noteResult?.success && noteResult.data ? {
+    id: noteResult.data.id,
+    title: noteResult.data.title,
+    content: noteResult.data.content,
+    folderId: noteResult.data.folderId || null,
+    position: noteResult.data.position,
+    isPublic: false, // Default to private since TNoteWithMetadata doesn't have this field
+    isFavorite: noteResult.data.isFavorite,
+    createdAt: new Date(noteResult.data.createdAt * 1000),
+    updatedAt: new Date(noteResult.data.updatedAt * 1000)
+  } : undefined
 
   return (
-    <div className={cn('flex flex-col h-full', className)}>
-      {/* Note Title */}
-      <div className="border-b border-border/50 p-4">
-        <div className="flex items-center justify-between">
-          {isEditingTitle ? (
-            <input
-              type="text"
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              onBlur={handleTitleSubmit}
-              onKeyDown={handleTitleKeyDown}
-              className="text-2xl font-bold bg-transparent border-none outline-none flex-1"
-              autoFocus
-            />
-          ) : (
-            <h1
-              className="text-2xl font-bold cursor-pointer hover:bg-muted/50 rounded px-2 py-1 -mx-2 -my-1 flex-1"
-              onClick={() => !readOnly && setIsEditingTitle(true)}
-            >
-              {noteTitle}
-            </h1>
-          )}
-
-          {/* Editor Mode Toggle */}
-          {!readOnly && (
-            <div className="flex items-center gap-2 ml-4">
-              <button
-                onClick={() => setIsRichEditor(false)}
-                className={cn(
-                  'p-2 rounded-md transition-colors',
-                  !isRichEditor
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                )}
-                title="Simple Editor"
-              >
-                <FileText className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setIsRichEditor(true)}
-                className={cn(
-                  'p-2 rounded-md transition-colors',
-                  isRichEditor
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                )}
-                title="Rich Text Editor"
-              >
-                <Type className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+    <div className={cn('flex h-full', className)}>
+      <div className="flex-1 flex flex-col">
+        <NoteEditorToolbar
+          noteId={noteId}
+          readOnly={readOnly}
+          onToggleMetadata={toggleMetadata}
+        />
+        <div className="flex-1 overflow-auto p-4">
+          <NoteTitle
+            title={title}
+            onChange={updateTitle}
+            readOnly={readOnly}
+          />
+          <BlockNoteEditor
+            initialContent={content}
+            onChange={updateContent}
+            readOnly={readOnly}
+            className="mt-4"
+          />
         </div>
       </div>
-
-      <div className="flex-1 overflow-auto">
-        {isRichEditor ? (
-          <Suspense fallback={
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            </div>
-          }>
-            <BlockNoteEditor
-              initialContent={initialContent}
-              onChange={onChange}
-              readOnly={readOnly}
-            />
-          </Suspense>
-        ) : (
-          <div className="min-h-full">
-            <textarea
-              value={initialContent || ''}
-              onChange={(e) => onChange?.(e.target.value)}
-              className="w-full h-full min-h-[400px] p-4 border-none outline-none resize-none bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
-              placeholder="Start writing..."
-              readOnly={readOnly}
-            />
-          </div>
-        )}
-      </div>
+      {showMetadata && note && (
+        <NoteMetadataSidebar
+          note={note}
+          onClose={() => toggleMetadata(false)}
+        />
+      )}
     </div>
   )
-})
+}

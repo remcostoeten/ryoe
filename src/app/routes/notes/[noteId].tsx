@@ -75,8 +75,10 @@ export default function NotePage() {
     try {
       await updateNoteMutation.mutateAsync({
         id: note.id,
-        title,
-        content
+        data: {
+          title,
+          content
+        }
       })
       
       setNote(prev => prev ? { ...prev, title, content, updatedAt: new Date() } : null)
@@ -225,15 +227,21 @@ export default function NotePage() {
 
       {/* Note Editor */}
       <div className="flex-1">
-        <NoteEditor
-          key={note.id}
-          title={note.title}
-          initialContent={note.content}
-          onChange={handleContentChange}
-          onTitleChange={handleTitleChange}
-          className="h-full"
-          useRichEditor={true}
-        />
+        {note ? (
+          <NoteEditor
+            key={note.id}
+            noteId={note.id}
+            readOnly={false}
+            className="h-full"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="text-center">
+              <h3 className="text-lg font-medium mb-2">Note not found</h3>
+              <p className="text-sm">The note you're looking for doesn't exist or has been deleted.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
