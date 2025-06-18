@@ -19,7 +19,6 @@ tauri-plugin-process = "2.2.0"
 tauri-plugin-window-state = "2.0.1"
 window-vibrancy = "0.5.2"
 tokio = { version = "1.0", features = ["full"] }
-netstat2 = "0.9"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

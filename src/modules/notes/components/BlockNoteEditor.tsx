@@ -54,8 +54,8 @@ export default function BlockNoteEditor({
         // Show error message in the editor
         editor.insertBlocks([{
           type: 'paragraph',
-          content: [{ 
-            type: 'text', 
+          content: [{
+            type: 'text',
             text: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
             styles: { textColor: 'red' }
           }]
@@ -82,7 +82,7 @@ export default function BlockNoteEditor({
   // Render the editor
   return (
     <div className={className}>
-      <BlockNoteView 
+      <BlockNoteView
         editor={editor}
         theme="light"
         editable={!readOnly}
