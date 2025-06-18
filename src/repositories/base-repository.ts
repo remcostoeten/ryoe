@@ -103,7 +103,7 @@ export async function findMany<T extends TBaseEntity>(
 ): Promise<TRepositoryListResult<T>> {
   try {
     const client = getTursoClient()
-    
+
     const whereClause = buildWhereClause(options?.filters || {})
     const orderClause = buildOrderClause(options?.sort)
     const limitClause = buildLimitClause(options?.pagination)
@@ -137,9 +137,11 @@ export async function create<T extends TBaseEntity>(
   mapRowToEntity: (row: any) => T
 ): Promise<TRepositoryResult<T>> {
   try {
+    console.log(`Creating entity in table: ${tableName}`, data)
+
     const client = getTursoClient()
     const now = getCurrentTimestamp()
-    
+
     const dataWithTimestamp = {
       ...data,
       created_at: now,
@@ -151,16 +153,22 @@ export async function create<T extends TBaseEntity>(
     const values = Object.values(dataWithTimestamp)
 
     const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`
+    console.log('Executing SQL:', sql, 'with values:', values)
+
     const result = await client.execute({ sql, args: values })
+    console.log('Insert result:', result)
 
     if (!result.lastInsertRowid) {
+      console.error('No lastInsertRowid returned from database')
       return { success: false, error: 'Failed to create entity' }
     }
 
     // Fetch the created entity
     const createdEntity = await findById(tableName, Number(result.lastInsertRowid), mapRowToEntity)
+    console.log('Created entity:', createdEntity)
     return createdEntity
   } catch (error) {
+    console.error(`Error creating entity in ${tableName}:`, error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -177,7 +185,7 @@ export async function update<T extends TBaseEntity>(
   try {
     const client = getTursoClient()
     const now = getCurrentTimestamp()
-    
+
     const dataWithTimestamp = {
       ...data,
       updated_at: now

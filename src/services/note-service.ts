@@ -17,11 +17,11 @@ import {
   findFavoriteNotes
 } from '@/repositories'
 import { validateNoteTitle, validateNoteContent, calculateReadingTime, countWords } from '@/utilities'
-import type { 
-  TServiceResult, 
+import type {
+  TServiceResult,
   TServiceListResult,
-  TNoteCreationData, 
-  TNoteUpdateData, 
+  TNoteCreationData,
+  TNoteUpdateData,
   TNoteWithMetadata,
   TSearchOptions,
   TSearchResult
@@ -45,10 +45,10 @@ function validateNoteCreation(data: TNoteCreationData): TServiceResult<TNoteWith
     }
   }
 
+  // Validation passed - return success
   return {
-    success: false,
-    error: 'Validation successful but no data available',
-    code: 'VALIDATION_ONLY'
+    success: true,
+    data: null as any // This will be replaced by actual data in createNoteWithValidation
   }
 }
 

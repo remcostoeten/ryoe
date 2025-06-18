@@ -1,4 +1,5 @@
 import { createClient } from '@libsql/client'
+import { getEnvironmentConfig } from '@/core/config/env-config'
 import type { DatabaseClient, DatabaseConfig, DatabaseHealth, ExecuteOptions } from '../types'
 
 let client: DatabaseClient | null = null
@@ -10,24 +11,17 @@ function createTursoClient(config: DatabaseConfig): DatabaseClient {
   })
 }
 
-function getEnvironmentConfig(): DatabaseConfig {
-  const url = import.meta.env.VITE_TURSO_DATABASE_URL
-  const authToken = import.meta.env.VITE_TURSO_AUTH_TOKEN
-
-  if (!url) {
-    throw new Error('VITE_TURSO_DATABASE_URL environment variable is required')
+function getDbConfig(): DatabaseConfig {
+  const envConfig = getEnvironmentConfig()
+  return {
+    url: envConfig.TURSO_DATABASE_URL,
+    authToken: envConfig.TURSO_AUTH_TOKEN
   }
-
-  if (!authToken) {
-    throw new Error('VITE_TURSO_AUTH_TOKEN environment variable is required')
-  }
-
-  return { url, authToken }
 }
 
 export function getTursoClient(): DatabaseClient {
   if (!client) {
-    const config = getEnvironmentConfig()
+    const config = getDbConfig()
     client = createTursoClient(config)
     console.log('Turso client initialized successfully')
   }
@@ -38,7 +32,7 @@ export function getTursoClient(): DatabaseClient {
 export async function initializeTursoDatabase(): Promise<string> {
   try {
     const client = getTursoClient()
-    
+
     // Create tables if they don't exist
     await client.execute(`
       CREATE TABLE IF NOT EXISTS users (
@@ -153,15 +147,15 @@ export async function initializeTursoDatabase(): Promise<string> {
 
 export async function checkTursoDatabaseHealth(): Promise<DatabaseHealth> {
   const startTime = Date.now()
-  
+
   try {
     const client = getTursoClient()
-    
+
     // Simple health check query
     await client.execute('SELECT 1')
-    
+
     const responseTime = Date.now() - startTime
-    
+
     return {
       status: 'healthy',
       message: `Turso database is healthy (${responseTime}ms)`,
@@ -170,7 +164,7 @@ export async function checkTursoDatabaseHealth(): Promise<DatabaseHealth> {
     }
   } catch (error) {
     const responseTime = Date.now() - startTime
-    
+
     return {
       status: 'error',
       message: `Turso database error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -182,23 +176,23 @@ export async function checkTursoDatabaseHealth(): Promise<DatabaseHealth> {
 
 export async function executeTursoQuery(options: ExecuteOptions) {
   const startTime = Date.now()
-  
+
   try {
     const client = getTursoClient()
     const result = await client.execute(options)
     const responseTime = Date.now() - startTime
-    
+
     // Format the result for display
     let formattedResult = ''
-    
+
     if (result.rows && result.rows.length > 0) {
       // Get column names from the first row
       const columns = Object.keys(result.rows[0])
-      
+
       // Create header
       formattedResult += columns.join(' | ') + '\n'
       formattedResult += columns.map(() => '---').join(' | ') + '\n'
-      
+
       // Add rows
       result.rows.forEach(row => {
         const values = columns.map(col => String(row[col] ?? ''))
@@ -207,7 +201,7 @@ export async function executeTursoQuery(options: ExecuteOptions) {
     } else {
       formattedResult = 'Query executed successfully (no results)'
     }
-    
+
     return {
       success: true,
       result: formattedResult,
@@ -218,7 +212,7 @@ export async function executeTursoQuery(options: ExecuteOptions) {
     }
   } catch (error) {
     const responseTime = Date.now() - startTime
-    
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

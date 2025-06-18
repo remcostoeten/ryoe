@@ -1,10 +1,4 @@
 import { useCallback } from 'react'
-import { BlockNoteViewRaw as BlockNoteView, useCreateBlockNote, getDefaultReactSlashMenuItems, DefaultReactSuggestionItem, SuggestionMenuController } from '@blocknote/react'
-import { filterSuggestionItems } from '@blocknote/core'
-import '@blocknote/core/fonts/inter.css'
-import '@blocknote/core/style.css'
-import '@blocknote/mantine/style.css'
-import { uploadFile as uploadFileService } from '@/services/file-service'
 
 interface BlockNoteEditorProps {
   initialContent?: string
@@ -19,88 +13,46 @@ export default function BlockNoteEditor({
   readOnly = false,
   className
 }: BlockNoteEditorProps) {
-  // Create a new editor instance
-  const editor = useCreateBlockNote({
-    initialContent: initialContent ? JSON.parse(initialContent) : undefined,
-    defaultStyles: true,
-    trailingBlock: true,
-    uploadFile: async (file: File): Promise<string> => {
-      try {
-        // Show upload progress in the editor
-        const progressBlock = editor.insertBlocks([{
-          type: 'paragraph',
-          content: [{ type: 'text', text: `Uploading ${file.name}...`, styles: {} }]
-        }], editor.getTextCursorPosition().block, 'before')[0]
-
-        // Upload the file
-        const result = await uploadFileService(file, (progress) => {
-          // Update progress in the editor
-          editor.updateBlock(progressBlock, {
-            type: 'paragraph',
-            content: [{ type: 'text', text: `Uploading ${file.name}... ${Math.round(progress)}%`, styles: {} }]
-          })
-        })
-
-        // Remove the progress block
-        editor.removeBlocks([progressBlock])
-
-        if (!result.success) {
-          throw new Error(result.error || 'Upload failed')
-        }
-
-        return result.data.url
-      } catch (error) {
-        console.error('Failed to upload file:', error)
-        // Show error message in the editor
-        editor.insertBlocks([{
-          type: 'paragraph',
-          content: [{
-            type: 'text',
-            text: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            styles: { textColor: 'red' }
-          }]
-        }], editor.getTextCursorPosition().block, 'before')
-        throw error
-      }
-    }
-  })
-
   // Handle content changes
-  const handleChange = useCallback(() => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (onChange) {
-      const content = JSON.stringify(editor.topLevelBlocks)
-      onChange(content)
+      onChange(e.target.value)
     }
-  }, [editor, onChange])
+  }, [onChange])
 
-  // Get custom slash menu items
-  const getItems = useCallback(async (query: string): Promise<DefaultReactSuggestionItem[]> => {
-    const items = getDefaultReactSlashMenuItems(editor)
-    return filterSuggestionItems(items, query)
-  }, [editor])
+  // Parse initial content - if it's JSON (BlockNote format), extract text
+  let displayContent = initialContent
+  if (initialContent && initialContent.startsWith('[') && initialContent.endsWith(']')) {
+    try {
+      const blocks = JSON.parse(initialContent)
+      if (Array.isArray(blocks)) {
+        // Extract text from BlockNote blocks
+        displayContent = blocks
+          .map(block => {
+            if (block.content && Array.isArray(block.content)) {
+              return block.content
+                .map(item => item.text || '')
+                .join('')
+            }
+            return ''
+          })
+          .join('\n')
+      }
+    } catch {
+      // If parsing fails, use as-is
+      displayContent = initialContent
+    }
+  }
 
-  // Render the editor
   return (
     <div className={className}>
-      <BlockNoteView
-        editor={editor}
-        theme="light"
-        editable={!readOnly}
-        formattingToolbar={!readOnly}
-        linkToolbar={!readOnly}
-        sideMenu={!readOnly}
-        slashMenu={false}
-        emojiPicker={!readOnly}
-        tableHandles={!readOnly}
+      <textarea
+        value={displayContent}
         onChange={handleChange}
-      >
-        {!readOnly && (
-          <SuggestionMenuController
-            triggerCharacter="/"
-            getItems={getItems}
-          />
-        )}
-      </BlockNoteView>
+        readOnly={readOnly}
+        className="w-full h-full min-h-[400px] p-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Start writing your note..."
+      />
     </div>
   )
 }
