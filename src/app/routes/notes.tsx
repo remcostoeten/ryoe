@@ -1,18 +1,20 @@
 import { useState, useMemo, lazy, Suspense } from 'react'
-import { useFolders } from '@/modules/folder-management/hooks/use-folders'
-import { useFolderOperations } from '@/modules/folder-management/hooks/use-folder-operations'
-import type { TFolder } from '@/types/notes'
-import type { FolderTreeNode } from '@/modules/folder-management/types'
-import { CreateNoteButton } from '@/modules/notes/components/create-note-button'
-import { NoteEditor } from '@/modules/notes/components/note-editor'
-import { useNotes } from '@/modules/notes/hooks/use-notes'
-import { Button } from '@/components/ui/button'
+import { useFolders } from '@/application/features/workspace/modules/folder-management/hooks/use-folders'
+import { useFolderOperations } from '@/application/features/workspace/modules/folder-management/hooks/use-folder-operations'
+import type { TFolder } from '@/domain/entities/workspace'
+import type { FolderTreeNode } from '@/domain/entities/workspace'
+import { CreateNoteButton } from '@/application/features/workspace/modules/notes/components/create-note-button'
+import { NoteEditor } from '@/application/features/workspace/modules/notes/components/note-editor'
+import { useNotes } from '@/application/features/workspace/modules/notes/hooks/use-notes'
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { FileText } from 'lucide-react'
+import { cn } from '@/shared/utils'
+import { FolderSidebar } from '@/modules/sidebar/components/folder-sidebar'
 
 // Lazy load heavy components
 const FolderTree = lazy(() => import('@/modules/folder-management/components/folder-tree').then(module => ({ default: module.FolderTree })))
 const NoteList = lazy(() => import('@/modules/notes/components/note-list').then(module => ({ default: module.NoteList })))
 import { PanelLeftClose, PanelLeft } from 'lucide-react'
-import { cn } from '@/utilities'
 
 // Helper function to convert TFolder[] to FolderTreeNode[]
 function buildFolderTree(folders: TFolder[]): FolderTreeNode[] {
@@ -67,7 +69,7 @@ export default function NotesPage() {
   const folderTree = useMemo(() => buildFolderTree(folders), [folders])
 
   // Note management
-  const { notes, loading: notesLoading, createNote, updateNote, deleteNote } = useNotes(selectedFolderId)
+  const { notes, loading: notesLoading, createNote, deleteNote } = useNotes(selectedFolderId)
 
   // Get the selected note
   const selectedNote = notes.find(note => note.id === selectedNoteId)
@@ -75,6 +77,10 @@ export default function NotesPage() {
   const handleFolderSelect = (folder: TFolder) => {
     setSelectedFolderId(folder.id)
     setSelectedNoteId(null) // Clear note selection when folder changes
+  }
+
+  const handleNoteSelect = (note: any) => {
+    setSelectedNoteId(note.id)
   }
 
   const handleFolderExpand = (folderId: number, isExpanded: boolean) => {
@@ -123,37 +129,11 @@ export default function NotesPage() {
     }
   }
 
-  const handleNoteContentChange = async (content: string) => {
-    if (!selectedNote) return
-    
-    try {
-      await updateNote({
-        id: selectedNote.id,
-        content
-      })
-    } catch (error) {
-      console.error('Failed to save note:', error)
-    }
-  }
-
-  const handleNoteTitleChange = async (title: string) => {
-    if (!selectedNote) return
-    
-    try {
-      await updateNote({
-        id: selectedNote.id,
-        title
-      })
-    } catch (error) {
-      console.error('Failed to save note title:', error)
-    }
-  }
-
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-background via-background/98 to-muted/5">
       {/* Sidebar */}
       <div className={cn(
-        'border-r border-border transition-all duration-300',
+        'border-r border-border/40 transition-all duration-300 backdrop-blur-sm bg-card/30',
         sidebarCollapsed ? 'w-0' : 'w-80'
       )}>
         <div className={cn(
@@ -161,104 +141,51 @@ export default function NotesPage() {
           sidebarCollapsed && 'hidden'
         )}>
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Notes</h2>
+          <div className="p-6 border-b border-border/30 bg-gradient-to-r from-card/80 via-card/90 to-background/95 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Notes</h2>
+                <p className="text-sm text-muted-foreground/70 mt-1">Organize your thoughts</p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSidebarCollapsed(true)}
+                className="hover:bg-accent/40 transition-all duration-200 h-8 w-8 p-0 border border-transparent hover:border-border/30"
               >
                 <PanelLeftClose className="w-4 h-4" />
               </Button>
             </div>
-            
+
             <CreateNoteButton
               selectedFolderId={selectedFolderId}
               onCreateNote={handleCreateNote}
-              className="w-full"
+              className="w-full shadow-sm hover:shadow-md transition-all duration-200 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-10"
             />
           </div>
 
           {/* Folder Tree */}
-          <div className="flex-1 overflow-auto p-4">
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Folders</h3>
-              {foldersLoading ? (
-                <div className="text-sm text-muted-foreground">Loading folders...</div>
-              ) : (
-                <Suspense fallback={
-                  <div className="animate-pulse space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  </div>
-                }>
-                  <FolderTree
-                    folders={folderTree}
-                    selectedFolderId={selectedFolderId}
-                    expandedFolderIds={expandedFolderIds}
-                    onFolderSelect={handleFolderSelect}
-                    onFolderExpand={handleFolderExpand}
-                    onFolderCreate={handleFolderCreate}
-                    onFolderRename={handleFolderRename}
-                    onFolderDelete={handleFolderDelete}
-                    onFolderMove={moveFolder}
-                    enableDragDrop={true}
-                    className="mb-4"
-                  />
-                </Suspense>
-              )}
-            </div>
-
-            {/* Notes in Selected Folder */}
-            {selectedFolderId && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                  Notes in Folder
-                </h3>
-                {notesLoading ? (
-                  <div className="text-sm text-muted-foreground">Loading notes...</div>
-                ) : (
-                  <Suspense fallback={
-                    <div className="animate-pulse space-y-2">
-                      <div className="h-8 bg-gray-200 rounded"></div>
-                      <div className="h-8 bg-gray-200 rounded"></div>
-                      <div className="h-8 bg-gray-200 rounded"></div>
-                    </div>
-                  }>
-                    <NoteList
-                      notes={notes.map(note => ({
-                        ...note,
-                        folderId: note.folderId ?? undefined,
-                        wordCount: 0,
-                        characterCount: note.content?.length || 0,
-                        readingTime: Math.ceil((note.content?.length || 0) / 1000),
-                        lastModified: note.updatedAt.toISOString(),
-                        createdAt: note.createdAt.getTime(),
-                        updatedAt: note.updatedAt.getTime()
-                      }))}
-                      selectedNoteId={selectedNoteId}
-                      onNoteSelect={setSelectedNoteId}
-                      onNoteDelete={deleteNote}
-                    />
-                  </Suspense>
-                )}
-              </div>
-            )}
+          <div className="flex-1 overflow-hidden">
+            <FolderSidebar
+              searchFilter=""
+              enableDragDrop={true}
+              showNotes={true}
+              onNoteSelect={handleNoteSelect}
+              selectedNoteId={selectedNoteId}
+            />
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-gradient-to-b from-background via-background/95 to-card/20">
         {/* Collapsed Sidebar Toggle */}
         {sidebarCollapsed && (
-          <div className="p-2 border-b border-border">
+          <div className="p-4 border-b border-border/30 bg-card/50 backdrop-blur-sm">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarCollapsed(false)}
+              className="hover:bg-accent/40 transition-all duration-200 h-8 w-8 p-0 border border-transparent hover:border-border/30"
             >
               <PanelLeft className="w-4 h-4" />
             </Button>
@@ -266,26 +193,39 @@ export default function NotesPage() {
         )}
 
         {/* Note Editor */}
-        <div className="flex-1">
+        <div className="flex-1 relative">
           {selectedNote ? (
-            <NoteEditor
-              key={selectedNote.id}
-              title={selectedNote.title}
-              initialContent={selectedNote.content}
-              onChange={handleNoteContentChange}
-              onTitleChange={handleNoteTitleChange}
-              className="h-full"
-            />
+            <div className="h-full bg-gradient-to-br from-background via-background/98 to-card/10 shadow-inner">
+              <NoteEditor
+                key={selectedNote.id}
+                noteId={selectedNote.id}
+                readOnly={false}
+                className="h-full"
+              />
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <h3 className="text-lg font-medium mb-2">No note selected</h3>
-                <p className="text-sm">
-                  {selectedFolderId 
-                    ? 'Select a note from the sidebar or create a new one'
-                    : 'Select a folder first, then create or select a note'
-                  }
+            <div className="flex items-center justify-center h-full bg-gradient-to-br from-background via-card/10 to-muted/5">
+              <div className="text-center max-w-md mx-auto p-8">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center border border-border/30">
+                  <FileText className="w-10 h-10 text-muted-foreground/60" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground/90 mb-3">Select a note to start writing</h3>
+                <p className="text-muted-foreground/70 leading-relaxed mb-6">
+                  Choose a note from the sidebar or create a new one to begin your writing journey
                 </p>
+                <div className="flex flex-col gap-3">
+                  <CreateNoteButton
+                    selectedFolderId={selectedFolderId}
+                    onCreateNote={handleCreateNote}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-10 shadow-sm hover:shadow-md transition-all duration-200"
+                    disabled={!selectedFolderId}
+                  />
+                  {!selectedFolderId && (
+                    <p className="text-xs text-muted-foreground/60">
+                      Please select a folder first to create a note
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           )}

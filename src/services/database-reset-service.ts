@@ -3,9 +3,9 @@
  * Uses the enterprise architecture pattern
  */
 
-import { getTursoClient } from '@/core/database/clients/turso-client'
-import { getAppStorage } from '@/core/storage'
-import { DATABASE_TABLES, STORAGE_KEYS } from '@/core/config/constants'
+import { getTursoClient } from '@/infrastructure/database/core/database/clients/turso-client'
+import { getAppStorage } from '@/infrastructure/storage'
+import { DATABASE_TABLES, STORAGE_KEYS } from '@/infrastructure/config/core/config/constants'
 import type { TServiceResult } from './types'
 
 export interface TDatabaseResetResult {

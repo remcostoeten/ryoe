@@ -1,0 +1,50 @@
+# Bun configuration file
+
+[install]
+# Use exact versions for better reproducibility
+exact = true
+
+# Cache directory
+cache = "node_modules/.cache/bun"
+
+# Registry configuration
+registry = "https://registry.npmjs.org/"
+
+# Peer dependencies handling
+peer = true
+
+# Production dependencies only in production
+production = false
+
+# Optional dependencies
+optional = true
+
+[install.scopes]
+# Add any scoped registries here if needed
+
+[run]
+# Shell to use for scripts
+shell = "bash"
+
+# Environment variables
+env = "development"
+
+[build]
+# Build configuration
+target = "browser"
+format = "esm"
+splitting = true
+minify = false
+
+[dev]
+# Development server configuration
+port = 1420
+host = "localhost"
+open = false
+
+[tauri]
+# Tauri-specific configuration
+beforeDevCommand = "bun run dev"
+beforeBuildCommand = "bun run build"
+devPath = "http://localhost:1420"
+distDir = "../dist"

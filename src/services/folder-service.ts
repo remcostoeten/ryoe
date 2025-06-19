@@ -3,20 +3,22 @@
  * Pure functions only, no classes
  */
 
-import { 
-  findFolderById, 
+import {
+  findFolderById,
   findRootFolders,
   findChildFolders,
-  createFolder, 
-  updateFolder, 
+  createFolder,
+  updateFolder,
   deleteFolder,
   moveFolder,
   reorderFolders,
   getFolderHierarchy,
-  getFolderPath
+  getFolderPath,
+  toggleFolderFavorite,
+  findFavoriteFolders
 } from '@/repositories'
 import { findNotesByFolderId } from '@/repositories'
-import { validateFolderName } from '@/utilities'
+import { validateFolderName } from '@/shared/utils'
 import type { 
   TServiceResult, 
   TServiceListResult,
@@ -24,7 +26,7 @@ import type {
   TFolderUpdateData, 
   TFolderWithStats
 } from './types'
-import type { TCreateFolderData, TUpdateFolderData, TFolder } from '@/repositories/types'
+import type { TCreateFolderData, TUpdateFolderData, TFolder } from '@/domain/entities/workspace'
 
 function validateFolderCreation(data: TFolderCreationData): TServiceResult<null> {
   if (!data.name || !validateFolderName(data.name)) {
@@ -58,6 +60,7 @@ async function mapFolderToStats(folder: TFolder): Promise<TFolderWithStats> {
     name: folder.name,
     parentId: folder.parentId,
     position: folder.position,
+    isFavorite: folder.isFavorite,
     noteCount,
     subfolderCount,
     totalSize,
@@ -227,25 +230,79 @@ export async function getChildFolders(parentId: number): Promise<TServiceListRes
   }
 }
 
-export async function deleteFolderById(id: number): Promise<TServiceResult<boolean>> {
+export async function getFolderDeletionStats(id: number): Promise<TServiceResult<{ childFoldersCount: number; notesCount: number }>> {
   try {
-    // Check if folder has children
     const childFolders = await findChildFolders(id)
-    if (childFolders.success && childFolders.data && childFolders.data.length > 0) {
-      return {
-        success: false,
-        error: 'Cannot delete folder that contains subfolders',
-        code: 'FOLDER_HAS_CHILDREN'
-      }
-    }
+    const childFoldersCount = childFolders.success && childFolders.data ? childFolders.data.length : 0
 
-    // Check if folder has notes
     const notes = await findNotesByFolderId(id)
-    if (notes.success && notes.data && notes.data.length > 0) {
-      return {
-        success: false,
-        error: 'Cannot delete folder that contains notes',
-        code: 'FOLDER_HAS_NOTES'
+    const notesCount = notes.success && notes.data ? notes.data.length : 0
+
+    return {
+      success: true,
+      data: { childFoldersCount, notesCount }
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: 'GET_FOLDER_STATS_ERROR'
+    }
+  }
+}
+
+export async function deleteFolderById(id: number, options?: { force?: boolean }): Promise<TServiceResult<boolean>> {
+  try {
+    const { force = false } = options || {}
+
+    if (!force) {
+      const childFolders = await findChildFolders(id)
+      if (childFolders.success && childFolders.data && childFolders.data.length > 0) {
+        return {
+          success: false,
+          error: 'Cannot delete folder that contains subfolders',
+          code: 'FOLDER_HAS_CHILDREN'
+        }
+      }
+
+      const notes = await findNotesByFolderId(id)
+      if (notes.success && notes.data && notes.data.length > 0) {
+        return {
+          success: false,
+          error: 'Cannot delete folder that contains notes',
+          code: 'FOLDER_HAS_NOTES'
+        }
+      }
+    } else {
+      // Force delete: recursively delete all children first
+      const childFolders = await findChildFolders(id)
+      if (childFolders.success && childFolders.data) {
+        for (const childFolder of childFolders.data) {
+          const childResult = await deleteFolderById(childFolder.id, { force: true })
+          if (!childResult.success) {
+            return {
+              success: false,
+              error: `Failed to delete child folder: ${childResult.error}`,
+              code: 'DELETE_CHILD_FOLDER_FAILED'
+            }
+          }
+        }
+      }
+
+      // Delete all notes in this folder
+      const notes = await findNotesByFolderId(id)
+      if (notes.success && notes.data) {
+        const { deleteNoteById } = await import('./note-service')
+        for (const note of notes.data) {
+          const noteResult = await deleteNoteById(note.id)
+          if (!noteResult.success) {
+            return {
+              success: false,
+              error: `Failed to delete note: ${noteResult.error}`,
+              code: 'DELETE_NOTE_FAILED'
+            }
+          }
+        }
       }
     }
 
@@ -375,6 +432,57 @@ export async function getFolderPathWithStats(id: number): Promise<TServiceResult
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       code: 'GET_PATH_ERROR'
+    }
+  }
+}
+
+export async function toggleFolderFavoriteStatus(id: number): Promise<TServiceResult<TFolderWithStats>> {
+  try {
+    const result = await toggleFolderFavorite(id)
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        error: result.error || 'Failed to toggle folder favorite status',
+        code: 'TOGGLE_FAVORITE_FAILED'
+      }
+    }
+
+    const folderWithStats = await mapFolderToStats(result.data)
+    return { success: true, data: folderWithStats }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: 'TOGGLE_FAVORITE_ERROR'
+    }
+  }
+}
+
+export async function getFavoriteFoldersWithStats(): Promise<TServiceListResult<TFolderWithStats>> {
+  try {
+    const result = await findFavoriteFolders()
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || 'Failed to get favorite folders',
+        code: 'GET_FAVORITES_FAILED'
+      }
+    }
+
+    const foldersWithStats = await Promise.all(
+      (result.data || []).map(mapFolderToStats)
+    )
+
+    return {
+      success: true,
+      data: foldersWithStats,
+      total: foldersWithStats.length
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: 'GET_FAVORITES_ERROR'
     }
   }
 }

@@ -4,17 +4,17 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { 
-  getNoteById, 
+import {
+  getNoteById,
   getNotesByFolder,
   searchNotesWithOptions
 } from '@/services/note-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
-import type { TNoteWithMetadata, TSearchOptions, TSearchResult } from '@/services/types'
+import type { TNoteWithMetadata, TSearchOptions, TSearchResult } from '@/domain/entities/workspace'
 
 export function useNote(
-  id: number, 
+  id: number,
   options?: TQueryOptions<TNoteWithMetadata>
 ) {
   return useQuery({
@@ -38,7 +38,7 @@ export function useNote(
 }
 
 export function useNotesByFolder(
-  folderId: number | null, 
+  folderId: number | null,
   options?: TQueryOptions<TNoteWithMetadata[]>
 ) {
   return useQuery({
@@ -68,7 +68,7 @@ export function useSearchNotes(
   return useQuery({
     queryKey: QUERY_KEYS.SEARCH_NOTES(searchOptions.query),
     queryFn: async () => {
-      const result = await searchNotesWithOptions(searchOptions)
+      const result = await searchNotesWithOptions(searchOptions.query)
       if (!result.success) {
         throw new Error(result.error || 'Failed to search notes')
       }
@@ -144,14 +144,14 @@ export function getNotesByFolderFromCache(queryClient: any, folderId: number | n
 
 // Optimistic update helpers
 export function updateNoteInFolderCache(
-  queryClient: any, 
-  folderId: number | null, 
-  noteId: number, 
+  queryClient: any,
+  folderId: number | null,
+  noteId: number,
   updater: (note: TNoteWithMetadata) => TNoteWithMetadata
 ) {
   const notes = getNotesByFolderFromCache(queryClient, folderId)
   if (notes) {
-    const updatedNotes = notes.map(note => 
+    const updatedNotes = notes.map(note =>
       note.id === noteId ? updater(note) : note
     )
     setNotesByFolderCache(queryClient, folderId, updatedNotes)
@@ -159,8 +159,8 @@ export function updateNoteInFolderCache(
 }
 
 export function addNoteToFolderCache(
-  queryClient: any, 
-  folderId: number | null, 
+  queryClient: any,
+  folderId: number | null,
   note: TNoteWithMetadata
 ) {
   const notes = getNotesByFolderFromCache(queryClient, folderId) || []
@@ -169,8 +169,8 @@ export function addNoteToFolderCache(
 }
 
 export function removeNoteFromFolderCache(
-  queryClient: any, 
-  folderId: number | null, 
+  queryClient: any,
+  folderId: number | null,
   noteId: number
 ) {
   const notes = getNotesByFolderFromCache(queryClient, folderId)
@@ -188,11 +188,11 @@ export function moveNoteBetweenFoldersCache(
 ) {
   // Remove from old folder
   removeNoteFromFolderCache(queryClient, oldFolderId, note.id)
-  
+
   // Add to new folder
   const updatedNote = { ...note, folderId: newFolderId }
   addNoteToFolderCache(queryClient, newFolderId, { ...updatedNote, folderId: updatedNote.folderId || undefined })
-  
+
   // Update individual note cache
   setNoteCache(queryClient, note.id, { ...updatedNote, folderId: updatedNote.folderId || undefined })
 }

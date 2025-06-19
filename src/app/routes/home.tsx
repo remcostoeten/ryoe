@@ -2,8 +2,6 @@
 import { DatabaseHealthIndicator } from '@/modules/database-actions/ui/database-health-indicator'
 import { UserCreationForm } from '@/modules/database-actions/ui/user-creation-form'
 import { DatabaseQueryTester } from '@/modules/database-actions/ui/database-query-tester'
-import { VersionTest } from '@/components/version-test'
-import { EnvironmentDebug } from '@/components/debug/environment-debug'
 import { FooterEnhanced } from '@/components/footer-enhanced'
 import { UserProfile } from '@/components/layout/UserProfile'
 
@@ -31,18 +29,7 @@ export function HomePage() {
                         </div>
 
                         <div className="flex justify-center">
-                            <VersionTest />
-                        </div>
-
-                        <div className="flex justify-center">
                             <DatabaseQueryTester />
-                        </div>
-
-                        <div className="mt-8 p-6 bg-card rounded-lg shadow-sm">
-                            <h2 className="text-xl font-semibold mb-4">
-                                Environment Debug
-                            </h2>
-                            <EnvironmentDebug />
                         </div>
 
                         <div className="mt-8 p-6 bg-card rounded-lg shadow-sm">

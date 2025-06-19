@@ -13,7 +13,7 @@ import {
 } from '@/services/folder-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/domain/entities/workspace'
 
 export function useFolder(
   id: number, 

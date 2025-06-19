@@ -50,7 +50,9 @@ export {
   moveNoteToFolder,
   reorderNotesInFolder,
   duplicateNoteById,
-  searchNotesWithOptions
+  searchNotesWithOptions,
+  toggleNoteFavoriteStatus,
+  getFavoriteNotesWithMetadata
 } from './note-service'
 
 // Folder service functions
@@ -64,7 +66,9 @@ export {
   moveFolderToParent,
   reorderFoldersInParent,
   getFolderHierarchyWithStats,
-  getFolderPathWithStats
+  getFolderPathWithStats,
+  toggleFolderFavoriteStatus,
+  getFavoriteFoldersWithStats
 } from './folder-service'
 
 // Database reset service functions
@@ -73,3 +77,24 @@ export {
   hardResetDatabase,
   validateReset
 } from './database-reset-service'
+
+// Export service functions
+export {
+  exportNote,
+  exportNotes,
+  printNote,
+  shareNote
+} from './export-service'
+
+// Note history service functions
+export {
+  addNoteHistoryEntry,
+  getNoteHistory,
+  getRecentChanges,
+  getNoteHistoryStats,
+  clearNoteHistory,
+  exportNoteHistory,
+  initializeNoteHistory,
+  trackNoteChange
+} from './note-history-service'
+export type { TNoteHistoryEntry } from './note-history-service'

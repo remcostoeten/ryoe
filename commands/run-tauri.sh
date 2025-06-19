@@ -35,5 +35,5 @@ else
   echo -e "${GREEN}No ports needed cleaning. Starting app...${NC}"
 fi
 
-pnpm tauri dev
+bun tauri dev
 

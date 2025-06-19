@@ -30,7 +30,7 @@ import type {
   TMoveFolderVariables,
   TReorderFoldersVariables
 } from './types'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/domain/entities/workspace'
 
 export function useCreateFolder(
   options?: TMutationOptions<TFolderWithStats, TCreateFolderVariables>
@@ -63,6 +63,7 @@ export function useCreateFolder(
         name: variables.name,
         parentId: variables.parentId,
         position: previousFolders?.length || 0,
+        isFavorite: false,
         noteCount: 0,
         subfolderCount: 0,
         totalSize: 0,
@@ -176,7 +177,7 @@ export function useDeleteFolder(
 
   return useMutation({
     mutationFn: async (variables: TDeleteFolderVariables) => {
-      const result = await deleteFolderById(variables.id)
+      const result = await deleteFolderById(variables.id, { force: variables.force })
       if (!result.success) {
         throw new Error(result.error || 'Failed to delete folder')
       }

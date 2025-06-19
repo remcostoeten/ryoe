@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '@/utilities'
+import { cn } from '@/shared/utils'
 import { Link } from 'react-router'
 
 interface SignInPageProps {

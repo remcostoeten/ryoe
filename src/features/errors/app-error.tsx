@@ -1,12 +1,12 @@
 import { relaunch } from '@tauri-apps/plugin-process'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/presentation/components/ui/components/ui/button'
 import {
     ErrorView,
     ErrorHeader,
     ErrorDescription,
     ErrorActions
 } from '@/features/errors/error-base'
-import { isTauriEnvironment } from '@/utilities'
+import { isTauriEnvironment } from '@/shared/utils'
 
 export default function AppErrorPage() {
     const handleRestart = () => {

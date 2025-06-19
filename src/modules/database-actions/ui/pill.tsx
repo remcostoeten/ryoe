@@ -5,7 +5,7 @@ import {
     Badge,
     TooltipContent,
     TooltipTrigger
-} from '@/components/ui/'
+} from '@/presentation/components/ui/components/ui/'
 import {
     CheckCircle,
     XCircle,
@@ -14,7 +14,7 @@ import {
     RefreshCw,
     Database
 } from 'lucide-react'
-import { cn } from '@/utilities'
+import { cn } from '@/shared/utils'
 
 interface DatabaseHealthIndicatorProps {
     /** Show refresh button. Default: true */

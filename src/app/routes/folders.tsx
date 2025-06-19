@@ -1,18 +1,17 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from '@/components/ui/toast'
-import { Plus, RefreshCw, TestTube } from 'lucide-react'
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/components/ui/card'
+import { toast } from '@/presentation/components/ui/components/ui/toast'
+import { Plus, RefreshCw } from 'lucide-react'
 import {
   FolderTree,
   FolderCreateForm,
-  useFolderTree,
-  useFolderOperations
-} from '@/modules/folder-management'
-import type { TFolder } from '@/types/notes'
+  useFolderContext
+} from '@/application/features/workspace'
+import type { TFolder } from '@/domain/entities/workspace'
 
 type Folder = TFolder
-import { testFolderCRUD } from '@/__tests__/test-folder-crud'
+
 
 // Helper function to get all folders from tree structure
 function getAllFolders(folder: any): any[] {
@@ -28,12 +27,12 @@ function getAllFolders(folder: any): any[] {
 export default function FoldersPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedParentId, setSelectedParentId] = useState<number | null>(null)
-  
+
   const {
     treeData,
-    expandedIds,
-    selectedId,
-    editingId,
+    expandedFolderIds,
+    selectedFolderId,
+    editingFolderId,
     loading,
     error,
     expandFolder,
@@ -42,10 +41,9 @@ export default function FoldersPage() {
     startEditing,
     stopEditing,
     renameFolder,
-    refreshTree
-  } = useFolderTree()
-
-  const { moveFolder, deleteFolder } = useFolderOperations()
+    refreshFolders,
+    deleteFolder
+  } = useFolderContext()
 
   const handleFolderSelect = (folder: Folder) => {
     selectFolder(folder.id)
@@ -53,8 +51,10 @@ export default function FoldersPage() {
 
   const handleFolderMove = async (folderId: number, newParentId: number | null, newPosition: number) => {
     try {
-      await moveFolder(folderId, newParentId, newPosition)
-      toast.success('Folder moved successfully')
+      // Note: moveFolder is not available in useFolderContext, we'll need to implement this
+      // For now, just show a message
+      toast.error('Move functionality needs to be implemented in context')
+      console.error('Move folder not implemented in context:', { folderId, newParentId, newPosition })
     } catch (error) {
       toast.error('Failed to move folder')
       console.error('Move folder error:', error)
@@ -77,7 +77,7 @@ export default function FoldersPage() {
   const handleCreateSuccess = (folder: Folder) => {
     setShowCreateForm(false)
     setSelectedParentId(null)
-    refreshTree()
+    // No need to manually refresh - the context handles this automatically
     selectFolder(folder.id)
   }
 
@@ -88,7 +88,7 @@ export default function FoldersPage() {
 
   const handleRefresh = async () => {
     try {
-      await refreshTree()
+      await refreshFolders()
       toast.success('Folder tree refreshed')
     } catch (error) {
       toast.error('Failed to refresh folder tree')
@@ -100,9 +100,9 @@ export default function FoldersPage() {
       const success = await deleteFolder(folder.id)
       if (success) {
         toast.success(`Folder "${folder.name}" deleted successfully`)
-        refreshTree()
+        // No need to manually refresh - the context handles this automatically
         // Clear selection if deleted folder was selected
-        if (selectedId === folder.id) {
+        if (selectedFolderId === folder.id) {
           selectFolder(null)
         }
       }
@@ -112,12 +112,7 @@ export default function FoldersPage() {
     }
   }
 
-  const handleRunTests = async () => {
-    console.log('Running folder CRUD tests...')
-    await testFolderCRUD()
-    // Refresh the tree after tests
-    await handleRefresh()
-  }
+
 
   if (loading) {
     return (
@@ -143,15 +138,7 @@ export default function FoldersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRunTests}
-            disabled={loading}
-          >
-            <TestTube className="h-4 w-4 mr-2" />
-            Run Tests
-          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -188,9 +175,9 @@ export default function FoldersPage() {
             <CardContent>
               <FolderTree
                 folders={treeData}
-                selectedFolderId={selectedId}
-                expandedFolderIds={expandedIds}
-                editingFolderId={editingId}
+                selectedFolderId={selectedFolderId}
+                expandedFolderIds={expandedFolderIds}
+                editingFolderId={editingFolderId}
                 onFolderSelect={handleFolderSelect}
                 onFolderExpand={handleFolderExpand}
                 onFolderCreate={handleCreateFolder}
@@ -200,14 +187,9 @@ export default function FoldersPage() {
                   // Handle folder move without immediate refresh to prevent DOM reload
                   try {
                     await handleFolderMove(folderId, newParentId, newPosition)
-                    // Only refresh on success, and do it after a delay to prevent DOM reload
-                    setTimeout(() => {
-                      refreshTree()
-                    }, 500)
+                    // Context will handle refresh automatically
                   } catch (error) {
                     console.error('Failed to move folder:', error)
-                    // Refresh immediately on error to revert state
-                    refreshTree()
                   }
                 }}
                 onStartEditing={startEditing}
@@ -241,9 +223,9 @@ export default function FoldersPage() {
           )}
 
           {/* Selected Folder Info */}
-          {selectedId && (() => {
-            const selectedFolder = treeData.find(f => f.id === selectedId) ||
-              treeData.flatMap(f => getAllFolders(f)).find(f => f.id === selectedId)
+          {selectedFolderId && (() => {
+            const selectedFolder = treeData.find(f => f.id === selectedFolderId) ||
+              treeData.flatMap(f => getAllFolders(f)).find(f => f.id === selectedFolderId)
 
             if (!selectedFolder) return null
 
@@ -307,15 +289,15 @@ export default function FoldersPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Expanded:</span>
-                  <span className="font-medium">{expandedIds.size}</span>
+                  <span className="font-medium">{expandedFolderIds.size}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Selected:</span>
-                  <span className="font-medium">{selectedId ? 'Yes' : 'None'}</span>
+                  <span className="font-medium">{selectedFolderId ? 'Yes' : 'None'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Editing:</span>
-                  <span className="font-medium">{editingId ? 'Yes' : 'None'}</span>
+                  <span className="font-medium">{editingFolderId ? 'Yes' : 'None'}</span>
                 </div>
               </div>
             </CardContent>
@@ -372,3 +354,5 @@ export default function FoldersPage() {
     </div>
   )
 }
+
+

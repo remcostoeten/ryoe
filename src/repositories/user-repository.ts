@@ -1,16 +1,7 @@
+import { TUser, TCreateUserData, TUpdateUserData, TRepositoryResult, TFilterOptions, TSortOptions, TPaginationOptions, TRepositoryListResult } from '.'
 import { findById, findMany, create, update, deleteById } from './base-repository'
 import { getTursoClient } from '@/core/database/clients/turso-client'
-import type { 
-  TUser, 
-  TCreateUserData, 
-  TUpdateUserData, 
-  TRepositoryResult, 
-  TRepositoryListResult,
-  TPaginationOptions,
-  TSortOptions,
-  TFilterOptions
-} from './types'
-import { QUERY_KEYS } from '@/queries'
+
 
 const TABLE_NAME = 'users'
 
@@ -29,7 +20,7 @@ function mapRowToUser(row: any): TUser {
 
 function mapUserDataToRow(data: TCreateUserData | TUpdateUserData): Record<string, any> {
   const row: Record<string, any> = {}
-  
+
   if ('name' in data && data.name !== undefined) {
     row.name = data.name
   }
@@ -42,7 +33,7 @@ function mapUserDataToRow(data: TCreateUserData | TUpdateUserData): Record<strin
   if ('preferences' in data && data.preferences !== undefined) {
     row.preferences = JSON.stringify(data.preferences)
   }
-  
+
   return row
 }
 
@@ -63,11 +54,11 @@ export async function findUserByName(name: string): Promise<TRepositoryResult<TU
     filters: { name },
     pagination: { limit: 1 }
   })
-  
+
   if (!result.success) {
     return { success: false, error: result.error }
   }
-  
+
   const user = result.data?.[0]
   return { success: true, data: user }
 }
@@ -83,7 +74,7 @@ export async function createUser(data: TCreateUserData): Promise<TRepositoryResu
   const now = Date.now()
   const rowData = {
     ...mapUserDataToRow(data),
-    is_setup_complete: 1, 
+    is_setup_complete: 1,
     created_at: now,
     updated_at: now
   }
@@ -141,7 +132,7 @@ export async function getUserCount(): Promise<TRepositoryResult<number>> {
     if (!result.success) {
       return { success: false, error: result.error }
     }
-    
+
     return { success: true, data: result.data?.length || 0 }
   } catch (error) {
     return {
@@ -157,7 +148,7 @@ export async function getSetupCompleteUserCount(): Promise<TRepositoryResult<num
     if (!result.success) {
       return { success: false, error: result.error }
     }
-    
+
     return { success: true, data: result.data?.length || 0 }
   } catch (error) {
     return {

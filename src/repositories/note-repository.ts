@@ -3,16 +3,16 @@
  */
 
 import { findById, findMany, create, update, deleteById } from './base-repository'
-import type { 
-  TNote, 
-  TCreateNoteData, 
-  TUpdateNoteData, 
-  TRepositoryResult, 
+import type {
+  TNote,
+  TCreateNoteData,
+  TUpdateNoteData,
+  TRepositoryResult,
   TRepositoryListResult,
   TPaginationOptions,
   TSortOptions,
   TFilterOptions
-} from './types'
+} from '.'
 
 const TABLE_NAME = 'notes'
 
@@ -23,6 +23,7 @@ function mapRowToNote(row: any): TNote {
     content: String(row.content),
     folderId: row.folder_id ? Number(row.folder_id) : undefined,
     position: Number(row.position || 0),
+    isFavorite: Boolean(row.is_favorite || false),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at)
   }
@@ -30,7 +31,7 @@ function mapRowToNote(row: any): TNote {
 
 function mapNoteDataToRow(data: TCreateNoteData | TUpdateNoteData): Record<string, any> {
   const row: Record<string, any> = {}
-  
+
   if ('title' in data && data.title !== undefined) {
     row.title = data.title
   }
@@ -43,7 +44,10 @@ function mapNoteDataToRow(data: TCreateNoteData | TUpdateNoteData): Record<strin
   if ('position' in data && data.position !== undefined) {
     row.position = data.position
   }
-  
+  if ('isFavorite' in data && data.isFavorite !== undefined) {
+    row.is_favorite = data.isFavorite
+  }
+
   return row
 }
 
@@ -61,7 +65,7 @@ export async function findNotes(options?: {
 
 export async function findNotesByFolderId(folderId: number | null): Promise<TRepositoryListResult<TNote>> {
   const filters = folderId ? { folder_id: folderId } : { folder_id: null }
-  
+
   return findNotes({
     filters,
     sort: { field: 'position', direction: 'asc' }
@@ -83,10 +87,23 @@ export async function searchNotes(searchTerm: string): Promise<TRepositoryListRe
       return result
     }
 
-    const filteredNotes = result.data.filter(note => 
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase())
+    const searchLower = searchTerm.toLowerCase()
+    const filteredNotes = result.data.filter(note =>
+      note.title.toLowerCase().includes(searchLower) ||
+      note.content.toLowerCase().includes(searchLower)
     )
+
+    // Sort by relevance (title matches first, then content matches)
+    filteredNotes.sort((a, b) => {
+      const aTitleMatch = a.title.toLowerCase().includes(searchLower)
+      const bTitleMatch = b.title.toLowerCase().includes(searchLower)
+
+      if (aTitleMatch && !bTitleMatch) return -1
+      if (!aTitleMatch && bTitleMatch) return 1
+
+      // If both or neither match title, sort by updated date
+      return b.updatedAt - a.updatedAt
+    })
 
     return { success: true, data: filteredNotes }
   } catch (error) {
@@ -112,7 +129,7 @@ export async function createNote(data: TCreateNoteData): Promise<TRepositoryResu
   const rowData = {
     ...mapNoteDataToRow({ ...data, position })
   }
-  
+
   return create(TABLE_NAME, rowData, mapRowToNote)
 }
 
@@ -143,7 +160,7 @@ export async function moveNote(id: number, newFolderId: number | null, newPositi
 export async function reorderNotes(noteIds: number[]): Promise<TRepositoryResult<boolean>> {
   try {
     // Update position for each note
-    const updatePromises = noteIds.map((noteId, index) => 
+    const updatePromises = noteIds.map((noteId, index) =>
       updateNote(noteId, { position: index })
     )
 
@@ -183,4 +200,27 @@ export async function duplicateNote(id: number): Promise<TRepositoryResult<TNote
       error: error instanceof Error ? error.message : 'Unknown error'
     }
   }
+}
+
+export async function toggleNoteFavorite(id: number): Promise<TRepositoryResult<TNote>> {
+  try {
+    const note = await findNoteById(id)
+    if (!note.success || !note.data) {
+      return { success: false, error: 'Note not found' }
+    }
+
+    return updateNote(id, { isFavorite: !note.data.isFavorite })
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
+export async function findFavoriteNotes(): Promise<TRepositoryListResult<TNote>> {
+  return findNotes({
+    filters: { is_favorite: true },
+    sort: { field: 'title', direction: 'asc' }
+  })
 }

@@ -52,15 +52,24 @@ export function getCurrentTheme(): 'dark' | 'light' {
 
 export async function initTheme(): Promise<void> {
   try {
+    // Check if theme was already applied by the blocking script
+    const currentTheme = getCurrentTheme()
     const storedTheme = await getStoredTheme()
-    
+
     if (storedTheme) {
-      await setTheme(storedTheme)
+      // Only apply theme if it's different from what's currently applied
+      const targetTheme = storedTheme === 'system' ? getSystemTheme() : storedTheme
+
+      if (currentTheme !== targetTheme) {
+        // Apply theme without saving again (it's already stored)
+        applyThemeToDOM(targetTheme)
+      }
     } else {
-      // Default to system theme
-      await setTheme('system')
+      // No stored theme, save the current theme (likely dark from HTML default)
+      const themeToSave = currentTheme === 'light' ? 'light' : 'dark'
+      await setTheme(themeToSave)
     }
-    
+
     // Listen for system theme changes
     if (typeof window !== 'undefined') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -73,8 +82,11 @@ export async function initTheme(): Promise<void> {
     }
   } catch (error) {
     console.error('Failed to initialize theme:', error)
-    // Fallback to dark theme
-    applyThemeToDOM('dark')
+    // Fallback to dark theme (should already be applied by HTML script)
+    const currentTheme = getCurrentTheme()
+    if (currentTheme !== 'dark') {
+      applyThemeToDOM('dark')
+    }
   }
 }
 

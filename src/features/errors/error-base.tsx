@@ -1,4 +1,4 @@
-import { cn } from '@/utilities'
+import { cn } from '@/shared/utils'
 import { ReactNode } from 'react'
 
 export function ErrorView({
