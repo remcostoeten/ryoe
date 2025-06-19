@@ -76,46 +76,60 @@ const NoteMetadata = memo(({ note }: { note: TNote }) => {
   const readingTime = Math.ceil(wordCount / 200) // Average reading speed
 
   return (
-    <div className="p-4">
-      <h3 className="text-sm font-medium mb-3 text-muted-foreground flex items-center gap-2">
-        <FileText className="h-3 w-3" />
-        NOTE INFO
+    <div className="p-5 border-b border-border/30">
+      <h3 className="text-sm font-semibold mb-4 text-muted-foreground/80 flex items-center gap-2.5 uppercase tracking-wide">
+        <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-muted/40 border border-border/30">
+          <FileText className="h-3 w-3 text-muted-foreground/70" />
+        </div>
+        Note Details
       </h3>
-      <div className="space-y-3 text-sm">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Hash className="h-3 w-3 flex-shrink-0" />
-          <span className="truncate">{note.title}</span>
-        </div>
-
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Clock className="h-3 w-3 flex-shrink-0" />
-          <span>Modified: {formatDate(note.updatedAt)}</span>
-        </div>
-
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Calendar className="h-3 w-3 flex-shrink-0" />
-          <span>Created: {formatDate(note.createdAt)}</span>
-        </div>
-
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <User className="h-3 w-3 flex-shrink-0" />
-          <span>Author: You</span>
-        </div>
-
-        <div className="pt-2 border-t border-border">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="text-center p-2 bg-muted/50 rounded">
-              <div className="font-medium">{wordCount}</div>
-              <div className="text-muted-foreground">Words</div>
-            </div>
-            <div className="text-center p-2 bg-muted/50 rounded">
-              <div className="font-medium">{charCount}</div>
-              <div className="text-muted-foreground">Characters</div>
-            </div>
+      <div className="space-y-4 text-sm">
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-border/20">
+          <Hash className="h-4 w-4 flex-shrink-0 text-muted-foreground/60" />
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-muted-foreground/60 mb-1">Title</div>
+            <div className="font-medium text-foreground/90 truncate">{note.title}</div>
           </div>
-          <div className="text-center p-2 bg-muted/50 rounded mt-2">
-            <div className="font-medium">{readingTime} min</div>
-            <div className="text-muted-foreground">Reading time</div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-lg bg-muted/20 border border-border/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <span className="text-xs text-muted-foreground/60">Modified</span>
+            </div>
+            <div className="text-xs font-medium text-foreground/80">{formatDate(note.updatedAt)}</div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-muted/20 border border-border/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <span className="text-xs text-muted-foreground/60">Created</span>
+            </div>
+            <div className="text-xs font-medium text-foreground/80">{formatDate(note.createdAt)}</div>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-lg bg-muted/20 border border-border/20">
+          <div className="flex items-center gap-2 mb-2">
+            <User className="h-3.5 w-3.5 text-muted-foreground/60" />
+            <span className="text-xs text-muted-foreground/60">Author</span>
+          </div>
+          <div className="text-xs font-medium text-foreground/80">You</div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-3 bg-gradient-to-br from-muted/30 to-muted/20 rounded-lg border border-border/20">
+            <div className="font-semibold text-foreground/90">{wordCount}</div>
+            <div className="text-xs text-muted-foreground/60 mt-1">Words</div>
+          </div>
+          <div className="text-center p-3 bg-gradient-to-br from-muted/30 to-muted/20 rounded-lg border border-border/20">
+            <div className="font-semibold text-foreground/90">{charCount}</div>
+            <div className="text-xs text-muted-foreground/60 mt-1">Characters</div>
+          </div>
+          <div className="text-center p-3 bg-gradient-to-br from-muted/30 to-muted/20 rounded-lg border border-border/20">
+            <div className="font-semibold text-foreground/90">{readingTime} min</div>
+            <div className="text-xs text-muted-foreground/60 mt-1">Read time</div>
           </div>
         </div>
       </div>
@@ -135,36 +149,36 @@ const NoteProperties = memo(({
   onToggleFavorite?: (note: TNote) => void
   onToggleVisibility?: (note: TNote) => void
 }) => (
-  <div className="p-4 border-t border-border">
-    <h3 className="text-sm font-medium mb-3 text-muted-foreground">
-      PROPERTIES
+  <div className="p-5 border-b border-border/30">
+    <h3 className="text-sm font-semibold mb-4 text-muted-foreground/80 uppercase tracking-wide">
+      Properties
     </h3>
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm">
-          <Star className={cn("h-3 w-3", note.isFavorite ? "text-yellow-500 fill-current" : "text-muted-foreground")} />
-          <span>Favorite</span>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/20 hover:bg-muted/30 transition-all duration-200">
+        <div className="flex items-center gap-3 text-sm">
+          <Star className={cn("h-4 w-4", note.isFavorite ? "text-amber-500 fill-current" : "text-muted-foreground/60")} />
+          <span className="font-medium text-foreground/90">Favorite</span>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onToggleFavorite?.(note)}
-          className="h-6 px-2 text-xs"
+          className="h-7 px-3 text-xs hover:bg-accent/50 transition-all duration-200"
         >
           {note.isFavorite ? "Remove" : "Add"}
         </Button>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm">
-          {note.isPublic ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-          <span>Visibility</span>
+      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/20 hover:bg-muted/30 transition-all duration-200">
+        <div className="flex items-center gap-3 text-sm">
+          {note.isPublic ? <Eye className="h-4 w-4 text-muted-foreground/60" /> : <EyeOff className="h-4 w-4 text-muted-foreground/60" />}
+          <span className="font-medium text-foreground/90">Visibility</span>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onToggleVisibility?.(note)}
-          className="h-6 px-2 text-xs"
+          className="h-7 px-3 text-xs hover:bg-accent/50 transition-all duration-200"
         >
           {note.isPublic ? "Private" : "Public"}
         </Button>
@@ -175,12 +189,16 @@ const NoteProperties = memo(({
 
 NoteProperties.displayName = "NoteProperties"
 
-// Tags component with full functionality
+// Note tags component
 const NoteTags = memo(({ note }: { note: TNote }) => {
   const [isAddingTag, setIsAddingTag] = useState(false)
   const [newTagName, setNewTagName] = useState("")
 
-  const { data: noteTags = [], isLoading: isLoadingTags } = useNoteTags(note.id)
+  const {
+    data: noteTags = [],
+    isLoading: isLoadingTags
+  } = useNoteTags(note.id)
+
   const createTagMutation = useCreateTag()
   const addTagToNoteMutation = useAddTagToNote()
   const removeTagFromNoteMutation = useRemoveTagFromNote()
@@ -189,13 +207,13 @@ const NoteTags = memo(({ note }: { note: TNote }) => {
     if (!newTagName.trim()) return
 
     try {
-      // First create the tag
+      // Create tag first
       const newTag = await createTagMutation.mutateAsync({
         name: newTagName.trim(),
         color: getRandomTagColor()
       })
 
-      // Then add it to the note
+      // Add tag to note
       await addTagToNoteMutation.mutateAsync({
         noteId: note.id,
         tagId: newTag.id
@@ -219,32 +237,25 @@ const NoteTags = memo(({ note }: { note: TNote }) => {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAddTag()
-    } else if (e.key === 'Escape') {
-      setNewTagName("")
-      setIsAddingTag(false)
-    }
-  }
-
   return (
-    <div className="p-4 border-t border-border">
-      <h3 className="text-sm font-medium mb-3 text-muted-foreground flex items-center gap-2">
-        <Tag className="h-3 w-3" />
-        TAGS
+    <div className="p-5 border-b border-border/30">
+      <h3 className="text-sm font-semibold mb-4 text-muted-foreground/80 flex items-center gap-2.5 uppercase tracking-wide">
+        <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-muted/40 border border-border/30">
+          <Tag className="h-3 w-3 text-muted-foreground/70" />
+        </div>
+        Tags
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-3">
         {/* Existing tags */}
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2">
           {isLoadingTags ? (
-            <div className="text-xs text-muted-foreground">Loading tags...</div>
+            <div className="text-xs text-muted-foreground/60">Loading tags...</div>
           ) : noteTags.length > 0 ? (
             noteTags.map((tag) => (
               <Badge
                 key={tag.id}
                 variant="secondary"
-                className="text-xs group relative pr-6"
+                className="text-xs group relative pr-7 hover:scale-105 transition-all duration-200 border"
                 style={{
                   backgroundColor: tag.color,
                   color: getContrastColor(tag.color),
@@ -254,51 +265,55 @@ const NoteTags = memo(({ note }: { note: TNote }) => {
                 {tag.name}
                 <button
                   onClick={() => handleRemoveTag(tag)}
-                  className="absolute right-1 top-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-1 top-0.5 bottom-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/20 rounded-sm px-0.5"
                 >
-                  <X className="h-2 w-2" />
+                  <X className="h-2.5 w-2.5" />
                 </button>
               </Badge>
             ))
           ) : (
-            <div className="text-xs text-muted-foreground">No tags yet</div>
+            <div className="text-xs text-muted-foreground/60 p-3 rounded-lg bg-muted/20 border border-border/20 text-center w-full">
+              No tags yet
+            </div>
           )}
         </div>
 
         {/* Add tag input or button */}
         {isAddingTag ? (
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <Input
+              type="text"
+              placeholder="Tag name"
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={() => {
-                if (!newTagName.trim()) {
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddTag()
+                } else if (e.key === 'Escape') {
                   setIsAddingTag(false)
+                  setNewTagName("")
                 }
               }}
-              placeholder="Tag name"
-              className="h-6 text-xs"
+              className="h-8 text-xs bg-muted/20 border-border/40"
               autoFocus
             />
             <Button
-              variant="ghost"
               size="sm"
-              className="h-6 px-2 text-xs"
               onClick={handleAddTag}
-              disabled={!newTagName.trim() || createTagMutation.isPending}
+              disabled={!newTagName.trim()}
+              className="h-8 px-3 text-xs"
             >
               Add
             </Button>
           </div>
         ) : (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground"
             onClick={() => setIsAddingTag(true)}
+            className="w-full h-8 text-xs hover:bg-accent/40 border-border/40 border-dashed transition-all duration-200"
           >
-            <Plus className="h-3 w-3 mr-1" />
+            <Plus className="h-3 w-3 mr-1.5" />
             Add tag
           </Button>
         )}
@@ -309,126 +324,89 @@ const NoteTags = memo(({ note }: { note: TNote }) => {
 
 NoteTags.displayName = "NoteTags"
 
-// Quick actions component
+// Note actions component
 const NoteActions = memo(({ note }: { note: TNote }) => {
-  const handleExport = async (format: 'markdown' | 'html' | 'json') => {
+  const handleExport = async (format: 'markdown' | 'html') => {
     try {
-      const result = await exportNote(note, format)
-      if (result.success) {
-        console.log('Export successful:', result.data)
-      } else {
-        console.error('Export failed:', result.error)
-        alert(`Export failed: ${result.error}`)
-      }
+      await exportNote(note, format)
     } catch (error) {
-      console.error('Export error:', error)
-      alert('Export failed. Please try again.')
-    }
-  }
-
-  const handlePrint = async () => {
-    try {
-      const result = await printNote(note)
-      if (result.success) {
-        console.log('Print successful:', result.data)
-      } else {
-        console.error('Print failed:', result.error)
-        alert(`Print failed: ${result.error}`)
-      }
-    } catch (error) {
-      console.error('Print error:', error)
-      alert('Print failed. Please try again.')
+      console.error('Failed to export note:', error)
     }
   }
 
   const handleShare = async () => {
     try {
-      const result = await shareNote(note)
-      if (result.success) {
-        console.log('Share successful:', result.data)
-        // You could show a toast notification here
-      } else {
-        console.error('Share failed:', result.error)
-        alert(`Share failed: ${result.error}`)
-      }
+      await shareNote(note)
     } catch (error) {
-      console.error('Share error:', error)
-      alert('Share failed. Please try again.')
+      console.error('Failed to share note:', error)
+    }
+  }
+
+  const handlePrint = async () => {
+    try {
+      await printNote(note)
+    } catch (error) {
+      console.error('Failed to print note:', error)
     }
   }
 
   const handleViewHistory = async () => {
     try {
-      const result = await getNoteHistory(note.id)
-      if (result.success) {
-        const history = result.data!
-        if (history.length === 0) {
-          alert('No history available for this note.')
-        } else {
-          const historyText = history.map(entry =>
-            `${entry.timestamp.toLocaleString()} - ${entry.changeType}: ${entry.title} (${entry.wordCount} words)`
-          ).join('\n')
-          alert(`Note History:\n\n${historyText}`)
-        }
-      } else {
-        console.error('History failed:', result.error)
-        alert(`Failed to load history: ${result.error}`)
-      }
+      await getNoteHistory(note.id)
     } catch (error) {
-      console.error('History error:', error)
-      alert('Failed to load history. Please try again.')
+      console.error('Failed to get note history:', error)
     }
   }
 
   return (
-    <div className="p-4 border-t border-border">
-      <h3 className="text-sm font-medium mb-3 text-muted-foreground">
-        ACTIONS
+    <div className="p-5">
+      <h3 className="text-sm font-semibold mb-4 text-muted-foreground/80 uppercase tracking-wide">
+        Actions
       </h3>
       <div className="space-y-1">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-8 px-2 text-xs"
+          className="w-full justify-start h-9 px-3 text-sm hover:bg-accent/40 transition-all duration-200 rounded-lg"
           onClick={() => handleExport('markdown')}
         >
-          <Download className="h-3 w-3 mr-2" />
+          <Download className="h-4 w-4 mr-3" />
           Export as Markdown
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-8 px-2 text-xs"
+          className="w-full justify-start h-9 px-3 text-sm hover:bg-accent/40 transition-all duration-200 rounded-lg"
           onClick={() => handleExport('html')}
         >
-          <Download className="h-3 w-3 mr-2" />
+          <Download className="h-4 w-4 mr-3" />
           Export as HTML
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-8 px-2 text-xs"
+          className="w-full justify-start h-9 px-3 text-sm hover:bg-accent/40 transition-all duration-200 rounded-lg"
           onClick={handleShare}
         >
-          <Share className="h-3 w-3 mr-2" />
+          <Share className="h-4 w-4 mr-3" />
           Copy to clipboard
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-8 px-2 text-xs"
+          className="w-full justify-start h-9 px-3 text-sm hover:bg-accent/40 transition-all duration-200 rounded-lg"
           onClick={handlePrint}
         >
-          <Printer className="h-3 w-3 mr-2" />
+          <Printer className="h-4 w-4 mr-3" />
           Print note
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-8 px-2 text-xs"
+          className="w-full justify-start h-9 px-3 text-sm hover:bg-accent/40 transition-all duration-200 rounded-lg"
           onClick={handleViewHistory}
         >
-          <History className="h-3 w-3 mr-2" />
+          <History className="h-4 w-4 mr-3" />
           View history
         </Button>
       </div>
@@ -447,16 +425,17 @@ export function NoteMetadataSidebar({
   onClose
 }: TNoteMetadataSidebarProps) {
   return (
-    <aside className={cn("w-64 border-l border-border bg-background flex flex-col h-full flex-shrink-0", className)}>
+    <aside className={cn("w-72 border-l border-border/30 bg-card/50 backdrop-blur-sm flex flex-col h-full flex-shrink-0", className)}>
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium">Note Info</h2>
+      <div className="p-5 border-b border-border/30 bg-gradient-to-r from-card/80 to-background/90">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground/90">Note Information</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            title="Close metadata"
+            title="Close metadata panel"
+            className="h-8 w-8 p-0 hover:bg-accent/40 transition-all duration-200 border border-transparent hover:border-border/30"
           >
             <X className="h-4 w-4" />
           </Button>

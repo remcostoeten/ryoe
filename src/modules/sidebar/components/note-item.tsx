@@ -67,20 +67,22 @@ function NoteContextMenu({
       <ContextMenuTrigger asChild>
         {children}
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-48">
+      <ContextMenuContent className="w-48 bg-card border-border/40 shadow-lg rounded-lg">
         <ContextMenuItem
           onClick={() => onEdit?.(note)}
           disabled={!onEdit}
+          className="hover:bg-accent/50 focus:bg-accent/50 transition-colors"
         >
           <Edit2 className="h-4 w-4 mr-2" />
           Rename
         </ContextMenuItem>
 
-        <ContextMenuSeparator />
+        <ContextMenuSeparator className="bg-border/40" />
 
         <ContextMenuItem
           onClick={() => onDuplicate?.(note)}
           disabled={!onDuplicate}
+          className="hover:bg-accent/50 focus:bg-accent/50 transition-colors"
         >
           <Copy className="h-4 w-4 mr-2" />
           Duplicate
@@ -89,6 +91,7 @@ function NoteContextMenu({
         <ContextMenuItem
           onClick={() => onMove?.(note)}
           disabled={!onMove}
+          className="hover:bg-accent/50 focus:bg-accent/50 transition-colors"
         >
           <Move className="h-4 w-4 mr-2" />
           Move
@@ -97,6 +100,7 @@ function NoteContextMenu({
         <ContextMenuItem
           onClick={() => onToggleFavorite?.(note)}
           disabled={!onToggleFavorite}
+          className="hover:bg-accent/50 focus:bg-accent/50 transition-colors"
         >
           <Star className="h-4 w-4 mr-2" />
           {note.isFavorite ? "Remove from favorites" : "Add to favorites"}
@@ -105,17 +109,18 @@ function NoteContextMenu({
         <ContextMenuItem
           onClick={() => onToggleVisibility?.(note)}
           disabled={!onToggleVisibility}
+          className="hover:bg-accent/50 focus:bg-accent/50 transition-colors"
         >
           {note.isPublic ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
           {note.isPublic ? "Make Private" : "Make Public"}
         </ContextMenuItem>
 
-        <ContextMenuSeparator />
+        <ContextMenuSeparator className="bg-border/40" />
 
         <ContextMenuItem
           onClick={() => onDelete?.(note)}
           disabled={!onDelete}
-          className="text-destructive focus:text-destructive"
+          className="text-destructive focus:text-destructive hover:bg-destructive/10 focus:bg-destructive/10 transition-colors"
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
@@ -157,7 +162,7 @@ export function NoteItem({
       e.preventDefault()
       return
     }
-    
+
     setIsDragging(true)
     e.dataTransfer.setData("text/plain", `note:${note.id}`)
     e.dataTransfer.effectAllowed = "move"
@@ -186,8 +191,8 @@ export function NoteItem({
   return (
     <div
       className={cn(
-        "group relative transition-colors",
-        isDragging && "opacity-50",
+        "group relative transition-all duration-200 ease-out",
+        isDragging && "opacity-50 scale-95",
         className
       )}
       draggable={enableDragDrop}
@@ -207,59 +212,92 @@ export function NoteItem({
           variant="ghost"
           onClick={() => onSelect?.(note)}
           className={cn(
-            "w-full justify-between h-6 px-2 text-xs font-normal overflow-hidden transition-colors",
+            "w-full justify-between h-auto px-3 py-2.5 text-sm font-normal overflow-hidden transition-all duration-200 ease-out rounded-lg group-hover:shadow-sm",
             isSelected
-              ? "bg-background AAA-accent text-sidebar-accent-foreground"
-              : "text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
+              ? "bg-accent/80 text-accent-foreground border border-border/40 shadow-sm"
+              : "text-muted-foreground hover:bg-accent/40 hover:text-accent-foreground border border-transparent"
           )}
         >
-          <div className="flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
-            <FileText className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+          <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
+            <div className="flex-shrink-0">
+              <FileText className={cn(
+                "h-4 w-4 transition-colors duration-200",
+                isSelected ? "text-accent-foreground/80" : "text-muted-foreground/60"
+              )} />
+            </div>
 
             {note.isFavorite && (
-              <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
+              <div className="flex-shrink-0">
+                <Star className="h-3.5 w-3.5 text-amber-500 fill-current" />
+              </div>
             )}
 
-            {/* Inline editing or display title */}
-            {isEditing ? (
-              <input
-                type="text"
-                value={editingTitle}
-                onChange={(e) => setEditingTitle(e.target.value)}
-                onBlur={handleTitleSubmit}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleTitleSubmit()
-                  } else if (e.key === "Escape") {
-                    handleTitleCancel()
-                  }
-                }}
-                onFocus={(e) => {
-                  const input = e.target as HTMLInputElement
-                  // Select all text for easy replacement when creating new notes
-                  if (editingTitle === "Untitled") {
-                    input.select()
-                  } else {
-                    // For existing notes, position cursor at the end
-                    setTimeout(() => {
-                      input.setSelectionRange(input.value.length, input.value.length)
-                    }, 0)
-                  }
-                }}
-                className="bg-transparent border-none outline-none text-xs flex-1 min-w-0"
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <span className="truncate text-xs" title={note.title}>
-                {note.title}
-              </span>
-            )}
+            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  onBlur={handleTitleSubmit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleTitleSubmit()
+                    } else if (e.key === "Escape") {
+                      handleTitleCancel()
+                    }
+                  }}
+                  onFocus={(e) => {
+                    const input = e.target as HTMLInputElement
+                    // Select all text for easy replacement when creating new notes
+                    if (editingTitle === "Untitled") {
+                      input.select()
+                    } else {
+                      // For existing notes, position cursor at the end
+                      setTimeout(() => {
+                        input.setSelectionRange(input.value.length, input.value.length)
+                      }, 0)
+                    }
+                  }}
+                  className={cn(
+                    "bg-transparent border-none outline-none text-sm flex-1 min-w-0 font-medium",
+                    "placeholder:text-muted-foreground/50 focus:ring-0 focus:outline-none"
+                  )}
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <div className="flex flex-col gap-0.5">
+                  <span className={cn(
+                    "truncate text-sm font-medium leading-tight transition-colors duration-200",
+                    isSelected ? "text-accent-foreground" : "text-foreground/90"
+                  )} title={note.title}>
+                    {note.title}
+                  </span>
+                  <span className={cn(
+                    "text-xs leading-tight transition-colors duration-200",
+                    isSelected ? "text-accent-foreground/60" : "text-muted-foreground/70"
+                  )}>
+                    {new Date(note.updatedAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Three dots menu for hover/click access */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="h-3 w-3 text-muted-foreground" />
+          <div className={cn(
+            "flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out ml-2",
+            isSelected && "opacity-60"
+          )}>
+            <div className={cn(
+              "p-1 rounded-md hover:bg-accent/60 transition-colors duration-200",
+              isSelected ? "hover:bg-background/20" : "hover:bg-accent/80"
+            )}>
+              <MoreHorizontal className="h-3.5 w-3.5" />
+            </div>
           </div>
         </Button>
       </NoteContextMenu>
