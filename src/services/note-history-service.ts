@@ -3,7 +3,7 @@
  * This is a simplified implementation until proper versioning is added to the database
  */
 
-import type { TNote } from '@/types/notes'
+import type { TNote } from '@/domain/entities/workspace'
 import type { TServiceResult } from './types'
 
 export type TNoteHistoryEntry = {

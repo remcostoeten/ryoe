@@ -3,16 +3,16 @@
  */
 
 import { findById, findMany, create, update, deleteById } from './base-repository'
-import type { 
-  TFolder, 
-  TCreateFolderData, 
-  TUpdateFolderData, 
-  TRepositoryResult, 
+import type {
+  TFolder,
+  TCreateFolderData,
+  TUpdateFolderData,
+  TRepositoryResult,
   TRepositoryListResult,
   TPaginationOptions,
   TSortOptions,
   TFilterOptions
-} from './types'
+} from '.'
 
 const TABLE_NAME = 'folders'
 
@@ -84,10 +84,10 @@ export async function createFolder(data: TCreateFolderData): Promise<TRepository
   // If no position specified, get the next position in the parent folder
   let position = data.position
   if (position === undefined) {
-    const existingFolders = data.parentId 
+    const existingFolders = data.parentId
       ? await findChildFolders(data.parentId)
       : await findRootFolders()
-    
+
     if (existingFolders.success && existingFolders.data) {
       position = existingFolders.data.length
     } else {
@@ -98,7 +98,7 @@ export async function createFolder(data: TCreateFolderData): Promise<TRepository
   const rowData = {
     ...mapFolderDataToRow({ ...data, position })
   }
-  
+
   return create(TABLE_NAME, rowData, mapRowToFolder)
 }
 
@@ -115,10 +115,10 @@ export async function moveFolder(id: number, newParentId: number | null, newPosi
   // If no position specified, move to end of target parent
   let position = newPosition
   if (position === undefined) {
-    const existingFolders = newParentId 
+    const existingFolders = newParentId
       ? await findChildFolders(newParentId)
       : await findRootFolders()
-    
+
     if (existingFolders.success && existingFolders.data) {
       position = existingFolders.data.length
     } else {
@@ -132,7 +132,7 @@ export async function moveFolder(id: number, newParentId: number | null, newPosi
 export async function reorderFolders(_parentId: number | null, folderIds: number[]): Promise<TRepositoryResult<boolean>> {
   try {
     // Update position for each folder
-    const updatePromises = folderIds.map((folderId, index) => 
+    const updatePromises = folderIds.map((folderId, index) =>
       updateFolder(folderId, { position: index })
     )
 

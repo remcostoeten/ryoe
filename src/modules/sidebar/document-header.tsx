@@ -15,13 +15,13 @@ import {
   FileText,
 } from "lucide-react"
 import { PortManagerTray } from "@/modules/port-manager/components/port-manager-tray"
-import { cn } from "@/utilities"
+import { cn } from '@/shared/utils'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from '@/presentation/components/ui/components/ui/tooltip'
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut"
 
 interface DocumentHeaderProps {

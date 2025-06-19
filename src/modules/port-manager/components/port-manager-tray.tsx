@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/presentation/components/ui/components/ui/popover'
+import { Button } from '@/presentation/components/ui/components/ui/button'
 import { Network } from 'lucide-react'
 import { PortManagerDropdown } from './port-manager-dropdown'
 import { usePortManager } from '../hooks/use-port-manager'
-import { isTauriEnvironment } from '@/utilities'
+import { isTauriEnvironment } from '@/shared/utils'
 
 interface TPortManagerTrayProps {
   className?: string

@@ -6,16 +6,16 @@ import {
   getSetupCompleteUserCount,
   markAllUsersSetupComplete
 } from '@/repositories/user-repository'
-import { getAppStorage } from '@/core/storage'
-import { STORAGE_KEYS, DEFAULT_MDX_STORAGE_PATH } from '@/core/config/constants'
-import { isValidUsername, isValidPath } from '@/utilities'
+import { getAppStorage } from '@/infrastructure/storage'
+import { STORAGE_KEYS, DEFAULT_MDX_STORAGE_PATH } from '@/infrastructure/config/core/config/constants'
+import { isValidUsername, isValidPath } from '@/shared/utils'
 import type { 
   TServiceResult, 
   TUserRegistrationData, 
   TUserProfile, 
   TUserPreferencesUpdate 
 } from './types'
-import type { TCreateUserData, TUpdateUserData } from '@/repositories/types'
+import type { TCreateUserData, TUpdateUserData } from '@/domain/entities/workspace'
 
 function validateUserRegistration(data: TUserRegistrationData): TServiceResult<null> {
   if (!data.username || !isValidUsername(data.username)) {

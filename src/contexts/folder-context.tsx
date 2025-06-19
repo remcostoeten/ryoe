@@ -1,13 +1,13 @@
 import { createContext, useContext, ReactNode, useState, useCallback, useMemo } from "react"
-import { useFolders } from "@/modules/folder-management/hooks/use-folders"
-import { useFolderTree } from "@/modules/folder-management/hooks/use-folder-tree"
-import { useFolderOperations } from "@/modules/folder-management/hooks/use-folder-operations"
+import { useFolders } from '@/application/features/workspace/modules/folder-management/hooks/use-folders'
+import { useFolderTree } from '@/application/features/workspace/modules/folder-management/hooks/use-folder-tree'
+import { useFolderOperations } from '@/application/features/workspace/modules/folder-management/hooks/use-folder-operations'
 import type {
   TFolder,
   TCreateFolderInput,
   TUpdateFolderInput,
   TFolderTreeNode
-} from "@/types/notes"
+} from '@/domain/entities/workspace'
 
 type TFolderContextValue = {
   // Folder data

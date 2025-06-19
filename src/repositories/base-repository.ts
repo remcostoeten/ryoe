@@ -5,7 +5,7 @@
 
 import { getTursoClient } from '@/core/database/clients/turso-client'
 
-import type { TRepositoryResult, TRepositoryListResult, TPaginationOptions, TSortOptions, TFilterOptions } from './types'
+import type { TRepositoryResult, TRepositoryListResult, TPaginationOptions, TSortOptions, TFilterOptions } from '.'
 
 export type TBaseEntity = {
   id: number

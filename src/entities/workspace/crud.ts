@@ -1,6 +1,6 @@
 import { createHierarchicalCrud } from "@/factories/crud-factory"
 import type { TMutationHandlers } from "@/factories/crud-types"
-import type { TFolder, TNote, TWorkspaceItem } from "./types"
+import type { TFolder, TNote } from "@/domain/entities/workspace"
 
 // Folder CRUD configuration
 export function createFolderCrud(mutations: TMutationHandlers<TFolder>) {

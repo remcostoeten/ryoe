@@ -1,23 +1,23 @@
 "use client";
 
 import { Plus, Star, Search, MoreHorizontal, FolderPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/presentation/components/ui/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/presentation/components/ui/components/ui/tooltip';
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
-import { useFolderContext } from "@/modules/folder-management";
+import { useFolderContext } from '@/application/features/workspace';
 import { FolderCreationInput } from "./folder-creation-input";
 import { SearchInput } from "./search-input"
 import { useFavorites } from "@/queries/use-favorites";
 import { FavoritesPanel } from "./favorites-panel";
 import { useFavoritesNavigation } from "../hooks/use-favorites-navigation";
-import type { TNote } from "@/types/notes";
+import type { TNote } from '@/domain/entities/workspace';
 
 export function TopActionBar() {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);

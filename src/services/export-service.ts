@@ -3,7 +3,7 @@
  * Pure functions only, no classes
  */
 
-import type { TNote } from '@/types/notes'
+import type { TNote } from '@/domain/entities/workspace'
 import type { TServiceResult } from './types'
 
 // Convert note content to different formats

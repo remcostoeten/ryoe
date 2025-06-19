@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import { useNavigate } from 'react-router'
-import { useSidebar } from '@/components/ui/sidebar'
-import { isTauriEnvironment } from '@/utilities'
+import { useSidebar } from '@/presentation/components/ui/components/ui/sidebar'
+import { isTauriEnvironment } from '@/shared/utils'
 
 type MenuAction = 
   | 'new_file'

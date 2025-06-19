@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNotes } from '@/modules/notes/hooks/use-notes'
-import type { TNote } from '@/types/notes'
+import { useNotes } from '@/application/features/workspace/modules/notes/hooks/use-notes'
+import type { TNote } from '@/domain/entities/workspace'
 
 // Hook to manage notes for multiple folders in the sidebar
 export function useFolderNotes(folderIds: number[]) {

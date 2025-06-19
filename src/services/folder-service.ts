@@ -18,7 +18,7 @@ import {
   findFavoriteFolders
 } from '@/repositories'
 import { findNotesByFolderId } from '@/repositories'
-import { validateFolderName } from '@/utilities'
+import { validateFolderName } from '@/shared/utils'
 import type { 
   TServiceResult, 
   TServiceListResult,
@@ -26,7 +26,7 @@ import type {
   TFolderUpdateData, 
   TFolderWithStats
 } from './types'
-import type { TCreateFolderData, TUpdateFolderData, TFolder } from '@/repositories/types'
+import type { TCreateFolderData, TUpdateFolderData, TFolder } from '@/domain/entities/workspace'
 
 function validateFolderCreation(data: TFolderCreationData): TServiceResult<null> {
   if (!data.name || !validateFolderName(data.name)) {

@@ -1,13 +1,13 @@
 import { ReactNode, Suspense, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { TooltipProvider } from '@/presentation/components/ui/components/ui/tooltip'
 import { initializeDatabase } from '@/api/db'
 import { initTheme } from '@/core/theme'
 import { fixExistingUsersSetupStatus } from '@/services'
-import { ToastProvider } from '@/components/ui/toast'
-import { Spinner } from '@/components/ui/loaders/spinner'
-import { debugEnvironment } from '@/utilities'
+import { ToastProvider } from '@/presentation/components/ui/components/ui/toast'
+import { Spinner } from '@/presentation/components/ui/components/ui/loaders/spinner'
+import { debugEnvironment } from '@/shared/utils'
 
 // Create a client
 const queryClient = new QueryClient({

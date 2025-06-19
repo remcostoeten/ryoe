@@ -1,10 +1,5 @@
-import {
-    initializeTursoDatabase,
-    checkTursoDatabaseHealth,
-    executeTursoQuery
-} from '@/core/database/clients/turso-client'
-import { createUser as createUserRepository } from '@/repositories/user-repository'
-import type { TCreateUserData } from '@/repositories/types'
+import { initializeTursoDatabase, checkTursoDatabaseHealth, executeTursoQuery } from "@/core/database/clients/turso-client"
+import { TCreateUserData } from "@/repositories"
 
 export async function initializeDatabase() {
     try {

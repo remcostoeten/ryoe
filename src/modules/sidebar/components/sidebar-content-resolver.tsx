@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useLocation } from "react-router"
 import { DocsSidebar } from "./docs-sidebar"
 import { FolderSidebar } from "./folder-sidebar"
-import type { TNote } from "@/types/notes"
+import type { TNote } from '@/domain/entities/workspace'
 
 type TSidebarContentResolverProps = {
   searchFilter: string

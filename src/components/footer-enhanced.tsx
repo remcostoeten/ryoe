@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { appConfig } from "@/app/config"
-import { isTauriEnvironment } from "@/utilities"
+import { isTauriEnvironment } from '@/shared/utils'
 import { checkDatabaseHealth, type DatabaseHealth } from "@/api/db"
 import { fetchLatestCommitInfo } from "@/core/git/git-info"
 import { GitBranch, GitCommit, Clock, Database, Monitor, Globe } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/components/ui/components/ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from '@/presentation/components/ui/components/ui/popover'
 import { GitTreeVisualization } from "./layout/footer/git-tree-visualization"
 
 interface CommitInfo {

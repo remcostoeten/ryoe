@@ -1,7 +1,4 @@
 import { getTursoClient } from '@/core/database/clients/turso-client'
-import type { TTag, TCreateTagData, TUpdateTagData, TNoteTag } from '@/types/tags'
-
-// Repository types
 export type TTagRepository = {
   id: number
   name: string
@@ -18,7 +15,7 @@ export type TNoteTagRepository = {
   created_at: number
 }
 
-// Convert repository tag to domain tag
+// Covert repository tag to domain tag
 function mapRepositoryTagToDomain(repoTag: TTagRepository): TTag {
   return {
     id: repoTag.id,

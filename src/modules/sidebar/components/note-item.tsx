@@ -12,16 +12,16 @@ import {
   EyeOff,
   Star
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from '@/presentation/components/ui/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger
-} from "@/components/ui/context-menu"
-import { cn } from "@/utilities"
-import type { TNote } from "@/types/notes"
+} from '@/presentation/components/ui/components/ui/context-menu'
+import { cn } from '@/shared/utils'
+import type { TNote } from '@/domain/entities/workspace'
 
 type TNoteItemProps = {
   note: TNote

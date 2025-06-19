@@ -1,15 +1,15 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/presentation/components/ui/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter
-} from "@/components/ui/sidebar"
+} from '@/presentation/components/ui/components/ui/sidebar'
 import { Archive, Command, FileText, Folder, Star, Home, BookOpen, User, LogIn, Network } from "lucide-react"
 import * as React from "react"
 import { useLocation, Link } from "react-router"
-import { useFolderContext } from "@/modules/folder-management"
+import { useFolderContext } from '@/application/features/workspace'
 import { useCurrentUser } from "@/features/onboarding/hooks/useOnboarding"
 import { SidebarContentResolver } from "./sidebar-content-resolver"
 import { ActionBarResolver } from "./action-bar-resolver"

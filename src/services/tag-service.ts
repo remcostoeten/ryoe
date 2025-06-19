@@ -1,7 +1,7 @@
 import { tagRepository } from '@/repositories/tag-repository'
 import { validateTagName, validateTagColor, getRandomTagColor } from '@/types/tags'
 import type { TTag, TCreateTagData, TUpdateTagData, TNoteTag, TTagWithNoteCount } from '@/types/tags'
-import type { TServiceResult } from '@/services/types'
+import type { TServiceResult } from '@/domain/entities/workspace'
 
 // Tag service functions
 export async function createTagWithValidation(data: TCreateTagData): Promise<TServiceResult<TTag>> {

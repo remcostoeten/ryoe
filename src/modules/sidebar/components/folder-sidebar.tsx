@@ -1,13 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import {
-  SidebarGroup,
-  SidebarGroupContent
-} from "@/components/ui/sidebar"
-import { ChevronDown, ChevronRight, Folder, FolderOpen, Edit, Trash2, FileText, FolderPlus, Star, Plus } from "lucide-react"
 import React, { useState, useRef, useEffect, useOptimistic, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router"
-import { useFolderContext } from "@/modules/folder-management"
 import { NoteItem } from "./note-item"
 import { useFolderNotes } from "../hooks/use-folder-notes"
 import { useMoveFolder, useDeleteFolder } from "@/mutations/folder-mutations"
@@ -15,8 +7,13 @@ import { useUpdateNote } from "@/mutations/note-mutations"
 import { useToggleFolderFavorite } from "@/mutations/use-toggle-folder-favorite"
 import { useToggleNoteFavorite } from "@/mutations/use-toggle-note-favorite"
 import { useDeleteNote } from "@/mutations/note-mutations"
-import { cn } from "@/utilities"
-import type { TNote } from "@/modules/folder-management/types"
+import { cn } from '@/shared/utils'
+import type { TNote } from '@/domain/entities/workspace'
+import { useFolderContext } from '@/contexts/folder-context'
+import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
+import { Button } from "@/presentation"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@radix-ui/react-collapsible"
+import { FileText, FolderPlus, Edit, Star, Trash2, FolderOpen, Folder, ChevronDown, ChevronRight, Plus } from "lucide-react"
 
 type TFolderSidebarProps = {
   searchFilter: string

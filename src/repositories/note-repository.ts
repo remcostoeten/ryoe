@@ -3,16 +3,16 @@
  */
 
 import { findById, findMany, create, update, deleteById } from './base-repository'
-import type { 
-  TNote, 
-  TCreateNoteData, 
-  TUpdateNoteData, 
-  TRepositoryResult, 
+import type {
+  TNote,
+  TCreateNoteData,
+  TUpdateNoteData,
+  TRepositoryResult,
   TRepositoryListResult,
   TPaginationOptions,
   TSortOptions,
   TFilterOptions
-} from './types'
+} from '.'
 
 const TABLE_NAME = 'notes'
 
@@ -65,7 +65,7 @@ export async function findNotes(options?: {
 
 export async function findNotesByFolderId(folderId: number | null): Promise<TRepositoryListResult<TNote>> {
   const filters = folderId ? { folder_id: folderId } : { folder_id: null }
-  
+
   return findNotes({
     filters,
     sort: { field: 'position', direction: 'asc' }
@@ -129,7 +129,7 @@ export async function createNote(data: TCreateNoteData): Promise<TRepositoryResu
   const rowData = {
     ...mapNoteDataToRow({ ...data, position })
   }
-  
+
   return create(TABLE_NAME, rowData, mapRowToNote)
 }
 
@@ -160,7 +160,7 @@ export async function moveNote(id: number, newFolderId: number | null, newPositi
 export async function reorderNotes(noteIds: number[]): Promise<TRepositoryResult<boolean>> {
   try {
     // Update position for each note
-    const updatePromises = noteIds.map((noteId, index) => 
+    const updatePromises = noteIds.map((noteId, index) =>
       updateNote(noteId, { position: index })
     )
 

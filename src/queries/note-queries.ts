@@ -11,7 +11,7 @@ import {
 } from '@/services/note-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
-import type { TNoteWithMetadata, TSearchOptions, TSearchResult } from '@/services/types'
+import type { TNoteWithMetadata, TSearchOptions, TSearchResult } from '@/domain/entities/workspace'
 
 export function useNote(
   id: number,

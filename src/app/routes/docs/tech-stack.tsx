@@ -1,5 +1,5 @@
 import { Suspense, useState, useEffect } from 'react'
-import { DocsLayout } from '@/components/layout/docs-layout'
+import { DocsLayout } from '@/presentation/layouts/components/layout/docs-layout'
 import { useToc } from '@/hooks/use-toc'
 import {
     Card,
@@ -7,10 +7,10 @@ import {
     CardDescription,
     CardHeader,
     CardTitle
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@/presentation/components/ui/components/ui/card'
+import { Badge } from '@/presentation/components/ui/components/ui/badge'
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Skeleton } from '@/presentation/components/ui/components/ui/skeleton'
 
 import {
     Package,
@@ -28,8 +28,8 @@ import {
     readPackageJson,
     type TechStackItem,
     type PackageInfo
-} from '@/utilities'
-import { cn } from '@/utilities'
+} from '@/shared/utils'
+import { cn } from '@/shared/utils'
 
 const CategoryIcon = ({
     category

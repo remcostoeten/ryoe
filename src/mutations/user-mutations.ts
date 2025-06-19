@@ -21,7 +21,7 @@ import type {
   TUpdateUserPreferencesVariables,
   TSwitchStorageTypeVariables
 } from './types'
-import type { TUserProfile } from '@/services/types'
+import type { TUserProfile } from '@/domain/entities/workspace'
 
 export function useRegisterUser(
   options?: TMutationOptions<TUserProfile, TRegisterUserVariables>

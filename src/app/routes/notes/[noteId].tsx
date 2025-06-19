@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { ArrowLeft, Save, MoreHorizontal, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { NoteEditor } from '@/modules/notes/components/note-editor'
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { NoteEditor } from '@/application/features/workspace/modules/notes/components/note-editor'
 import { useUpdateNote } from '@/mutations/note-mutations'
 import { useFolderPath } from '@/queries/folder-queries'
-import type { TNote } from '@/types/notes'
+import type { TNote } from '@/domain/entities/workspace'
 
 function useNote(noteId: number) {
   const [note, setNote] = useState<TNote | null>(null)

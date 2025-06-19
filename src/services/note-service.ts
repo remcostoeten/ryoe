@@ -16,7 +16,7 @@ import {
   toggleNoteFavorite,
   findFavoriteNotes
 } from '@/repositories'
-import { validateNoteTitle, validateNoteContent, calculateReadingTime, countWords } from '@/utilities'
+import { validateNoteTitle, validateNoteContent, calculateReadingTime, countWords } from '@/shared/utils'
 import type {
   TServiceResult,
   TServiceListResult,
@@ -25,7 +25,7 @@ import type {
   TNoteWithMetadata,
   TSearchResult
 } from './types'
-import type { TCreateNoteData, TNote } from '@/repositories/types'
+import type { TCreateNoteData, TNote } from '@/domain/entities/workspace'
 
 function validateNoteCreation(data: TNoteCreationData): TServiceResult<TNoteWithMetadata> {
   if (!data.title || !validateNoteTitle(data.title)) {

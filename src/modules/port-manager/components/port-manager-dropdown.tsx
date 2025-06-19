@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/components/ui/card'
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Badge } from '@/presentation/components/ui/components/ui/badge'
 import { 
   RefreshCw, 
   ExternalLink, 
@@ -10,7 +10,7 @@ import {
   Network,
   AlertCircle
 } from 'lucide-react'
-import { cn } from '@/utilities'
+import { cn } from '@/shared/utils'
 import { usePortManager } from '../hooks/use-port-manager'
 import { getPortCategory } from '@/types/port-manager'
 

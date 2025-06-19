@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/components/ui/card'
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Badge } from '@/presentation/components/ui/components/ui/badge'
+import { Checkbox } from '@/presentation/components/ui/components/ui/checkbox'
 import {
   Square,
   Trash2,
@@ -12,7 +12,7 @@ import {
   Zap,
   AlertTriangle
 } from 'lucide-react'
-import { cn } from '@/utilities'
+import { cn } from '@/shared/utils'
 import type { TPortInfo } from '@/types/port-manager'
 import { getPortCategory } from '@/types/port-manager'
 

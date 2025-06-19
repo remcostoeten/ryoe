@@ -1,5 +1,5 @@
-import { createBrowserRouter, RouterProvider } from 'react-router'
 import { RootLayout } from '@/components/layout'
+import { createBrowserRouter, RouterProvider } from 'react-router'
 
 const router = createBrowserRouter([
     {
@@ -96,13 +96,6 @@ const router = createBrowserRouter([
                 path: 'notes',
                 lazy: async () => {
                     const module = await import('@/app/routes/notes')
-                    return { Component: module.default }
-                }
-            },
-            {
-                path: 'notesv2',
-                lazy: async () => {
-                    const module = await import('@/app/routes/notesv2/notesv2')
                     return { Component: module.default }
                 }
             },

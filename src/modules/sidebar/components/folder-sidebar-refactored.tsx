@@ -3,18 +3,18 @@
 import type React from "react"
 
 import { useState, useCallback, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
+import { Button } from '@/presentation/components/ui/components/ui/button'
+import { SidebarGroup, SidebarGroupContent } from '@/presentation/components/ui/components/ui/sidebar'
 import { Folder, Plus } from "lucide-react"
 import { useNavigate } from "react-router"
-import { cn } from "@/utilities"
+import { cn } from '@/shared/utils'
 
-import { useFolderCrud } from "@/modules/folder-management/hooks/use-folder-crud"
-import { useNoteCrud } from "@/modules/notes/hooks/use-note-crud"
-import { ContextMenu } from "@/components/ui/context-menu"
-import { FolderItem } from "@/components/ui/folder-item"
+import { useFolderCrud } from '@/application/features/workspace/modules/folder-management/hooks/use-folder-crud'
+import { useNoteCrud } from '@/application/features/workspace/modules/notes/hooks/use-note-crud'
+import { ContextMenu } from '@/presentation/components/ui/components/ui/context-menu'
+import { FolderItem } from '@/presentation/components/ui/components/ui/folder-item'
 
-import type { TFolderSidebarProps, TFolder, TNote, TContextMenuState, TDragState } from "@/modules/folder-management/types"
+import type { TFolderSidebarProps, TFolder, TNote, TContextMenuState, TDragState } from '@/domain/entities/workspace'
 import type { TMutationHandlers } from "@/factories/crud-types"
 
 export function FolderSidebar({

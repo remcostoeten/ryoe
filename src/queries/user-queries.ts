@@ -11,7 +11,7 @@ import {
 } from '@/services/user-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
-import type { TUserProfile } from '@/services/types'
+import type { TUserProfile } from '@/domain/entities/workspace'
 
 export function useUserProfile(
   id: number, 

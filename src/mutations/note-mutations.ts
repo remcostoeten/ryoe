@@ -18,8 +18,8 @@ import type {
   TMutationOptions,
   TMoveNoteVariables
 } from './types'
-import type { TNoteCreationData, TNoteUpdateData } from '@/services/types'
-import type { TNoteWithMetadata } from '@/services/types'
+import type { TNoteCreationData, TNoteUpdateData } from '@/domain/entities/workspace'
+import type { TNoteWithMetadata } from '@/domain/entities/workspace'
 
 export function useCreateNote() {
   const queryClient = useQueryClient()

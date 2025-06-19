@@ -30,7 +30,7 @@ import type {
   TMoveFolderVariables,
   TReorderFoldersVariables
 } from './types'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/domain/entities/workspace'
 
 export function useCreateFolder(
   options?: TMutationOptions<TFolderWithStats, TCreateFolderVariables>
