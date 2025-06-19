@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import {
   useSortable
 } from '@dnd-kit/sortable'
@@ -145,7 +145,7 @@ export function SortableFolderItem({
   }
 
   async function handleDeleteClick() {
-    handleDelete({ stopPropagation: () => {} } as React.MouseEvent)
+    handleDelete({ stopPropagation: () => { } } as React.MouseEvent)
   }
 
 
@@ -156,9 +156,11 @@ export function SortableFolderItem({
     const options = [
       { label: 'Rename', action: () => handleStartEdit(e) },
       { label: 'Create Subfolder', action: () => handleCreateChild(e) },
-      { label: 'Delete', action: () => {
-        handleDeleteClick()
-      }}
+      {
+        label: 'Delete', action: () => {
+          handleDeleteClick()
+        }
+      }
     ]
 
     // For now, show a simple menu using native browser methods
@@ -185,193 +187,193 @@ export function SortableFolderItem({
     <>
       <div>
         {/* Folder Item */}
-      <div
-        ref={setNodeRef}
-        className={cn(
-          "group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-all duration-200 relative",
-          "hover:bg-accent/30 hover:scale-[1.01]",
-          isSelected && "bg-gradient-to-r from-accent/15 to-accent/10 text-foreground shadow-sm",
-          isFocused && "bg-accent/8 outline-none",
-          effectiveIsEditing && "bg-accent/25 shadow-sm",
-          isDragging && "z-50 shadow-lg bg-background/95 backdrop-blur-sm scale-105",
-          isOver && "bg-accent/35 scale-[1.02]",
-          isDragOverlay && "shadow-xl bg-background/95 backdrop-blur-sm scale-110"
-        )}
-        style={{
-          paddingLeft: `${8 + indentLevel}px`,
-          ...style
-        }}
-        onClick={handleSelect}
-        onDoubleClick={handleDoubleClick}
-        onDragStart={(e) => {
-          if (!enableDragDrop) {
-            e.preventDefault()
-          }
-        }}
-        onDrop={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onDragOver={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        role="treeitem"
-        aria-selected={isSelected}
-        aria-expanded={hasChildren ? isExpanded : undefined}
-        aria-level={folder.depth + 1}
-        tabIndex={-1}
-      >
-        {/* Drag Handle */}
-        {enableDragDrop && !effectiveIsEditing && (
-          <button
-            {...attributes}
-            {...listeners}
-            className={cn(
-              "flex h-4 w-4 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing",
-              isDragging && "opacity-100"
-            )}
-            aria-label="Drag to reorder folder"
-            tabIndex={-1}
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-            onReset={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-          >
-            <GripVertical className="h-3 w-3" />
-          </button>
-        )}
-
-        {/* Expand/Collapse Button */}
-        <button
-          onClick={handleToggleExpand}
+        <div
+          ref={setNodeRef}
           className={cn(
-            "flex h-4 w-4 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary",
-            !hasChildren && "invisible"
+            "group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-all duration-200 relative",
+            "hover:bg-accent/30 hover:scale-[1.01]",
+            isSelected && "bg-gradient-to-r from-accent/15 to-accent/10 text-foreground shadow-sm",
+            isFocused && "bg-accent/8 outline-none",
+            effectiveIsEditing && "bg-accent/25 shadow-sm",
+            isDragging && "z-50 shadow-lg bg-background/95 backdrop-blur-sm scale-105",
+            isOver && "bg-accent/35 scale-[1.02]",
+            isDragOverlay && "shadow-xl bg-background/95 backdrop-blur-sm scale-110"
           )}
-          aria-label={hasChildren ? (isExpanded ? "Collapse folder" : "Expand folder") : undefined}
+          style={{
+            paddingLeft: `${8 + indentLevel}px`,
+            ...style
+          }}
+          onClick={handleSelect}
+          onDoubleClick={handleDoubleClick}
+          onDragStart={(e) => {
+            if (!enableDragDrop) {
+              e.preventDefault()
+            }
+          }}
+          onDrop={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+          role="treeitem"
+          aria-selected={isSelected}
+          aria-expanded={hasChildren ? isExpanded : undefined}
+          aria-level={folder.depth + 1}
           tabIndex={-1}
         >
-          {hasChildren && (
-            isExpanded ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
-            )
-          )}
-        </button>
-
-        {/* Folder Icon */}
-        <div className="flex h-4 w-4 items-center justify-center">
-          {isExpanded && hasChildren ? (
-            <FolderOpen className="h-3 w-3" />
-          ) : (
-            <Folder className="h-3 w-3" />
-          )}
-        </div>
-
-        {/* Folder Name / Edit Input */}
-        <div className="flex-1 min-w-0">
-          {effectiveIsEditing ? (
-            <div className="space-y-1">
-              <input
-                ref={inputRef}
-                type="text"
-                value={currentValue}
-                onChange={(e) => updateValue(e.target.value)}
-                onKeyDown={handleEditKeyDown}
-                onBlur={handleBlur}
-                className={cn(
-                  "w-full px-1 py-0.5 text-sm bg-background border rounded focus:outline-none focus:ring-1 focus:ring-primary",
-                  !isValid && "border-destructive focus:ring-destructive"
-                )}
-                disabled={isSaving}
-                aria-label="Edit folder name"
-              />
-              {error && (
-                <p className="text-xs text-destructive">{error}</p>
+          {/* Drag Handle */}
+          {enableDragDrop && !effectiveIsEditing && (
+            <button
+              {...attributes}
+              {...listeners}
+              className={cn(
+                "flex h-4 w-4 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing",
+                isDragging && "opacity-100"
               )}
+              aria-label="Drag to reorder folder"
+              tabIndex={-1}
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+              onReset={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            >
+              <GripVertical className="h-3 w-3" />
+            </button>
+          )}
+
+          {/* Expand/Collapse Button */}
+          <button
+            onClick={handleToggleExpand}
+            className={cn(
+              "flex h-4 w-4 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary",
+              !hasChildren && "invisible"
+            )}
+            aria-label={hasChildren ? (isExpanded ? "Collapse folder" : "Expand folder") : undefined}
+            tabIndex={-1}
+          >
+            {hasChildren && (
+              isExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )
+            )}
+          </button>
+
+          {/* Folder Icon */}
+          <div className="flex h-4 w-4 items-center justify-center">
+            {isExpanded && hasChildren ? (
+              <FolderOpen className="h-3 w-3" />
+            ) : (
+              <Folder className="h-3 w-3" />
+            )}
+          </div>
+
+          {/* Folder Name / Edit Input */}
+          <div className="flex-1 min-w-0">
+            {effectiveIsEditing ? (
+              <div className="space-y-1">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={currentValue}
+                  onChange={(e) => updateValue(e.target.value)}
+                  onKeyDown={handleEditKeyDown}
+                  onBlur={handleBlur}
+                  className={cn(
+                    "w-full px-1 py-0.5 text-sm bg-background border rounded focus:outline-none focus:ring-1 focus:ring-primary",
+                    !isValid && "border-destructive focus:ring-destructive"
+                  )}
+                  disabled={isSaving}
+                  aria-label="Edit folder name"
+                />
+                {error && (
+                  <p className="text-xs text-destructive">{error}</p>
+                )}
+              </div>
+            ) : (
+              <span className="truncate block">{folder.name}</span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          {!effectiveIsEditing && showContextMenu && (
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={handleCreateChild}
+                className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
+                aria-label="Create child folder"
+                tabIndex={-1}
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+
+              <button
+                onClick={handleStartEdit}
+                className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
+                aria-label="Edit folder"
+                tabIndex={-1}
+              >
+                <Edit2 className="h-3 w-3" />
+              </button>
+
+              <button
+                onClick={handleMoreOptions}
+                className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
+                aria-label="More options"
+                tabIndex={-1}
+              >
+                <MoreHorizontal className="h-3 w-3" />
+              </button>
             </div>
-          ) : (
-            <span className="truncate block">{folder.name}</span>
+          )}
+
+          {/* Loading indicator */}
+          {isSaving && (
+            <div className="flex h-4 w-4 items-center justify-center">
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
           )}
         </div>
 
-        {/* Action Buttons */}
-        {!effectiveIsEditing && showContextMenu && (
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={handleCreateChild}
-              className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
-              aria-label="Create child folder"
-              tabIndex={-1}
-            >
-              <Plus className="h-3 w-3" />
-            </button>
-            
-            <button
-              onClick={handleStartEdit}
-              className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
-              aria-label="Edit folder"
-              tabIndex={-1}
-            >
-              <Edit2 className="h-3 w-3" />
-            </button>
-            
-            <button
-              onClick={handleMoreOptions}
-              className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-accent-foreground/10 focus:outline-none focus:ring-1 focus:ring-primary"
-              aria-label="More options"
-              tabIndex={-1}
-            >
-              <MoreHorizontal className="h-3 w-3" />
-            </button>
+        {/* Children */}
+        {hasChildren && isExpanded && folder.children && (
+          <div className="space-y-1" role="group">
+            {folder.children.map((child) => (
+              <SortableFolderItem
+                key={child.id}
+                folder={child}
+                isSelected={selectedFolderId === child.id}
+                isExpanded={expandedFolderIds?.has(child.id) || false}
+                isEditing={editingFolderId === child.id}
+                isFocused={focusedId === child.id}
+                onSelect={onSelect}
+                onExpand={onExpand}
+                onEdit={onEdit}
+                onRename={onRename}
+                onDelete={onDelete}
+                onCreateChild={onCreateChild}
+                onMove={onMove}
+                onStartEditing={onStartEditing}
+                onStopEditing={onStopEditing}
+                enableDragDrop={enableDragDrop}
+                enableKeyboardNavigation={enableKeyboardNavigation}
+                showContextMenu={showContextMenu}
+                selectedFolderId={selectedFolderId}
+                expandedFolderIds={expandedFolderIds}
+                editingFolderId={editingFolderId}
+                focusedId={focusedId}
+              />
+            ))}
           </div>
         )}
-
-        {/* Loading indicator */}
-        {isSaving && (
-          <div className="flex h-4 w-4 items-center justify-center">
-            <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        )}
-      </div>
-
-      {/* Children */}
-      {hasChildren && isExpanded && folder.children && (
-        <div className="space-y-1" role="group">
-          {folder.children.map((child) => (
-            <SortableFolderItem
-              key={child.id}
-              folder={child}
-              isSelected={selectedFolderId === child.id}
-              isExpanded={expandedFolderIds?.has(child.id) || false}
-              isEditing={editingFolderId === child.id}
-              isFocused={focusedId === child.id}
-              onSelect={onSelect}
-              onExpand={onExpand}
-              onEdit={onEdit}
-              onRename={onRename}
-              onDelete={onDelete}
-              onCreateChild={onCreateChild}
-              onMove={onMove}
-              onStartEditing={onStartEditing}
-              onStopEditing={onStopEditing}
-              enableDragDrop={enableDragDrop}
-              enableKeyboardNavigation={enableKeyboardNavigation}
-              showContextMenu={showContextMenu}
-              selectedFolderId={selectedFolderId}
-              expandedFolderIds={expandedFolderIds}
-              editingFolderId={editingFolderId}
-              focusedId={focusedId}
-            />
-          ))}
-        </div>
-      )}
       </div>
 
 

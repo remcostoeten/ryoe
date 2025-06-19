@@ -1,31 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { 
-  createNoteWithValidation, 
-  updateNoteWithValidation, 
+import {
+  createNoteWithValidation,
+  updateNoteWithValidation,
   deleteNoteById,
   moveNoteToFolder,
   reorderNotesInFolder,
   duplicateNoteById,
   toggleNoteFavoriteStatus
 } from '@/services/note-service'
-import { 
+import {
   invalidateNoteQueries,
   setNoteCache,
-  addNoteToFolderCache,
-  updateNoteInFolderCache,
-  removeNoteFromFolderCache,
   moveNoteBetweenFoldersCache,
-  getNoteFromCache,
-  getNotesByFolderFromCache
+  getNoteFromCache
 } from '@/queries/note-queries'
-import type { 
+import type {
   TMutationOptions,
-  TCreateNoteVariables,
-  TUpdateNoteVariables,
-  TDeleteNoteVariables,
-  TMoveNoteVariables,
-  TReorderNotesVariables,
-  TDuplicateNoteVariables
+  TMoveNoteVariables
 } from './types'
 import type { TNoteCreationData, TNoteUpdateData } from '@/services/types'
 import type { TNoteWithMetadata } from '@/services/types'
@@ -99,7 +90,7 @@ export function useMoveNote(
     onMutate: async (variables) => {
       // Get current note
       const currentNote = getNoteFromCache(queryClient, variables.id)
-      
+
       if (currentNote) {
         // Optimistically move note between folders
         moveNoteBetweenFoldersCache(
@@ -131,7 +122,7 @@ export function useMoveNote(
     onSuccess: (data, variables, _context) => {
       // Update cache with server response
       setNoteCache(queryClient, variables.id, data)
-      
+
       options?.onSuccess?.(data, variables)
     },
     onSettled: (data, error, variables, context) => {
@@ -140,7 +131,7 @@ export function useMoveNote(
       if (context?.currentNote?.folderId !== variables.newFolderId) {
         invalidateNoteQueries(queryClient, undefined, context?.currentNote?.folderId)
       }
-      
+
       options?.onSettled?.(data, error, variables)
     }
   })

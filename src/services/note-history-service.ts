@@ -30,7 +30,7 @@ function calculateWordCount(content: string): number {
 
 // Add a history entry for a note
 export function addNoteHistoryEntry(
-  note: TNote, 
+  note: TNote,
   changeType: TNoteHistoryEntry['changeType']
 ): TNoteHistoryEntry {
   const entry: TNoteHistoryEntry = {
@@ -46,14 +46,14 @@ export function addNoteHistoryEntry(
 
   const history = noteHistory.get(note.id) || []
   history.push(entry)
-  
+
   // Keep only the last 50 entries per note
   if (history.length > 50) {
     history.splice(0, history.length - 50)
   }
-  
+
   noteHistory.set(note.id, history)
-  
+
   return entry
 }
 
@@ -61,10 +61,10 @@ export function addNoteHistoryEntry(
 export async function getNoteHistory(noteId: number): Promise<TServiceResult<TNoteHistoryEntry[]>> {
   try {
     const history = noteHistory.get(noteId) || []
-    
+
     // Sort by timestamp descending (newest first)
     const sortedHistory = [...history].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-    
+
     return {
       success: true,
       data: sortedHistory
@@ -82,16 +82,16 @@ export async function getNoteHistory(noteId: number): Promise<TServiceResult<TNo
 export async function getRecentChanges(limit: number = 20): Promise<TServiceResult<TNoteHistoryEntry[]>> {
   try {
     const allEntries: TNoteHistoryEntry[] = []
-    
+
     for (const history of noteHistory.values()) {
       allEntries.push(...history)
     }
-    
+
     // Sort by timestamp descending and limit
     const recentChanges = allEntries
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit)
-    
+
     return {
       success: true,
       data: recentChanges
@@ -115,7 +115,7 @@ export async function getNoteHistoryStats(noteId: number): Promise<TServiceResul
 }>> {
   try {
     const history = noteHistory.get(noteId) || []
-    
+
     if (history.length === 0) {
       return {
         success: true,
@@ -128,21 +128,21 @@ export async function getNoteHistoryStats(noteId: number): Promise<TServiceResul
         }
       }
     }
-    
+
     const sortedHistory = [...history].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
     const firstEntry = sortedHistory[0]
     const lastEntry = sortedHistory[sortedHistory.length - 1]
-    
+
     let totalWordChanges = 0
     let totalCharacterChanges = 0
-    
+
     for (let i = 1; i < sortedHistory.length; i++) {
       const prev = sortedHistory[i - 1]
       const curr = sortedHistory[i]
       totalWordChanges += Math.abs(curr.wordCount - prev.wordCount)
       totalCharacterChanges += Math.abs(curr.characterCount - prev.characterCount)
     }
-    
+
     return {
       success: true,
       data: {
@@ -166,7 +166,7 @@ export async function getNoteHistoryStats(noteId: number): Promise<TServiceResul
 export async function clearNoteHistory(noteId: number): Promise<TServiceResult<boolean>> {
   try {
     noteHistory.delete(noteId)
-    
+
     return {
       success: true,
       data: true
@@ -184,11 +184,11 @@ export async function clearNoteHistory(noteId: number): Promise<TServiceResult<b
 export async function exportNoteHistory(noteId: number): Promise<TServiceResult<string>> {
   try {
     const historyResult = await getNoteHistory(noteId)
-    
+
     if (!historyResult.success) {
       return historyResult as TServiceResult<string>
     }
-    
+
     const exportData = {
       noteId,
       exportedAt: new Date().toISOString(),
@@ -198,9 +198,9 @@ export async function exportNoteHistory(noteId: number): Promise<TServiceResult<
         timestamp: entry.timestamp.toISOString()
       }))
     }
-    
+
     const jsonContent = JSON.stringify(exportData, null, 2)
-    
+
     // Download the file
     const blob = new Blob([jsonContent], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -211,7 +211,7 @@ export async function exportNoteHistory(noteId: number): Promise<TServiceResult<
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    
+
     return {
       success: true,
       data: `History exported for note ${noteId}`
@@ -228,7 +228,7 @@ export async function exportNoteHistory(noteId: number): Promise<TServiceResult<
 // Initialize history tracking for existing notes
 export function initializeNoteHistory(note: TNote) {
   const existingHistory = noteHistory.get(note.id)
-  
+
   if (!existingHistory || existingHistory.length === 0) {
     addNoteHistoryEntry(note, 'created')
   }

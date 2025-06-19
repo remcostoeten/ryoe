@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input"
 import { useNoteTags } from "@/hooks/use-tags"
 import { useCreateTag, useAddTagToNote, useRemoveTagFromNote } from "@/mutations/tag-mutations"
 import { getContrastColor, getRandomTagColor } from "@/types/tags"
-import { exportNote, printNote, shareNote, getNoteHistory, exportNoteHistory } from "@/services"
+import { exportNote, printNote, shareNote, getNoteHistory } from "@/services"
 import type { TNote } from "@/types/notes"
 import type { TTag } from "@/types/tags"
 
@@ -86,17 +86,17 @@ const NoteMetadata = memo(({ note }: { note: TNote }) => {
           <Hash className="h-3 w-3 flex-shrink-0" />
           <span className="truncate">{note.title}</span>
         </div>
-        
+
         <div className="flex items-center gap-2 text-muted-foreground">
           <Clock className="h-3 w-3 flex-shrink-0" />
           <span>Modified: {formatDate(note.updatedAt)}</span>
         </div>
-        
+
         <div className="flex items-center gap-2 text-muted-foreground">
           <Calendar className="h-3 w-3 flex-shrink-0" />
           <span>Created: {formatDate(note.createdAt)}</span>
         </div>
-        
+
         <div className="flex items-center gap-2 text-muted-foreground">
           <User className="h-3 w-3 flex-shrink-0" />
           <span>Author: You</span>
@@ -126,11 +126,11 @@ const NoteMetadata = memo(({ note }: { note: TNote }) => {
 NoteMetadata.displayName = "NoteMetadata"
 
 // Note properties component
-const NoteProperties = memo(({ 
-  note, 
-  onToggleFavorite, 
-  onToggleVisibility 
-}: { 
+const NoteProperties = memo(({
+  note,
+  onToggleFavorite,
+  onToggleVisibility
+}: {
   note: TNote
   onToggleFavorite?: (note: TNote) => void
   onToggleVisibility?: (note: TNote) => void
@@ -154,7 +154,7 @@ const NoteProperties = memo(({
           {note.isFavorite ? "Remove" : "Add"}
         </Button>
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           {note.isPublic ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
@@ -439,9 +439,9 @@ const NoteActions = memo(({ note }: { note: TNote }) => {
 NoteActions.displayName = "NoteActions"
 
 // Main note metadata sidebar component
-export function NoteMetadataSidebar({ 
-  note, 
-  onToggleFavorite, 
+export function NoteMetadataSidebar({
+  note,
+  onToggleFavorite,
   onToggleVisibility,
   className,
   onClose
@@ -466,17 +466,17 @@ export function NoteMetadataSidebar({
       <ScrollArea className="flex-1">
         {/* Note metadata */}
         <NoteMetadata note={note} />
-        
+
         {/* Note properties */}
-        <NoteProperties 
-          note={note} 
+        <NoteProperties
+          note={note}
           onToggleFavorite={onToggleFavorite}
           onToggleVisibility={onToggleVisibility}
         />
-        
+
         {/* Tags */}
         <NoteTags note={note} />
-        
+
         {/* Quick actions */}
         <NoteActions note={note} />
       </ScrollArea>

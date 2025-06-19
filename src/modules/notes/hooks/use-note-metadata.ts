@@ -10,7 +10,6 @@ export function useNoteMetadata(noteId: number) {
   const metadata = noteResult?.success && noteResult.data ? {
     createdAt: new Date(noteResult.data.createdAt * 1000),
     updatedAt: new Date(noteResult.data.updatedAt * 1000),
-    isPublic: noteResult.data.isPublic || false,
     isFavorite: noteResult.data.isFavorite || false,
     folderId: noteResult.data.folderId || null
   } : null

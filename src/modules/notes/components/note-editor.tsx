@@ -3,7 +3,6 @@ import { NoteEditorToolbar } from './note-editor-toolbar'
 import { NoteMetadataSidebar } from './note-metadata-sidebar'
 import { NoteTitle } from './note-title'
 import { useNoteContent } from '../hooks/use-note-content'
-import { useNoteMetadata } from '../hooks/use-note-metadata'
 import { useNoteTitle } from '../hooks/use-note-title'
 import { useNoteEditorConfig } from '../hooks/use-note-editor-config'
 import { cn } from '@/utilities/styling'
@@ -20,7 +19,6 @@ interface NoteEditorProps {
 export function NoteEditor({ noteId, readOnly = false, className }: NoteEditorProps) {
   const { title, updateTitle } = useNoteTitle(noteId)
   const { content, updateContent } = useNoteContent(noteId)
-  const { metadata } = useNoteMetadata(noteId)
   const { showMetadata, toggleMetadata } = useNoteEditorConfig()
 
   // Get the full note data for the sidebar

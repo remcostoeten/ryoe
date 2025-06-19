@@ -17,11 +17,11 @@ function useNote(noteId: number) {
       try {
         setLoading(true)
         setError(null)
-        
+
         // Import the service dynamically to avoid circular dependencies
         const { getNoteById } = await import('@/services/note-service')
         const response = await getNoteById(noteId)
-        
+
         if (response.success && response.data) {
           const noteData: TNote = {
             id: response.data.id,
@@ -56,7 +56,7 @@ export default function NotePage() {
   const navigate = useNavigate()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  
+
   const noteIdNumber = noteId ? parseInt(noteId, 10) : null
   const { note, loading, error, setNote } = useNote(noteIdNumber!)
   const updateNoteMutation = useUpdateNote()
@@ -65,9 +65,6 @@ export default function NotePage() {
   const { data: folderPath = [] } = useFolderPath(note?.folderId || 0, {
     enabled: !!note?.folderId
   })
-
-  // Auto-save functionality
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null)
 
   const saveNote = async (title: string, content: string) => {
     if (!note) return
@@ -80,7 +77,7 @@ export default function NotePage() {
           content
         }
       })
-      
+
       setNote(prev => prev ? { ...prev, title, content, updatedAt: new Date() } : null)
       setHasUnsavedChanges(false)
       setLastSaved(new Date())
@@ -89,44 +86,10 @@ export default function NotePage() {
     }
   }
 
-  const handleContentChange = (content: string) => {
-    if (!note) return
-    
-    setHasUnsavedChanges(true)
-    
-    // Clear existing timeout
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout)
-    }
-    
-    // Set new auto-save timeout (2 seconds)
-    const timeout = setTimeout(() => {
-      saveNote(note.title, content)
-    }, 2000)
-    
-    setAutoSaveTimeout(timeout)
-  }
-
-  const handleTitleChange = (title: string) => {
-    if (!note) return
-    
-    setHasUnsavedChanges(true)
-    saveNote(title, note.content)
-  }
-
   const handleManualSave = () => {
     if (!note) return
     saveNote(note.title, note.content)
   }
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout)
-      }
-    }
-  }, [autoSaveTimeout])
 
   if (!noteIdNumber) {
     return (
@@ -198,7 +161,7 @@ export default function NotePage() {
               <span className="font-medium text-foreground">{note.title}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {lastSaved && (
               <span className="text-xs text-muted-foreground">

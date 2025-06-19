@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, FileText } from 'lucide-react'
+import { Plus, FileText, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities/styling'
 // import type { TCreateNoteInput } from '@/types/notes'
@@ -53,23 +53,35 @@ export function CreateNoteButton({
       onClick={handleCreateNote}
       disabled={disabled || isCreating || !selectedFolderId}
       className={cn(
-        'flex items-center gap-2',
-        !selectedFolderId && 'opacity-50 cursor-not-allowed',
+        'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group relative overflow-hidden',
+        !selectedFolderId
+          ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
+          : 'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]',
         className
       )}
       variant="default"
       size="sm"
     >
+      {/* Background shimmer effect */}
+      {!disabled && selectedFolderId && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+      )}
+
       {isCreating ? (
         <>
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Creating...
+          <span className="font-medium">Creating...</span>
         </>
       ) : (
         <>
-          <Plus className="w-4 h-4" />
-          <FileText className="w-4 h-4" />
-          New Note
+          <div className="relative">
+            <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
+            {selectedFolderId && (
+              <Sparkles className="w-2 h-2 absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-yellow-300" />
+            )}
+          </div>
+          <FileText className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+          <span className="font-medium">New Note</span>
         </>
       )}
     </Button>

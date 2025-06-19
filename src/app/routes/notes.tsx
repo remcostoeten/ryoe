@@ -7,12 +7,13 @@ import { CreateNoteButton } from '@/modules/notes/components/create-note-button'
 import { NoteEditor } from '@/modules/notes/components/note-editor'
 import { useNotes } from '@/modules/notes/hooks/use-notes'
 import { Button } from '@/components/ui/button'
+import { FileText } from 'lucide-react'
+import { cn } from '@/utilities'
 
 // Lazy load heavy components
 const FolderTree = lazy(() => import('@/modules/folder-management/components/folder-tree').then(module => ({ default: module.FolderTree })))
 const NoteList = lazy(() => import('@/modules/notes/components/note-list').then(module => ({ default: module.NoteList })))
 import { PanelLeftClose, PanelLeft } from 'lucide-react'
-import { cn } from '@/utilities'
 
 // Helper function to convert TFolder[] to FolderTreeNode[]
 function buildFolderTree(folders: TFolder[]): FolderTreeNode[] {
@@ -67,7 +68,7 @@ export default function NotesPage() {
   const folderTree = useMemo(() => buildFolderTree(folders), [folders])
 
   // Note management
-  const { notes, loading: notesLoading, createNote, updateNote, deleteNote } = useNotes(selectedFolderId)
+  const { notes, loading: notesLoading, createNote, deleteNote } = useNotes(selectedFolderId)
 
   // Get the selected note
   const selectedNote = notes.find(note => note.id === selectedNoteId)
@@ -123,37 +124,11 @@ export default function NotesPage() {
     }
   }
 
-  const handleNoteContentChange = async (content: string) => {
-    if (!selectedNote) return
-    
-    try {
-      await updateNote({
-        id: selectedNote.id,
-        content
-      })
-    } catch (error) {
-      console.error('Failed to save note:', error)
-    }
-  }
-
-  const handleNoteTitleChange = async (title: string) => {
-    if (!selectedNote) return
-    
-    try {
-      await updateNote({
-        id: selectedNote.id,
-        title
-      })
-    } catch (error) {
-      console.error('Failed to save note title:', error)
-    }
-  }
-
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-background to-background/95">
       {/* Sidebar */}
       <div className={cn(
-        'border-r border-border transition-all duration-300',
+        'border-r border-border/60 transition-all duration-300 backdrop-blur-sm bg-background/80',
         sidebarCollapsed ? 'w-0' : 'w-80'
       )}>
         <div className={cn(
@@ -161,37 +136,41 @@ export default function NotesPage() {
           sidebarCollapsed && 'hidden'
         )}>
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Notes</h2>
+          <div className="p-6 border-b border-border/40 bg-gradient-to-r from-background to-background/90">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight">Notes</h2>
+                <p className="text-sm text-muted-foreground/80">Organize your thoughts</p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSidebarCollapsed(true)}
+                className="hover:bg-accent/50 transition-colors"
               >
                 <PanelLeftClose className="w-4 h-4" />
               </Button>
             </div>
-            
+
             <CreateNoteButton
               selectedFolderId={selectedFolderId}
               onCreateNote={handleCreateNote}
-              className="w-full"
+              className="w-full shadow-sm hover:shadow-md transition-shadow bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
             />
           </div>
 
           {/* Folder Tree */}
           <div className="flex-1 overflow-auto p-4">
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Folders</h3>
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Folders</h3>
               {foldersLoading ? (
                 <div className="text-sm text-muted-foreground">Loading folders...</div>
               ) : (
                 <Suspense fallback={
-                  <div className="animate-pulse space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-4 bg-muted/60 rounded-md w-3/4"></div>
+                    <div className="h-4 bg-muted/60 rounded-md w-1/2"></div>
+                    <div className="h-4 bg-muted/60 rounded-md w-2/3"></div>
                   </div>
                 }>
                   <FolderTree
@@ -205,7 +184,7 @@ export default function NotesPage() {
                     onFolderDelete={handleFolderDelete}
                     onFolderMove={moveFolder}
                     enableDragDrop={true}
-                    className="mb-4"
+                    className="mb-6"
                   />
                 </Suspense>
               )}
@@ -213,18 +192,18 @@ export default function NotesPage() {
 
             {/* Notes in Selected Folder */}
             {selectedFolderId && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+              <div className="bg-accent/10 rounded-lg p-4 border border-border/40">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
                   Notes in Folder
                 </h3>
                 {notesLoading ? (
                   <div className="text-sm text-muted-foreground">Loading notes...</div>
                 ) : (
                   <Suspense fallback={
-                    <div className="animate-pulse space-y-2">
-                      <div className="h-8 bg-gray-200 rounded"></div>
-                      <div className="h-8 bg-gray-200 rounded"></div>
-                      <div className="h-8 bg-gray-200 rounded"></div>
+                    <div className="animate-pulse space-y-3">
+                      <div className="h-8 bg-muted/60 rounded-md"></div>
+                      <div className="h-8 bg-muted/60 rounded-md"></div>
+                      <div className="h-8 bg-muted/60 rounded-md"></div>
                     </div>
                   }>
                     <NoteList
@@ -251,14 +230,15 @@ export default function NotesPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-gradient-to-b from-background to-background/98">
         {/* Collapsed Sidebar Toggle */}
         {sidebarCollapsed && (
-          <div className="p-2 border-b border-border">
+          <div className="p-3 border-b border-border/40 bg-background/90 backdrop-blur-sm">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarCollapsed(false)}
+              className="hover:bg-accent/50 transition-colors"
             >
               <PanelLeft className="w-4 h-4" />
             </Button>
@@ -266,24 +246,38 @@ export default function NotesPage() {
         )}
 
         {/* Note Editor */}
-        <div className="flex-1">
+        <div className="flex-1 relative">
           {selectedNote ? (
-            <NoteEditor
-              key={selectedNote.id}
-              noteId={selectedNote.id}
-              readOnly={false}
-              className="h-full"
-            />
+            <div className="h-full bg-gradient-to-br from-background to-background/95 shadow-inner">
+              <NoteEditor
+                key={selectedNote.id}
+                noteId={selectedNote.id}
+                readOnly={false}
+                className="h-full"
+              />
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <h3 className="text-lg font-medium mb-2">No note selected</h3>
-                <p className="text-sm">
-                  {selectedFolderId 
-                    ? 'Select a note from the sidebar or create a new one'
-                    : 'Select a folder first, then create or select a note'
+            <div className="flex items-center justify-center h-full text-muted-foreground/80 bg-gradient-to-br from-background via-background/95 to-accent/5">
+              <div className="text-center max-w-md mx-auto p-8">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                  <FileText className="w-12 h-12 text-primary/60" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">No note selected</h3>
+                <p className="text-muted-foreground/70 leading-relaxed">
+                  {selectedFolderId
+                    ? 'Select a note from the sidebar or create a new one to get started with your writing journey.'
+                    : 'Select a folder first, then create or select a note to begin organizing your thoughts.'
                   }
                 </p>
+                {selectedFolderId && (
+                  <div className="mt-6">
+                    <CreateNoteButton
+                      selectedFolderId={selectedFolderId}
+                      onCreateNote={handleCreateNote}
+                      className="shadow-sm hover:shadow-md transition-shadow bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}

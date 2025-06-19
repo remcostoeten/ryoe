@@ -4,7 +4,7 @@
  */
 
 import type { TNote } from '@/types/notes'
-import type { TServiceResult, TExportOptions } from './types'
+import type { TServiceResult } from './types'
 
 // Convert note content to different formats
 function convertToMarkdown(note: TNote): string {
@@ -22,7 +22,7 @@ function convertToHTML(note: TNote): string {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br>')
-  
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -70,7 +70,7 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 
 // Export single note
 export async function exportNote(
-  note: TNote, 
+  note: TNote,
   format: 'markdown' | 'html' | 'json' = 'markdown'
 ): Promise<TServiceResult<string>> {
   try {
@@ -121,7 +121,7 @@ export async function exportNote(
 
 // Export multiple notes
 export async function exportNotes(
-  notes: TNote[], 
+  notes: TNote[],
   format: 'markdown' | 'html' | 'json' = 'markdown'
 ): Promise<TServiceResult<string>> {
   try {
@@ -207,7 +207,7 @@ export async function printNote(note: TNote): Promise<TServiceResult<string>> {
   try {
     const htmlContent = convertToHTML(note)
     const printWindow = window.open('', '_blank')
-    
+
     if (!printWindow) {
       return {
         success: false,
@@ -239,7 +239,7 @@ export async function printNote(note: TNote): Promise<TServiceResult<string>> {
 export async function shareNote(note: TNote): Promise<TServiceResult<string>> {
   try {
     const shareText = `${note.title}\n\n${note.content}`
-    
+
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(shareText)
     } else {

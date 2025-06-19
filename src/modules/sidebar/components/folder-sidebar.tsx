@@ -227,7 +227,7 @@ const CustomContextMenu = ({
     >
       {menuItems.map((item, index) => {
         if (!item.show) return null
-        
+
         return (
           <React.Fragment key={index}>
             {item.separator && <div className="h-px my-1 bg-border" />}
@@ -606,10 +606,7 @@ export function FolderSidebar({
     }
 
     try {
-      await updateNoteMutation.mutateAsync({
-        id: note.id,
-        title: trimmedTitle
-      })
+      await updateNoteMutation.mutateAsync({ id: note.id, data: { title: trimmedTitle } })
 
       // Update the local state to reflect the change immediately
       if (note.folderId) {
@@ -632,7 +629,7 @@ export function FolderSidebar({
 
   const handleNoteDelete = async (note: TNote) => {
     try {
-      await deleteNoteMutation.mutateAsync({ id: note.id })
+      await deleteNoteMutation.mutateAsync(note.id)
 
       // Update the local state to reflect the deletion immediately
       if (note.folderId) {
@@ -786,11 +783,10 @@ export function FolderSidebar({
           }
         }}
         onDragEnd={handleDragEnd}
-        className={`w-full justify-between h-7 px-1 mx-0 text-xs font-normal overflow-hidden transition-colors ${
-          isSelected
+        className={`w-full justify-between h-7 px-1 mx-0 text-xs font-normal overflow-hidden transition-colors ${isSelected
             ? "bg-background AAA-accent text-sidebar-accent-foreground"
             : "text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground"
-        } ${draggedFolder?.id === folder.id ? "opacity-50" : ""}`}
+          } ${draggedFolder?.id === folder.id ? "opacity-50" : ""}`}
         style={{ paddingLeft: `${indentLevel + 4}px` }}
         {...props}
       >
@@ -1034,7 +1030,7 @@ export function FolderSidebar({
                   console.log('Testing note deletion:', firstNote)
                   try {
                     console.log('Calling deleteNoteMutation.mutateAsync directly...')
-                    const result = await deleteNoteMutation.mutateAsync({ id: firstNote.id })
+                    const result = await deleteNoteMutation.mutateAsync(firstNote.id)
                     console.log('Direct note mutation result:', result)
 
                     // Update local state

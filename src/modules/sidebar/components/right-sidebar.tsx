@@ -192,6 +192,7 @@ export function RightSidebar({ documentTitle = "Untitled Document" }: { document
         note={note}
         onToggleFavorite={handleToggleFavorite}
         onToggleVisibility={handleToggleVisibility}
+        onClose={() => { }}
       />
     )
   }
@@ -240,13 +241,13 @@ export function RightSidebar({ documentTitle = "Untitled Document" }: { document
           )}
         </>
       )}
-      
+
       {/* Document metadata */}
       <DocumentMetadata documentTitle={documentTitle} />
-      
+
       {/* Quick actions */}
       <QuickActions />
-      
+
       {/* Spacer to push content to top */}
       <div className="flex-1" />
     </aside>

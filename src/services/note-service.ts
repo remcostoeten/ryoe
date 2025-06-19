@@ -23,10 +23,9 @@ import type {
   TNoteCreationData,
   TNoteUpdateData,
   TNoteWithMetadata,
-  TSearchOptions,
   TSearchResult
 } from './types'
-import type { TCreateNoteData, TUpdateNoteData, TNote, TRepositoryResult, TRepositoryListResult } from '@/repositories/types'
+import type { TCreateNoteData, TNote } from '@/repositories/types'
 
 function validateNoteCreation(data: TNoteCreationData): TServiceResult<TNoteWithMetadata> {
   if (!data.title || !validateNoteTitle(data.title)) {
@@ -239,7 +238,7 @@ export async function searchNotes(query: string): Promise<TServiceResult<TSearch
 }
 
 // Search notes with options
-export async function searchNotesWithOptions(query: string, options?: TSearchOptions): Promise<TServiceResult<TSearchResult>> {
+export async function searchNotesWithOptions(query: string): Promise<TServiceResult<TSearchResult>> {
   return searchNotes(query)
 }
 

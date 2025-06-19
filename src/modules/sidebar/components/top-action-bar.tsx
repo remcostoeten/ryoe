@@ -1,4 +1,4 @@
-  "use client";
+"use client";
 
 import { Plus, Star, Search, MoreHorizontal, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ export function TopActionBar() {
   }
 
   function handleCancelSearch() {
-    setSearchFilter(""); 
+    setSearchFilter("");
     setIsSearching(false);
   }
 
@@ -77,7 +77,7 @@ export function TopActionBar() {
   }
 
   useKeyboardShortcut(
-    { key: "/" },
+    { key: "/", metaKey: true },
     () => {
       setIsSearching(true);
     }
@@ -214,9 +214,8 @@ export function TopActionBar() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground ${
-                        showingFavorites ? "bg-background AAA-accent text-sidebar-accent-foreground" : ""
-                      }`}
+                      className={`h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground ${showingFavorites ? "bg-background AAA-accent text-sidebar-accent-foreground" : ""
+                        }`}
                       onClick={handleToggleFavorites}
                     >
                       <Star className={`h-4 w-4 ${showingFavorites ? "fill-current" : ""}`} />

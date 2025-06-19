@@ -1,4 +1,8 @@
 import { useCallback } from 'react'
+import { useCreateBlockNote } from '@blocknote/react'
+import { BlockNoteView } from '@blocknote/mantine'
+import '@blocknote/core/fonts/inter.css'
+import '@blocknote/mantine/style.css'
 
 interface BlockNoteEditorProps {
   initialContent?: string
@@ -13,46 +17,37 @@ export default function BlockNoteEditor({
   readOnly = false,
   className
 }: BlockNoteEditorProps) {
-  // Handle content changes
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onChange) {
-      onChange(e.target.value)
-    }
-  }, [onChange])
+  // Create a new editor instance with default theme
+  const editor = useCreateBlockNote({
+    initialContent: initialContent ? JSON.parse(initialContent) : undefined,
+    defaultStyles: true,
+    trailingBlock: true
+  })
 
-  // Parse initial content - if it's JSON (BlockNote format), extract text
-  let displayContent = initialContent
-  if (initialContent && initialContent.startsWith('[') && initialContent.endsWith(']')) {
-    try {
-      const blocks = JSON.parse(initialContent)
-      if (Array.isArray(blocks)) {
-        // Extract text from BlockNote blocks
-        displayContent = blocks
-          .map(block => {
-            if (block.content && Array.isArray(block.content)) {
-              return block.content
-                .map(item => item.text || '')
-                .join('')
-            }
-            return ''
-          })
-          .join('\n')
-      }
-    } catch {
-      // If parsing fails, use as-is
-      displayContent = initialContent
+  // Handle content changes
+  const handleChange = useCallback(() => {
+    if (onChange) {
+      const content = JSON.stringify(editor.topLevelBlocks)
+      onChange(content)
     }
-  }
+  }, [editor, onChange])
 
   return (
-    <div className={className}>
-      <textarea
-        value={displayContent}
-        onChange={handleChange}
-        readOnly={readOnly}
-        className="w-full h-full min-h-[400px] p-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Start writing your note..."
-      />
+    <div className={`${className} relative`}>
+      <div className="h-full bg-gradient-to-br from-background via-background/98 to-accent/5 rounded-lg border border-border/40 shadow-sm overflow-hidden">
+        <div className="h-full p-6">
+          <BlockNoteView
+            editor={editor}
+            theme="light"
+            editable={!readOnly}
+            onChange={handleChange}
+            className="h-full [&_.bn-editor]:min-h-full [&_.bn-editor]:border-none [&_.bn-editor]:shadow-none [&_.bn-editor]:bg-transparent [&_.bn-editor]:rounded-none [&_.bn-container]:min-h-full [&_.bn-container]:bg-transparent"
+          />
+        </div>
+
+        {/* Subtle bottom gradient for visual depth */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
+      </div>
     </div>
   )
 }
