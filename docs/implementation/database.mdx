@@ -1,0 +1,43 @@
+src/
+├── api/
+│   └── queries/
+│       └── database/
+│           └── health-check.ts
+├── api/
+│   └── db/
+│       └── index.ts → src/api/queries/database/health-check.ts
+└── modules/
+    └── database-actions/ui/ → src/api/queries/database/ + src/modules/database-actions/
+
+---
+
+## ✅ Testing Checklist
+
+### Factory Testing
+- [ ] Test query factory with sample entity
+- [ ] Test mutation factory with sample entity  
+- [ ] Test service factory with sample entity
+- [ ] Test generated hooks work correctly
+- [ ] Test cache invalidation works
+- [ ] Test error handling works
+
+### Query Testing
+- [ ] All auth queries work
+- [ ] All note queries work
+- [ ] All folder queries work
+- [ ] All git queries work
+- [ ] All database queries work
+- [ ] Custom queries work correctly
+- [ ] Query keys are consistent
+
+### Integration Testing
+- [ ] Queries integrate with components
+- [ ] Loading states work correctly
+- [ ] Error states work correctly
+- [ ] Cache invalidation works across related queries
+
+---
+
+## 📊 Progress: **0%** (0/60 items completed)
+
+**Next Priority**: Implement core factories first, then migrate auth queries as proof of concept.
