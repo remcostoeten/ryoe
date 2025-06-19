@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react"
 import { Star, Folder, FileText, X, Search } from "lucide-react"
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Separator } from '@/presentation/components/ui/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { cn } from '@/shared/utils'
 import { useFavorites } from "@/queries/use-favorites"
 import type { TNote } from '@/domain/entities/workspace'

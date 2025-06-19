@@ -7,13 +7,13 @@ import {
   reorderNotesInFolder,
   duplicateNoteById,
   toggleNoteFavoriteStatus
-} from '@/services/note-service'
+} from '@/api/services/notes-service'
 import {
   invalidateNoteQueries,
   setNoteCache,
   moveNoteBetweenFoldersCache,
   getNoteFromCache
-} from '@/queries/note-queries'
+} from '@/api/services/notes-service'
 import type {
   TMutationOptions,
   TMoveNoteVariables

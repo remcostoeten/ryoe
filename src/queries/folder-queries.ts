@@ -10,7 +10,7 @@ import {
   getChildFolders,
   getFolderHierarchyWithStats,
   getFolderPathWithStats
-} from '@/services/folder-service'
+} from '@/api/services/folders-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
 import type { TFolderWithStats } from '@/domain/entities/workspace'

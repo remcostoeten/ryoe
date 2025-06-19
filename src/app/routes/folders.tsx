@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/components/ui/card'
-import { toast } from '@/presentation/components/ui/components/ui/toast'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { toast } from '@/components/ui/toast'
 import { Plus, RefreshCw } from 'lucide-react'
 import {
   FolderTree,

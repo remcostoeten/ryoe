@@ -8,7 +8,7 @@ import {
   getUserProfile, 
   getCurrentUser, 
   checkOnboardingStatus 
-} from '@/services/user-service'
+} from '@/api/services/auth-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
 import type { TUserProfile } from '@/domain/entities/workspace'

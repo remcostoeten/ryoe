@@ -1,13 +1,13 @@
 "use client";
 
 import { Plus, Star, Search, MoreHorizontal, FolderPlus } from "lucide-react";
-import { Button } from '@/presentation/components/ui/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/presentation/components/ui/components/ui/tooltip';
+} from '@/components/ui/tooltip';
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";

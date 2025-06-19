@@ -1,7 +1,7 @@
 'use client'
 
 import { Link, useLocation } from 'react-router'
-import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/shared/utils'
 import { Home, FileText, Folder, BookOpen, LogIn, User, Network } from 'lucide-react'
 import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'

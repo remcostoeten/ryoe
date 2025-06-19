@@ -1,11 +1,11 @@
 "use client"
 
-import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter
-} from '@/presentation/components/ui/components/ui/sidebar'
+} from '@/components/ui/sidebar'
 import { Archive, Command, FileText, Folder, Star, Home, BookOpen, User, LogIn, Network } from "lucide-react"
 import * as React from "react"
 import { useLocation, Link } from "react-router"

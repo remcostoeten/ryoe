@@ -1,5 +1,5 @@
 import { relaunch } from '@tauri-apps/plugin-process'
-import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
     ErrorView,
     ErrorHeader,

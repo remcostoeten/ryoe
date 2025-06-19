@@ -5,11 +5,11 @@
  * Updates all imports to use the new API structure
  */
 
-import { readFileSync, writeFileSync } from 'fs'
-import { glob } from 'glob'
-import path from 'path'
+const fs = require('fs')
+const path = require('path')
+const { glob } = require('glob')
 
-const importMappings: Record<string, string> = {
+const importMappings = {
     // Auth services
     "from '@/services/user-service'": "from '@/api/services/auth-service'",
     "from '@/queries/user-queries'": "from '@/api/services/auth-service'",
@@ -51,13 +51,14 @@ function migrateImports() {
 
     files.forEach(filePath => {
         try {
-            let content = readFileSync(filePath, 'utf-8')
+            let content = fs.readFileSync(filePath, 'utf-8')
             let hasChanges = false
 
             // Apply all import mappings
             Object.entries(importMappings).forEach(([oldImport, newImport]) => {
                 if (content.includes(oldImport)) {
-                    content = content.replace(new RegExp(oldImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newImport)
+                    const escapedOldImport = oldImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                    content = content.replace(new RegExp(escapedOldImport, 'g'), newImport)
                     hasChanges = true
                 }
             })
@@ -74,7 +75,7 @@ function migrateImports() {
             }
 
             if (hasChanges) {
-                writeFileSync(filePath, content)
+                fs.writeFileSync(filePath, content)
                 filesUpdated++
                 console.log(`✅ Updated: ${filePath}`)
             }
@@ -89,4 +90,4 @@ function migrateImports() {
 // Run the migration
 if (require.main === module) {
     migrateImports()
-} 
+}

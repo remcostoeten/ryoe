@@ -21,7 +21,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/presentation/components/ui/components/ui/tooltip'
+} from '@/components/ui/tooltip'
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut"
 
 interface DocumentHeaderProps {

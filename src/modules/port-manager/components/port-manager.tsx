@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/components/ui/card'
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Input } from '@/presentation/components/ui/components/ui/input'
-import { Checkbox } from '@/presentation/components/ui/components/ui/checkbox'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   RefreshCw,
   Search,

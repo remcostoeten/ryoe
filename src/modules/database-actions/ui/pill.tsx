@@ -5,7 +5,7 @@ import {
     Badge,
     TooltipContent,
     TooltipTrigger
-} from '@/presentation/components/ui/components/ui/'
+} from '@/components/ui/'
 import {
     CheckCircle,
     XCircle,

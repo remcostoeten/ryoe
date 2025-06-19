@@ -9,8 +9,8 @@ import {
     type ReactNode
 } from 'react'
 import { Link } from 'react-router'
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { ScrollArea } from '@/presentation/components/ui/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     ArrowLeft,
     ExternalLink,

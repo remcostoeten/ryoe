@@ -4,23 +4,23 @@ import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Input } from '@/presentation/components/ui/components/ui/input'
-import { Separator } from '@/presentation/components/ui/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/presentation/components/ui/components/ui/sheet'
-import { Skeleton } from '@/presentation/components/ui/components/ui/skeleton'
+} from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/presentation/components/ui/components/ui/tooltip'
+} from '@/components/ui/tooltip'
 import { cn } from '@/shared/utils'
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"

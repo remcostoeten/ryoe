@@ -4,7 +4,7 @@ import { memo, useState, useEffect } from "react"
 import { useLocation, useParams } from "react-router"
 import { BookOpen, FileText, Hash, Clock, User, Calendar } from "lucide-react"
 import { cn } from '@/shared/utils'
-import { ScrollArea } from '@/presentation/components/ui/components/ui/scroll-area'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToc } from "@/hooks/use-toc"
 import { NoteMetadataSidebar } from '@/application/features/workspace/modules/notes/components/note-metadata-sidebar'
 import { useToggleNoteFavorite } from "@/mutations/use-toggle-note-favorite"

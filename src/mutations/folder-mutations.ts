@@ -10,7 +10,7 @@ import {
   deleteFolderById,
   moveFolderToParent,
   reorderFoldersInParent
-} from '@/services/folder-service'
+} from '@/api/services/folders-service'
 import { 
   invalidateFolderQueries,
   setFolderCache,
@@ -21,7 +21,7 @@ import {
   getFolderFromCache,
   getRootFoldersFromCache,
   getChildFoldersFromCache
-} from '@/queries/folder-queries'
+} from '@/api/services/folders-service'
 import type { 
   TMutationOptions,
   TCreateFolderVariables,

@@ -8,7 +8,7 @@ import {
   getNoteById,
   getNotesByFolder,
   searchNotesWithOptions
-} from '@/services/note-service'
+} from '@/api/services/notes-service'
 import { QUERY_KEYS, CACHE_TIMES, STALE_TIMES } from './types'
 import type { TQueryOptions } from './types'
 import type { TNoteWithMetadata, TSearchOptions, TSearchResult } from '@/domain/entities/workspace'

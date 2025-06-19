@@ -3,8 +3,8 @@
 import type React from "react"
 
 import { useCallback } from "react"
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/presentation/components/ui/components/ui/collapsible'
+import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { ChevronDown, ChevronRight, Folder, FolderOpen, Star } from "lucide-react"
 import type { TFolder, TNote, TDragState } from '@/domain/entities/workspace'
 import { cn } from '@/shared/utils'

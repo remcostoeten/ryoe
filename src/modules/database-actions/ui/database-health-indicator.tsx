@@ -1,6 +1,6 @@
 import { useDatabaseHealth } from '@/modules/database-actions/hooks/use-database-health'
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Badge, Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui'
+import { Button } from '@/components/ui/button'
+import { Badge, Tooltip, TooltipContent, TooltipTrigger } from '@/components/components/ui'
 import { RefreshCw } from 'lucide-react'
 import { cn } from '@/shared/utils'
 

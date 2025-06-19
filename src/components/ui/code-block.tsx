@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, memo } from 'react'
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Badge } from '@/presentation/components/ui/components/ui/badge'
-import { Skeleton } from '@/presentation/components/ui/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Copy, Check, Download, Play, Terminal } from 'lucide-react'
 import { cn } from '@/shared/utils'
 

@@ -8,13 +8,13 @@ import {
   registerUser, 
   updateUserPreferences, 
   switchStorageType 
-} from '@/services/user-service'
-import { QUERY_KEYS } from '@/queries/types'
+} from '@/api/services/auth-service'
+import { QUERY_KEYS } from '@/api/types'
 import { 
   invalidateUserQueries, 
   setCurrentUserCache, 
   setUserProfileCache 
-} from '@/queries/user-queries'
+} from '@/api/services/auth-service'
 import type { 
   TMutationOptions,
   TRegisterUserVariables,

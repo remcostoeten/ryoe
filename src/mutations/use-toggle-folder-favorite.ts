@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toggleFolderFavoriteStatus } from '@/services'
-import { QUERY_KEYS } from '@/queries/types'
+import { QUERY_KEYS } from '@/api/types'
 
 export function useToggleFolderFavorite() {
   const queryClient = useQueryClient()

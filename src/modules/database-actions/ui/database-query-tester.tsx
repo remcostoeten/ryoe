@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { executeQuery } from '@/api/db'
+import { executeQuery } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'

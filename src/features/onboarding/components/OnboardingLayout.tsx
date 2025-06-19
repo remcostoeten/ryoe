@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/shared/utils'
-import { SimpleCanvasEffect } from '@/presentation/components/ui/components/ui/SimpleCanvasEffect'
+import { SimpleCanvasEffect } from '@/components/ui/SimpleCanvasEffect'
 
 interface OnboardingLayoutProps {
   children: ReactNode

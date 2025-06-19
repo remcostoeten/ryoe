@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/components/ui/card'
-import { Button } from '@/presentation/components/ui/components/ui/button'
-import { Badge } from '@/presentation/components/ui/components/ui/badge'
-import { Checkbox } from '@/presentation/components/ui/components/ui/checkbox'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Square,
   Trash2,
