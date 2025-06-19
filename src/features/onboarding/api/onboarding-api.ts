@@ -1,19 +1,22 @@
 /**
- * Onboarding API - wrapper around service layer for onboarding operations
- * Uses the new enterprise architecture
+ * Onboarding API - wrapper around new API structure
  */
 
 import {
-  checkOnboardingStatus as checkStatus,
-  registerUser as register,
-  updateUserPreferences as updatePrefs
-} from '@/services'
-import type { TUserRegistrationData, TUserPreferencesUpdate } from '@/services'
+  useOnboardingStatus,
+  useRegisterUser,
+  useCurrentUser,
+  useUpdateUserPreferences
+} from '@/api/services/auth-service'
+import type { TUserRegistrationData, TUserPreferencesUpdate } from '@/api/types'
 import type { UserPreferences, OnboardingData } from '../types/onboarding'
 
+// Legacy wrapper functions for backwards compatibility
 export async function checkOnboardingStatus(): Promise<boolean> {
-  const result = await checkStatus()
-  return result.success ? result.data! : false
+  // This should be converted to use the hook in the components
+  const { checkOnboardingStatusQuery } = await import('@/api/queries/auth')
+  const result = await checkOnboardingStatusQuery()
+  return result
 }
 
 export async function completeOnboarding(data: OnboardingData): Promise<number> {
@@ -28,12 +31,9 @@ export async function completeOnboarding(data: OnboardingData): Promise<number> 
       }
     }
 
-    const result = await register(registrationData)
-    if (!result.success || !result.data) {
-      throw new Error(result.error || 'Failed to complete onboarding')
-    }
-
-    return result.data.id
+    const { registerUserMutation } = await import('@/api/mutations/auth')
+    const result = await registerUserMutation(registrationData)
+    return result.id
   } catch (error) {
     console.error('Failed to complete onboarding:', error)
     throw error
@@ -42,21 +42,17 @@ export async function completeOnboarding(data: OnboardingData): Promise<number> 
 
 export async function getCurrentUser(): Promise<{ id: number; name: string; preferences: UserPreferences } | null> {
   try {
-    const result = await checkStatus()
-    if (!result.success || !result.data) {
-      return null
-    }
+    const { getCurrentUserQuery } = await import('@/api/queries/auth')
+    const result = await getCurrentUserQuery()
 
-    // This is a simplified version - in a real app you'd get the actual current user
-    // For now, we'll return a mock user since we don't have user session management
     return {
-      id: 1,
-      name: 'Current User',
+      id: result.id,
+      name: result.name,
       preferences: {
-        mdxStoragePath: '~/.config/ryoe',
-        storageType: 'turso',
-        theme: 'dark',
-        autoSave: true
+        mdxStoragePath: result.preferences.mdxStoragePath || '~/.config/ryoe',
+        storageType: result.preferences.storageType || 'turso',
+        theme: result.preferences.theme || 'dark',
+        autoSave: result.preferences.autoSave || true
       }
     }
   } catch (error) {
@@ -80,10 +76,8 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
       ...preferences
     }
 
-    const result = await updatePrefs(currentUser.id, updateData)
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update user preferences')
-    }
+    const { updateUserPreferencesMutation } = await import('@/api/mutations/auth')
+    await updateUserPreferencesMutation(currentUser.id, updateData)
 
     console.log('User preferences updated')
   } catch (error) {

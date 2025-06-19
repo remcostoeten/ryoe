@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { 
-  checkOnboardingStatus, 
-  completeOnboarding, 
+import { useOnboardingStatus, useRegisterUser, useCurrentUser } from '@/api/services/auth-service'
+import {
+  checkOnboardingStatus,
+  completeOnboarding,
   getCurrentUser,
-  getDefaultPreferences 
+  getDefaultPreferences
 } from '../api/onboarding-api'
 import type { OnboardingState, OnboardingData } from '../types/onboarding'
 
@@ -19,6 +20,9 @@ export function useOnboarding() {
   })
 
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null)
+
+  // Use the new API hooks
+  const registerUserMutation = useRegisterUser()
 
   // Check onboarding status on mount
   useEffect(() => {
@@ -64,9 +68,9 @@ export function useOnboarding() {
       setState(prev => ({ ...prev, isComplete: true, isLoading: false }))
       setNeedsOnboarding(false)
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to complete setup'
       }))
       throw error
@@ -95,24 +99,18 @@ export function useOnboarding() {
   }
 }
 
+// Updated to use new API structure
 export function useCurrentUser() {
-  const [user, setUser] = useState<{ id: number; name: string; preferences: any } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Use the new API hook directly
+  const { data: user, isLoading, refetch } = useCurrentUser()
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const currentUser = await getCurrentUser()
-        setUser(currentUser)
-      } catch (error) {
-        console.error('Failed to load current user:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadUser()
-  }, [])
-
-  return { user, isLoading, refetch: () => setIsLoading(true) }
+  return {
+    user: user ? {
+      id: user.id,
+      name: user.name,
+      preferences: user.preferences
+    } : null,
+    isLoading,
+    refetch
+  }
 }

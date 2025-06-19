@@ -2,16 +2,15 @@ import React, { useState, useRef, useEffect, useOptimistic, useCallback, useMemo
 import { useNavigate } from "react-router"
 import { NoteItem } from "./note-item"
 import { useFolderNotes } from "../hooks/use-folder-notes"
-import { useMoveFolder, useDeleteFolder } from "@/mutations/folder-mutations"
-import { useUpdateNote } from "@/mutations/note-mutations"
-import { useToggleFolderFavorite } from "@/mutations/use-toggle-folder-favorite"
-import { useToggleNoteFavorite } from "@/mutations/use-toggle-note-favorite"
-import { useDeleteNote } from "@/mutations/note-mutations"
+import { useMoveFolder, useDeleteFolder } from "@/api/services/folders-service"
+import { useUpdateNote, useDeleteNote } from "@/api/services/notes-service"
+import { useToggleFolderFavorite } from "@/api/services/folders-service"
+import { useToggleNoteFavorite } from "@/api/services/notes-service"
 import { cn } from '@/shared/utils'
 import type { TNote } from '@/domain/entities/workspace'
 import { useFolderContext } from '@/contexts/folder-context'
 import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
-import { Button } from "@/presentation"
+import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@radix-ui/react-collapsible"
 import { FileText, FolderPlus, Edit, Star, Trash2, FolderOpen, Folder, ChevronDown, ChevronRight, Plus } from "lucide-react"
 
@@ -337,11 +336,8 @@ export function FolderSidebar({
     return folders
   }, [displayFolders, optimisticActions])
 
-
-
   function removeFolderById(folders: any[], folderId: number): any[] {
     return folders.filter(folder => folder.id !== folderId).map(folder => ({
-
       ...folder,
       children: folder.children ? removeFolderById(folder.children, folderId) : []
     }))

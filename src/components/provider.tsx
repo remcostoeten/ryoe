@@ -1,21 +1,21 @@
 import { ReactNode, Suspense, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { TooltipProvider } from '@/presentation/components/ui/components/ui/tooltip'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { initializeDatabase } from '@/api/db'
 import { initTheme } from '@/core/theme'
 import { fixExistingUsersSetupStatus } from '@/services'
-import { ToastProvider } from '@/presentation/components/ui/components/ui/toast'
-import { Spinner } from '@/presentation/components/ui/components/ui/loaders/spinner'
+import { ToastProvider } from '@/components/ui/toast'
+import { Spinner } from '@/components/ui/loaders/spinner'
 import { debugEnvironment } from '@/shared/utils'
 
 // Create a client
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+        },
     },
-  },
 })
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -59,7 +59,7 @@ export function Providers({ children }: { children: ReactNode }) {
             <Suspense fallback={<Spinner />}>
                 <ErrorBoundary
                     FallbackComponent={({ error, resetErrorBoundary }) => (
-                      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+                        <div className="min-h-screen bg-black flex items-center justify-center p-6">
                             <div className="max-w-md w-full text-center space-y-6">
                                 <div className="space-y-2">
                                     <h1 className="text-2xl font-bold text-white">Something went wrong</h1>

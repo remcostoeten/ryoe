@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { ArrowLeft, Save, MoreHorizontal, ChevronRight } from 'lucide-react'
-import { Button } from '@/presentation/components/ui/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { NoteEditor } from '@/application/features/workspace/modules/notes/components/note-editor'
-import { useUpdateNote } from '@/mutations/note-mutations'
-import { useFolderPath } from '@/queries/folder-queries'
+import { useUpdateNote } from '@/api/services/notes-service'
+import { useFolderPath } from '@/api/services/folders-service'
 import type { TNote } from '@/domain/entities/workspace'
 
 function useNote(noteId: number) {
@@ -19,25 +19,21 @@ function useNote(noteId: number) {
         setError(null)
 
         // Import the service dynamically to avoid circular dependencies
-        const { getNoteById } = await import('@/services/note-service')
-        const response = await getNoteById(noteId)
+        const { getNoteByIdQuery } = await import('@/api/queries/notes')
+        const response = await getNoteByIdQuery(noteId)
 
-        if (response.success && response.data) {
-          const noteData: TNote = {
-            id: response.data.id,
-            title: response.data.title,
-            content: response.data.content,
-            folderId: response.data.folderId || null,
-            position: response.data.position,
-            isPublic: true, // Default value
-            isFavorite: response.data.isFavorite || false,
-            createdAt: new Date(response.data.createdAt),
-            updatedAt: new Date(response.data.updatedAt)
-          }
-          setNote(noteData)
-        } else {
-          setError(response.error || 'Note not found')
+        const noteData: TNote = {
+          id: response.id,
+          title: response.title,
+          content: response.content,
+          folderId: response.folderId || null,
+          position: response.position,
+          isPublic: true, // Default value
+          isFavorite: response.isFavorite || false,
+          createdAt: new Date(response.createdAt),
+          updatedAt: new Date(response.updatedAt)
         }
+        setNote(noteData)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load note')
       } finally {
