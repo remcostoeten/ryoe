@@ -226,3 +226,49 @@ export interface InlineEditState {
   isValid: boolean
   error?: string
 }
+
+
+
+import type { TEntity } from "@/factories/crud-types"
+
+export type TFolder = TEntity & {
+  name: string
+  parentId: number | null
+  position: number
+  isFavorite: boolean
+  isPublic: boolean
+  children?: TFolder[]
+  depth?: number
+  hasChildren?: boolean
+  isTemp?: boolean
+}
+
+export type TNote = TEntity & {
+  title: string
+  content: string
+  folderId: number | null
+  position: number
+  isFavorite: boolean
+  isPublic: boolean
+}
+
+export type TFolderSidebarProps = {
+  searchFilter: string
+  enableDragDrop?: boolean
+  showNotes?: boolean
+  onNoteSelect?: (note: TNote) => void
+  selectedNoteId?: number | null
+}
+
+export type TContextMenuState = {
+  visible: boolean
+  x: number
+  y: number
+  folder: TFolder | null
+}
+
+export type TDragState = {
+  draggedFolder: TFolder | null
+  dragOverFolder: number | null
+  isDragging: boolean
+}

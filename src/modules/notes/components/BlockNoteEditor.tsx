@@ -18,15 +18,12 @@ export default function BlockNoteEditor({
   readOnly = false,
   className
 }: BlockNoteEditorProps) {
-  // Custom schema with enhanced block types
   const schema = useMemo(() => BlockNoteSchema.create({
     blockSpecs: {
       ...defaultBlockSpecs,
-      // Add custom blocks if needed in the future
     }
   }), [])
 
-  // Create editor with enhanced configuration
   const editor = useCreateBlockNote({
     schema,
     initialContent: initialContent ? JSON.parse(initialContent) : undefined,
@@ -34,17 +31,14 @@ export default function BlockNoteEditor({
     trailingBlock: true
   })
 
-  // Apply dark theme styles on mount
   useEffect(() => {
     const styleId = 'blocknote-dark-theme'
 
-    // Remove existing style if it exists
     const existingStyle = document.getElementById(styleId)
     if (existingStyle) {
       existingStyle.remove()
     }
 
-    // Create and inject dark theme styles
     const style = document.createElement('style')
     style.id = styleId
     style.textContent = `
@@ -190,7 +184,6 @@ export default function BlockNoteEditor({
 
     document.head.appendChild(style)
 
-    // Cleanup function to remove styles when component unmounts
     return () => {
       const styleEl = document.getElementById(styleId)
       if (styleEl) {
@@ -199,7 +192,6 @@ export default function BlockNoteEditor({
     }
   }, [])
 
-  // Optimized change handler using useCallback
   const handleChange = useCallback(() => {
     if (onChange) {
       const content = JSON.stringify(editor.topLevelBlocks)
@@ -220,10 +212,8 @@ export default function BlockNoteEditor({
           />
         </div>
 
-        {/* Subtle bottom gradient for visual depth */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background/60 via-background/20 to-transparent pointer-events-none" />
 
-        {/* Subtle top gradient */}
         <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background/20 to-transparent pointer-events-none" />
       </div>
     </div>
