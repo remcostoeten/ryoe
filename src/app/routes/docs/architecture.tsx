@@ -20,6 +20,7 @@ import {
 	Keyboard,
 	Archive,
 	Monitor,
+	HardDrive,
 } from 'lucide-react'
 
 interface ServiceInfo {
@@ -35,45 +36,31 @@ interface ServiceInfo {
 const services: ServiceInfo[] = [
 	// Core Services (Build First)
 	{
-		name: 'filesystem-storage',
-		description: 'File system operations and local storage management',
+		name: 'database',
+		description: 'SQLite database management and operations',
 		status: 'done',
 		category: 'core',
 		icon: Database,
-		features: ['Local file operations', 'Storage API', 'Path resolution', 'Data persistence'],
+		features: ['SQLite integration', 'Migration system', 'Query builder', 'Data validation'],
 		priority: 1,
 	},
 	{
-		name: 'notes',
-		description: 'Note-taking system with rich text support',
-		status: 'planned',
+		name: 'storage',
+		description: 'File system operations and data persistence',
+		status: 'done',
 		category: 'core',
-		icon: FileText,
-		features: [
-			'Rich text editing',
-			'Note organization',
-			'Tags and categories',
-			'Search within notes',
-		],
+		icon: HardDrive,
+		features: ['File operations', 'Data persistence', 'Path management', 'Error handling'],
 		priority: 2,
 	},
 	{
 		name: 'tasks',
-		description: 'Task management and todo functionality',
+		description: 'Task management and scheduling system',
 		status: 'planned',
 		category: 'core',
 		icon: CheckCircle,
 		features: ['Task creation', 'Due dates', 'Priority levels', 'Task categories'],
 		priority: 3,
-	},
-	{
-		name: 'port-manager',
-		description: 'Port monitoring and process management for development',
-		status: 'planned',
-		category: 'core',
-		icon: Terminal,
-		features: ['Port scanning', 'Process detection', 'Kill processes', 'Dev server management'],
-		priority: 4,
 	},
 	{
 		name: 'settings',
@@ -87,7 +74,7 @@ const services: ServiceInfo[] = [
 			'App configuration',
 			'Export/import settings',
 		],
-		priority: 5,
+		priority: 4,
 	},
 
 	// Secondary Services (Build Next)
@@ -98,7 +85,7 @@ const services: ServiceInfo[] = [
 		category: 'secondary',
 		icon: Search,
 		features: ['Full-text search', 'Search indexing', 'Advanced filters', 'Search history'],
-		priority: 6,
+		priority: 5,
 	},
 	{
 		name: 'process-manager',
@@ -107,7 +94,7 @@ const services: ServiceInfo[] = [
 		category: 'secondary',
 		icon: Monitor,
 		features: ['System monitoring', 'Process control', 'Resource usage', 'Performance metrics'],
-		priority: 7,
+		priority: 6,
 	},
 	{
 		name: 'project-manager',
@@ -121,7 +108,7 @@ const services: ServiceInfo[] = [
 			'Project templates',
 			'Quick switching',
 		],
-		priority: 8,
+		priority: 7,
 	},
 	{
 		name: 'notifications',
@@ -135,7 +122,7 @@ const services: ServiceInfo[] = [
 			'Custom notifications',
 			'Notification history',
 		],
-		priority: 9,
+		priority: 8,
 	},
 
 	// Enhancement Services (Build Later)
@@ -146,7 +133,7 @@ const services: ServiceInfo[] = [
 		category: 'enhancement',
 		icon: Keyboard,
 		features: ['Global hotkeys', 'Custom shortcuts', 'Shortcut conflicts', 'Quick actions'],
-		priority: 10,
+		priority: 9,
 	},
 	{
 		name: 'backup',
@@ -160,7 +147,7 @@ const services: ServiceInfo[] = [
 			'Restore functionality',
 			'Backup validation',
 		],
-		priority: 11,
+		priority: 10,
 	},
 	{
 		name: 'themes',
@@ -169,7 +156,7 @@ const services: ServiceInfo[] = [
 		category: 'enhancement',
 		icon: Palette,
 		features: ['Theme switching', 'Custom themes', 'Color schemes', 'UI customization'],
-		priority: 12,
+		priority: 11,
 	},
 	{
 		name: 'file-system',
@@ -178,7 +165,7 @@ const services: ServiceInfo[] = [
 		category: 'enhancement',
 		icon: FolderOpen,
 		features: ['File operations', 'File watching', 'Recent files', 'File search'],
-		priority: 13,
+		priority: 12,
 	},
 	{
 		name: 'window-manager',
@@ -192,7 +179,7 @@ const services: ServiceInfo[] = [
 			'Multi-monitor support',
 			'Window restoration',
 		],
-		priority: 14,
+		priority: 13,
 	},
 ]
 
@@ -325,19 +312,6 @@ const servicesFileTree: FileTreeNode[] = [
 							{ name: 'types.ts', type: 'file' },
 							{ name: 'task-repository.ts', type: 'file' },
 							{ name: 'task-scheduler.ts', type: 'file' },
-						],
-					},
-					{
-						name: 'port-manager',
-						type: 'folder',
-						status: 'planned',
-						description: 'Port monitoring & management',
-						children: [
-							{ name: 'index.ts', type: 'file' },
-							{ name: 'types.ts', type: 'file' },
-							{ name: 'port-scanner.ts', type: 'file' },
-							{ name: 'port-killer.ts', type: 'file' },
-							{ name: 'dev-server-detector.ts', type: 'file' },
 						],
 					},
 					{

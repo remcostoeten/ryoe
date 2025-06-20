@@ -14,7 +14,6 @@ import {
 	LayoutGrid,
 	FileText,
 } from 'lucide-react'
-import { PortManagerTray } from '@/modules/port-manager/components/port-manager-tray'
 import { cn } from '@/shared/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
@@ -147,11 +146,6 @@ export function DocumentHeader({
 					</div>
 
 					<div className='flex items-center gap-2'>
-						{/* Port Manager Tray */}
-						<PortManagerTray />
-
-						<div className='h-5 w-px bg-border mx-1' />
-
 						<button
 							onClick={togglePreviewMode}
 							className='inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'

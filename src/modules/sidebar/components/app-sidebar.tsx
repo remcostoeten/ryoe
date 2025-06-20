@@ -12,7 +12,6 @@ import {
 	BookOpen,
 	User,
 	LogIn,
-	Network,
 } from 'lucide-react'
 import * as React from 'react'
 import { useLocation, Link } from 'react-router'
@@ -27,7 +26,6 @@ const navigationItems = [
 	{ href: '/', icon: Home, label: 'Home' },
 	{ href: '/notes', icon: FileText, label: 'Notes' },
 	{ href: '/folders', icon: Folder, label: 'Folders' },
-	{ href: '/port-manager', icon: Network, label: 'Port Manager' },
 	{ href: '/docs', icon: BookOpen, label: 'Docs' },
 ]
 
@@ -94,8 +92,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 								size='sm'
 								asChild
 								className={`h-8 w-8 p-0 ${isActive
-										? 'bg-sidebar-accent text-sidebar-accent-foreground'
-										: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+									? 'bg-sidebar-accent text-sidebar-accent-foreground'
+									: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 									}`}
 							>
 								<Link to={item.href}>
@@ -139,8 +137,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									size='sm'
 									asChild
 									className={`h-8 w-8 p-0 ${isActive
-											? 'bg-sidebar-accent text-sidebar-accent-foreground'
-											: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+										? 'bg-sidebar-accent text-sidebar-accent-foreground'
+										: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 										}`}
 								>
 									<Link to={item.href}>
@@ -163,8 +161,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									size='sm'
 									asChild
 									className={`h-8 w-8 p-0 ${isActive
-											? 'bg-sidebar-accent text-sidebar-accent-foreground'
-											: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+										? 'bg-sidebar-accent text-sidebar-accent-foreground'
+										: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 										}`}
 								>
 									<Link to={item.href}>

@@ -152,21 +152,6 @@ cargo build
 cd ..
 ```
 
-## 🎯 Port Manager Integration
-
-The port manager module works seamlessly with Bun:
-
-```bash
-# Start development with port management
-bun run dev:bun
-
-# The script will:
-# 1. Check for port conflicts
-# 2. Kill conflicting processes
-# 3. Start clean development environment
-# 4. Enable port manager in the app
-```
-
 ## 📁 Project Structure
 
 ```
@@ -179,11 +164,9 @@ bun run dev:bun
 ├── src-tauri/               # Rust backend
 │   ├── Cargo.toml           # Rust dependencies
 │   └── src/
-│       ├── main.rs          # Tauri main
-│       └── port_manager.rs  # Port management
+│       └── main.rs          # Tauri main
 └── src/                     # Frontend
     ├── modules/
-    │   └── port-manager/    # Port manager module
     └── ...
 ```
 
@@ -224,7 +207,6 @@ bun run tauri:build
 ✅ **Faster development** with Bun's speed  
 ✅ **Smaller bundles** with better optimization  
 ✅ **Better DX** with instant startup  
-✅ **Port management** built-in  
 ✅ **Cross-platform** desktop apps with Tauri  
 ✅ **Modern tooling** with TypeScript-first approach
 

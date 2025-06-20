@@ -112,14 +112,6 @@ const router = createBrowserRouter([
 				},
 			},
 			{
-				path: 'port-manager',
-				lazy: async () => {
-					const module = await import('@/app/routes/port-manager')
-					return { Component: module.Component }
-				},
-			},
-
-			{
 				path: '*',
 				lazy: async () => {
 					const module = await import('@/app/routes/not-found')
