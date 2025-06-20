@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toggleFolderFavoriteStatus } from '@/services'
-import { QUERY_KEYS } from '@/api/types'
+import { QUERY_KEYS } from '@/queries/types'
 
 export function useToggleFolderFavorite() {
 	const queryClient = useQueryClient()
@@ -11,7 +11,9 @@ export function useToggleFolderFavorite() {
 			// Invalidate all folder-related queries to refresh the UI
 			queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOLDERS })
 			queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ROOT_FOLDERS })
-			queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOLDERS })
+
+			// Invalidate favorites queries specifically
+			queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.FOLDERS, 'favorites'] })
 		},
 		onError: error => {
 			console.error('Failed to toggle folder favorite:', error)

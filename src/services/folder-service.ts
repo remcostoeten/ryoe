@@ -1,4 +1,5 @@
 import type { TServiceResult, TFolder, TFolderWithStats, TFolderCreationData } from '@/types'
+import { toggleFolderFavorite } from '@/repositories'
 
 class FolderService {
     private folders: Map<number, TFolderWithStats> = new Map()
@@ -148,22 +149,29 @@ class FolderService {
 
     async toggleFavorite(id: number): Promise<TServiceResult<TFolderWithStats>> {
         try {
-            // TODO: Implement toggle favorite
-            const folder: TFolderWithStats = {
-                id,
-                name: 'Sample Folder',
-                parentId: null,
-                position: 0,
-                isPublic: false,
-                isFavorite: true,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                noteCount: 0,
-                childFolderCount: 0,
-                totalNoteCount: 0,
-                lastModified: new Date().toISOString(),
+            const result = await toggleFolderFavorite(id)
+            if (!result.success) {
+                return { success: false, error: result.error || 'Failed to toggle folder favorite' }
             }
-            return { success: true, data: folder }
+
+            // Convert repository format to service format
+            const folder = result.data
+            if (!folder) {
+                return { success: false, error: 'Folder not found' }
+            }
+
+            return {
+                success: true,
+                data: {
+                    ...folder,
+                    createdAt: new Date(folder.createdAt).toISOString(),
+                    updatedAt: new Date(folder.updatedAt).toISOString(),
+                    noteCount: 0,
+                    childFolderCount: 0,
+                    totalNoteCount: 0,
+                    lastModified: new Date(folder.updatedAt).toISOString(),
+                }
+            }
         } catch (error) {
             return {
                 success: false,

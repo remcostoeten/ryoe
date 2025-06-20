@@ -1,5 +1,6 @@
 import type { TServiceResult, TNote, TNoteWithMetadata } from '@/types'
 import type { TCreateNoteVariables, TUpdateNoteVariables } from '@/api/mutations/types'
+import { toggleNoteFavorite } from '@/repositories'
 
 class NoteService {
     async create(data: TCreateNoteVariables): Promise<TServiceResult<TNote>> {
@@ -176,6 +177,35 @@ class NoteService {
             }
         }
     }
+
+    async toggleFavorite(id: number): Promise<TServiceResult<TNote>> {
+        try {
+            const result = await toggleNoteFavorite(id)
+            if (!result.success) {
+                return { success: false, error: result.error || 'Failed to toggle note favorite' }
+            }
+
+            // Convert repository format to service format
+            const note = result.data
+            if (!note) {
+                return { success: false, error: 'Note not found' }
+            }
+
+            return {
+                success: true,
+                data: {
+                    ...note,
+                    createdAt: new Date(note.createdAt).toISOString(),
+                    updatedAt: new Date(note.updatedAt).toISOString(),
+                }
+            }
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to toggle note favorite',
+            }
+        }
+    }
 }
 
 export const noteService = new NoteService()
@@ -190,4 +220,5 @@ export const reorderNotes = (folderId: number | null, noteIds: number[]) => note
 export const getNoteById = (id: number) => noteService.getById(id)
 export const getNotesByFolder = (folderId: number | null) => noteService.getNotesByFolder(folderId)
 export const getFavoriteNotesWithMetadata = () => noteService.getFavoriteNotes()
-export const searchNotes = (query: string) => noteService.searchNotes(query) 
+export const searchNotes = (query: string) => noteService.searchNotes(query)
+export const toggleNoteFavoriteStatus = (id: number) => noteService.toggleFavorite(id) 
