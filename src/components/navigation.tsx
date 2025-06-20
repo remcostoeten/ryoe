@@ -3,8 +3,11 @@
 import { Link, useLocation } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/shared/utils'
-import { Home, FileText, Folder, BookOpen, LogIn, User } from 'lucide-react'
-import { useCurrentUser } from '@/features/onboarding/hooks/useOnboarding'
+import { Home, FileText, Folder, BookOpen, LogIn, User, LogOut } from 'lucide-react'
+import { useCurrentUser } from '@/hooks/useOnboarding'
+import { logout } from '@/services/user-service'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router'
 import { Logo } from './logo'
 
 const baseNavigationItems = [
@@ -49,6 +52,26 @@ const unauthenticatedItems = [
 export function Navigation() {
 	const location = useLocation()
 	const { user, isLoading } = useCurrentUser()
+	const queryClient = useQueryClient()
+	const navigate = useNavigate()
+
+	const handleLogout = async () => {
+		try {
+			const result = await logout()
+			if (!result.success) {
+				throw new Error(result.error || 'Failed to logout')
+			}
+
+			// Clear query cache
+			queryClient.clear()
+
+			// Navigate to onboarding
+			navigate('/onboarding')
+		} catch (error) {
+			console.error('Failed to logout:', error)
+			alert('Failed to logout. Please try again.')
+		}
+	}
 
 	return (
 		<nav className='border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50'>
@@ -100,6 +123,19 @@ export function Navigation() {
 									</Button>
 								)
 							})}
+
+						{/* Logout button - only show if user is logged in */}
+						{!isLoading && user && (
+							<Button
+								variant='ghost'
+								size='sm'
+								onClick={handleLogout}
+								className='gap-2 text-muted-foreground hover:text-foreground'
+							>
+								<LogOut className='h-4 w-4' />
+								Logout
+							</Button>
+						)}
 
 						{/* Sign in link - only show if no user */}
 						{!isLoading &&

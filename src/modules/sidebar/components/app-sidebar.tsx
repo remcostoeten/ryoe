@@ -12,11 +12,15 @@ import {
 	BookOpen,
 	User,
 	LogIn,
+	LogOut,
 } from 'lucide-react'
 import * as React from 'react'
 import { useLocation, Link } from 'react-router'
 import { useFolderContext } from '@/contexts/folder-context'
 import { useCurrentUser } from '@/hooks/useOnboarding'
+import { logout } from '@/services/user-service'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router'
 import { SidebarContentResolver } from './sidebar-content-resolver'
 import { ActionBarResolver } from './action-bar-resolver'
 import { useState } from 'react'
@@ -34,34 +38,43 @@ const authenticatedItems = [{ href: '/profile', icon: User, label: 'Profile' }]
 const unauthenticatedItems = [{ href: '/sign-in', icon: LogIn, label: 'Sign In' }]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const { searchFilter: folderSearchFilter, setSearchFilter: setFolderSearchFilter } =
-		useFolderContext()
 	const location = useLocation()
 	const { user, isLoading } = useCurrentUser()
+	const queryClient = useQueryClient()
+	const navigate = useNavigate()
 	const pathname = location.pathname
-	const [docsSearchFilter, setDocsSearchFilter] = useState('')
+	const [isLoggingOut, setIsLoggingOut] = useState(false)
+	const [searchFilter, setSearchFilter] = useState('')
 
-	// Determine which search filter to use based on current route
-	const isDocsPage = pathname.startsWith('/docs')
-	const currentSearchFilter = isDocsPage ? docsSearchFilter : folderSearchFilter
+	const handleLogout = async () => {
+		setIsLoggingOut(true)
+		try {
+			const result = await logout()
+			if (!result.success) {
+				throw new Error(result.error || 'Failed to logout')
+			}
+
+			// Clear query cache
+			queryClient.clear()
+
+			// Navigate to onboarding
+			navigate('/onboarding')
+		} catch (error) {
+			console.error('Failed to logout:', error)
+			alert('Failed to logout. Please try again.')
+		} finally {
+			setIsLoggingOut(false)
+		}
+	}
 
 	const handleSearch = (query: string) => {
-		if (isDocsPage) {
-			setDocsSearchFilter(query)
-		} else {
-			setFolderSearchFilter(query)
-		}
+		setSearchFilter(query)
 	}
 
 	const handleCancelSearch = () => {
-		if (isDocsPage) {
-			setDocsSearchFilter('')
-		} else {
-			setFolderSearchFilter('')
-		}
+		setSearchFilter('')
 	}
 
-	// Helper function to check if a route is active
 	const isActiveRoute = (href: string) => {
 		if (href === '/') {
 			return pathname === '/'
@@ -148,6 +161,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							)
 						})}
 
+					{/* Logout button for authenticated users */}
+					{!isLoading && user && (
+						<Button
+							variant='ghost'
+							size='sm'
+							onClick={handleLogout}
+							disabled={isLoggingOut}
+							className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:opacity-50'
+							title={isLoggingOut ? 'Logging out...' : 'Logout'}
+						>
+							<LogOut className='h-4 w-4' />
+						</Button>
+					)}
+
 					{/* Sign in button for unauthenticated users */}
 					{!isLoading &&
 						!user &&
@@ -195,7 +222,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<ActionBarResolver onSearch={handleSearch} onCancelSearch={handleCancelSearch} />
 
 				<SidebarContent className='p-2'>
-					<SidebarContentResolver searchFilter={currentSearchFilter} />
+					<SidebarContentResolver searchFilter={searchFilter} />
 				</SidebarContent>
 			</Sidebar>
 		</Sidebar>

@@ -194,11 +194,10 @@ function ProfilePageContent() {
 									type='button'
 									onClick={() => handleStorageTypeChange('turso')}
 									disabled={isUpdating}
-									className={`p-4 rounded-lg border transition-all duration-300 ${
-										currentPreferences?.storageType === 'turso'
+									className={`p-4 rounded-lg border transition-all duration-300 ${currentPreferences?.storageType === 'turso'
 											? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
 											: 'bg-gray-800/50 border-gray-600 text-gray-400 hover:bg-gray-700'
-									}`}
+										}`}
 									whileHover={{ scale: 1.02 }}
 									whileTap={{ scale: 0.98 }}
 								>
@@ -211,11 +210,10 @@ function ProfilePageContent() {
 									type='button'
 									onClick={() => handleStorageTypeChange('local')}
 									disabled={isUpdating}
-									className={`p-4 rounded-lg border transition-all duration-300 ${
-										currentPreferences?.storageType === 'local'
+									className={`p-4 rounded-lg border transition-all duration-300 ${currentPreferences?.storageType === 'local'
 											? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
 											: 'bg-gray-800/50 border-gray-600 text-gray-400 hover:bg-gray-700'
-									}`}
+										}`}
 									whileHover={{ scale: 1.02 }}
 									whileTap={{ scale: 0.98 }}
 								>
@@ -236,9 +234,9 @@ function ProfilePageContent() {
 										setEditedPreferences(prev =>
 											prev
 												? {
-														...prev,
-														mdxStoragePath: path,
-													}
+													...prev,
+													mdxStoragePath: path,
+												}
 												: null
 										)
 									}
