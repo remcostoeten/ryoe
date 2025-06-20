@@ -9,7 +9,7 @@ import {
 	updateUserPreferencesMutation,
 	switchStorageTypeMutation,
 } from '@/api/mutations/auth'
-import type { TUserRegistrationData, TUserPreferencesUpdate, TUserProfile } from '@/services/types'
+import type { TUserRegistrationData, TUserPreferencesUpdate, TUserProfile } from '@/types'
 
 // Query Keys
 export const AUTH_QUERY_KEYS = {

@@ -1,5 +1,5 @@
 import { getFavoriteNotesWithMetadata } from '@/services/note-service'
-import type { TNoteWithMetadata } from '@/services/types'
+import type { TNoteWithMetadata } from '@/types'
 
 export async function getFavoriteNotesQuery(): Promise<TNoteWithMetadata[]> {
 	const result = await getFavoriteNotesWithMetadata()

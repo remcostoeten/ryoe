@@ -42,27 +42,27 @@ type ContextMenuState = {
 
 type OptimisticFolderAction =
 	| {
-			type: 'CREATE_FOLDER'
-			parentId: number | null
-			tempId: string
-			name: string
-	  }
+		type: 'CREATE_FOLDER'
+		parentId: number | null
+		tempId: string
+		name: string
+	}
 	| { type: 'DELETE_FOLDER'; folderId: number }
 	| { type: 'RENAME_FOLDER'; folderId: number; newName: string }
 	| {
-			type: 'MOVE_FOLDER'
-			folderId: number
-			newParentId: number | null
-			newPosition: number
-	  }
+		type: 'MOVE_FOLDER'
+		folderId: number
+		newParentId: number | null
+		newPosition: number
+	}
 	| { type: 'CREATE_NOTE'; folderId: number; tempId: string; note: TNote }
 	| { type: 'DELETE_NOTE'; noteId: number; folderId: number }
 	| {
-			type: 'UPDATE_NOTE'
-			noteId: number
-			folderId: number
-			updates: Partial<TNote>
-	  }
+		type: 'UPDATE_NOTE'
+		noteId: number
+		folderId: number
+		updates: Partial<TNote>
+	}
 
 // Enhanced Context Menu with smooth animations
 const CustomContextMenu = ({
@@ -302,6 +302,9 @@ export function FolderSidebar({
 	const allFolderIds = useMemo(() => {
 		const collectFolderIds = (folders: any[]): number[] => {
 			const ids: number[] = []
+			if (!folders || !Array.isArray(folders)) {
+				return ids
+			}
 			folders.forEach(folder => {
 				ids.push(folder.id)
 				if (folder.children) {
@@ -310,7 +313,7 @@ export function FolderSidebar({
 			})
 			return ids
 		}
-		return collectFolderIds(displayFolders)
+		return collectFolderIds(displayFolders || [])
 	}, [displayFolders])
 
 	const { getNotesForFolder, addNoteToFolder, updateNoteInFolder, removeNoteFromFolder } =
@@ -335,7 +338,7 @@ export function FolderSidebar({
 	}
 
 	const optimisticFolders = useMemo(() => {
-		let folders = [...displayFolders]
+		let folders = [...(displayFolders || [])]
 
 		optimisticActions.forEach(action => {
 			switch (action.type) {
@@ -1028,8 +1031,8 @@ export function FolderSidebar({
 														)
 													}
 												}}
-												onMove={() => {}}
-												onToggleVisibility={() => {}}
+												onMove={() => { }}
+												onToggleVisibility={() => { }}
 												onToggleFavorite={async note => {
 													try {
 														await toggleNoteFavoriteMutation.mutateAsync(
@@ -1127,7 +1130,7 @@ export function FolderSidebar({
 				onCreateChild={handleCreateFolder}
 				onCreateNote={showNotes ? handleCreateNote : undefined}
 				onDelete={handleDeleteFolder}
-				onMove={() => {}}
+				onMove={() => { }}
 				onToggleFavorite={async folder => {
 					try {
 						await toggleFolderFavoriteMutation.mutateAsync(folder.id)

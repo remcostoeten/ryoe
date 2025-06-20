@@ -24,7 +24,7 @@ export type {
     TFolderUpdateData as TUpdateFolderVariables,
     TUserRegistrationData as TRegisterUserVariables,
     TUserPreferencesUpdate as TUpdateUserPreferencesVariables,
-} from '@/services/types'
+} from '@/types'
 
 // Storage switch variables
 export type TSwitchStorageTypeVariables = {

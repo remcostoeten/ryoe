@@ -1,6 +1,7 @@
 import { useDatabaseHealth } from '@/modules/database-actions/hooks/use-database-health'
 import { Button } from '@/components/ui/button'
-import { Badge, Tooltip, TooltipContent, TooltipTrigger } from '@/components/components/ui'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RefreshCw } from 'lucide-react'
 import { cn } from '@/shared/utils'
 
@@ -89,13 +90,13 @@ export function DatabaseHealthIndicator({
 							className={cn(
 								'gap-1.5 px-2 transition-colors duration-200',
 								health.status === 'error' &&
-									'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 border-rose-300/10',
+								'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 border-rose-300/10',
 								health.status === 'disconnected' &&
-									'bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 border-amber-300/10',
+								'bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 border-amber-300/10',
 								health.status === 'healthy' &&
-									'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 border-emerald-300/10',
+								'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 border-emerald-300/10',
 								health.status === 'checking' &&
-									'bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 border-gray-300/10'
+								'bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 border-gray-300/10'
 							)}
 						>
 							<span

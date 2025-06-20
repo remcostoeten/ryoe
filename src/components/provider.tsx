@@ -4,12 +4,10 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { initializeDatabase } from '@/api'
 import { initTheme } from '@/core/theme'
-import { fixExistingUsersSetupStatus } from '@/services'
 import { ToastProvider } from '@/components/ui/toast'
 import { Spinner } from '@/components/ui/loaders/spinner'
 import { debugEnvironment } from '@/shared/utils'
 
-// Create a client
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -21,29 +19,20 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		const initializeApp = async () => {
-			// Debug environment information in development
 			if (process.env.NODE_ENV === 'development') {
 				debugEnvironment()
 			}
 
-			// Initialize Turso database (works in both web and Tauri environments)
 			try {
 				console.log('Initializing Turso database...')
 				await initializeDatabase()
 				console.log('Database initialized successfully')
 
-				// Fix existing users that might have is_setup_complete = 0
-				try {
-					await fixExistingUsersSetupStatus()
-				} catch (error) {
-					console.warn('Failed to fix existing users setup status:', error)
-					// Don't fail app initialization for this
-				}
+				// TODO: Fix existing users that might have is_setup_complete = 0
 			} catch (error) {
 				console.error('Failed to initialize database:', error)
 			}
 
-			// Initialize theme (works in both environments)
 			try {
 				await initTheme()
 			} catch (error) {

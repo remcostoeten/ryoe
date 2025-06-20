@@ -1,5 +1,5 @@
 import { searchNotes } from '@/services/note-service'
-import type { TSearchResult } from '@/services/types'
+import type { TSearchResult } from '@/types'
 
 export async function searchNotesQuery(query: string): Promise<TSearchResult> {
 	const result = await searchNotes(query)

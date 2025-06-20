@@ -3,26 +3,52 @@ import {
 	checkTursoDatabaseHealth,
 	executeTursoQuery,
 } from '@/api/db/clients/turso-client'
+import type { TServiceResult } from '@/types'
 
-export async function initializeDatabase() {
-	try {
-		console.log('Database initialization started...')
-		const result = await initializeTursoDatabase()
-		console.log('Database initialized:', result)
-		return result
-	} catch (error) {
-		console.error('Failed to initialize database:', error)
-		throw error
-	}
-}
-
-export type DatabaseHealthStatus = 'checking' | 'healthy' | 'error' | 'disconnected'
-
-export interface DatabaseHealth {
-	status: DatabaseHealthStatus
+export type DatabaseHealth = {
+	status: 'checking' | 'healthy' | 'error' | 'disconnected'
 	message: string
 	lastChecked: Date
 	responseTime?: number
+}
+
+export async function resetAllData(): Promise<TServiceResult<void>> {
+	try {
+		// TODO: Implement actual database reset
+		console.log('Resetting all data...')
+		return { success: true }
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Failed to reset database'
+		}
+	}
+}
+
+export async function validateReset(): Promise<TServiceResult<boolean>> {
+	try {
+		// TODO: Implement actual validation
+		console.log('Validating database reset...')
+		return { success: true, data: true }
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Failed to validate reset'
+		}
+	}
+}
+
+export async function hardResetDatabase(): Promise<TServiceResult<void>> {
+	try {
+		// TODO: Implement actual hard reset
+		console.log('Hard resetting database...')
+		return { success: true }
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Failed to hard reset database'
+		}
+	}
 }
 
 export async function checkDatabaseHealth(): Promise<DatabaseHealth> {

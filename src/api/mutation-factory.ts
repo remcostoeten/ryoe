@@ -71,7 +71,7 @@ export function createMutationHooks<T, TCreateData, TUpdateData>(
         useCreate: (options?: TMutationOptions<T>) =>
             useMutation({
                 ...factory.create(options),
-                onSuccess: (data, variables) => {
+                onSuccess: (data, _variables) => {
                     queryClient.invalidateQueries({ queryKey: queryKeys })
                     options?.onSuccess?.(data)
                 },
@@ -80,7 +80,7 @@ export function createMutationHooks<T, TCreateData, TUpdateData>(
         useUpdate: (options?: TMutationOptions<T>) =>
             useMutation({
                 ...factory.update(options),
-                onSuccess: (data, variables) => {
+                onSuccess: (data, _variables) => {
                     queryClient.invalidateQueries({ queryKey: queryKeys })
                     options?.onSuccess?.(data)
                 },
@@ -89,7 +89,7 @@ export function createMutationHooks<T, TCreateData, TUpdateData>(
         useDelete: (options?: TMutationOptions<void>) =>
             useMutation({
                 ...factory.delete(options),
-                onSuccess: (data, variables) => {
+                onSuccess: (data, _variables) => {
                     queryClient.invalidateQueries({ queryKey: queryKeys })
                     options?.onSuccess?.(data)
                 },

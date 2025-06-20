@@ -8,7 +8,13 @@ import type {
     TMoveFolderVariables,
     TReorderFoldersVariables,
 } from './types'
-import { folderService } from '@/services/folder-service'
+import {
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    moveFolder,
+    reorderFolders,
+} from '@/services'
 
 export function useCreateFolder(options?: TMutationOptions<TFolder>) {
     const queryClient = useQueryClient()
@@ -16,11 +22,11 @@ export function useCreateFolder(options?: TMutationOptions<TFolder>) {
     return useMutation({
         mutationKey: ['folders', 'create'],
         mutationFn: async (variables: TCreateFolderVariables) => {
-            const result = await folderService.create(variables)
-            if (!result.success) {
+            const result = await createFolder(variables)
+            if (!result.success || !result.data) {
                 throw new Error(result.error || 'Failed to create folder')
             }
-            return result.data!
+            return result.data
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['folders'] })
@@ -37,11 +43,11 @@ export function useUpdateFolder(options?: TMutationOptions<TFolder>) {
     return useMutation({
         mutationKey: ['folders', 'update'],
         mutationFn: async (variables: TUpdateFolderVariables) => {
-            const result = await folderService.update(variables.id, variables)
-            if (!result.success) {
+            const result = await updateFolder(variables.id, variables)
+            if (!result.success || !result.data) {
                 throw new Error(result.error || 'Failed to update folder')
             }
-            return result.data!
+            return result.data
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['folders'] })
@@ -58,7 +64,7 @@ export function useDeleteFolder(options?: TMutationOptions<void>) {
     return useMutation({
         mutationKey: ['folders', 'delete'],
         mutationFn: async (variables: TDeleteFolderVariables) => {
-            const result = await folderService.delete(variables.id, variables.deleteChildren, variables.force)
+            const result = await deleteFolder(variables.id, { force: variables.force })
             if (!result.success) {
                 throw new Error(result.error || 'Failed to delete folder')
             }
@@ -78,11 +84,11 @@ export function useMoveFolder(options?: TMutationOptions<TFolder>) {
     return useMutation({
         mutationKey: ['folders', 'move'],
         mutationFn: async (variables: TMoveFolderVariables) => {
-            const result = await folderService.move(variables.id, variables.parentId)
-            if (!result.success) {
+            const result = await moveFolder(variables.id, variables.parentId)
+            if (!result.success || !result.data) {
                 throw new Error(result.error || 'Failed to move folder')
             }
-            return result.data!
+            return result.data
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['folders'] })
@@ -99,7 +105,7 @@ export function useReorderFolders(options?: TMutationOptions<void>) {
     return useMutation({
         mutationKey: ['folders', 'reorder'],
         mutationFn: async (variables: TReorderFoldersVariables) => {
-            const result = await folderService.reorder(variables.parentId, variables.folderIds)
+            const result = await reorderFolders(variables.parentId, variables.folderIds)
             if (!result.success) {
                 throw new Error(result.error || 'Failed to reorder folders')
             }

@@ -1,5 +1,5 @@
 import { createNoteWithValidation } from '@/services/note-service'
-import type { TNoteCreationData, TNoteWithMetadata } from '@/services/types'
+import type { TNoteCreationData, TNoteWithMetadata } from '@/types'
 
 export async function createNoteMutation(data: TNoteCreationData): Promise<TNoteWithMetadata> {
 	const result = await createNoteWithValidation(data)

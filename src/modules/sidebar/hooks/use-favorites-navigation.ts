@@ -1,5 +1,5 @@
-import { useFolderContext } from '@/application/features/workspace'
-import type { TNote } from '@/domain/entities/workspace'
+import { useFolderContext } from '@/contexts/folder-context'
+import type { TNote } from '@/types'
 
 export function useFavoritesNavigation() {
 	const { selectFolder, expandFolder } = useFolderContext()

@@ -2,7 +2,7 @@ import { createContext, useContext, ReactNode, useState, useCallback, useMemo } 
 import { useFolders } from '@/hooks/use-folders'
 import { useFolderTree } from '@/hooks/use-folder-tree'
 import { useFolderOperations } from '@/hooks/use-folder-operations'
-import type { TFolder, TFolderTreeNode } from '@/services/types'
+import type { TFolder, TFolderTreeNode } from '@/types'
 import type { TCreateFolderData, TUpdateFolderData } from '@/services/folder-service'
 
 interface FolderContextValue {

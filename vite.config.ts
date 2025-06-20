@@ -75,16 +75,4 @@ export default defineConfig({
 		// Increase chunk size warning limit
 		chunkSizeWarningLimit: 1000,
 	},
-
-	// Ignore TypeScript and ESLint errors during build
-	optimizeDeps: {
-		exclude: [],
-		esbuildOptions: {
-			tsconfigRaw: {
-				compilerOptions: {
-					ignoreErrors: true
-				}
-			}
-		}
-	}
 })

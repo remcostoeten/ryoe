@@ -1,5 +1,5 @@
 import { Suspense, useState, useEffect } from 'react'
-import { DocsLayout } from '@/components/layouts/components/layout/docs-layout'
+import { DocsLayout } from '@/components/layout/docs-layout'
 import { useToc } from '@/hooks/use-toc'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

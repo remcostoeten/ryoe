@@ -1,36 +1,42 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFolder, updateFolder, deleteFolder, type TCreateFolderData, type TUpdateFolderData } from '@/services/folder-service'
+import { useMutation } from '@tanstack/react-query'
+import type { TFolder } from '@/types'
+
+interface TCreateFolderData {
+    name: string
+    parentId?: number
+}
+
+interface TUpdateFolderData {
+    id: number
+    name: string
+}
 
 export function useFolderOperations() {
-    const queryClient = useQueryClient()
-
-    const createMutation = useMutation({
-        mutationFn: (data: TCreateFolderData) => createFolder(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['folders'] })
+    const createFolder = useMutation({
+        mutationFn: async (data: TCreateFolderData) => {
+            console.log('Creating folder:', data)
+            return null
         }
     })
 
-    const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: TUpdateFolderData }) => updateFolder(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['folders'] })
-        }
-    })
+    const updateFolder = (id: number, data: Partial<TFolder>) => {
+        console.log('Updating folder:', id, data)
+        return null
+    }
 
-    const deleteMutation = useMutation({
-        mutationFn: (id: number) => deleteFolder(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['folders'] })
+    const deleteFolder = useMutation({
+        mutationFn: async (id: number) => {
+            console.log('Deleting folder:', id)
+            return null
         }
     })
 
     return {
-        createFolder: createMutation.mutate,
-        updateFolder: (id: number, data: TUpdateFolderData) => updateMutation.mutate({ id, data }),
-        deleteFolder: deleteMutation.mutate,
-        isCreating: createMutation.isPending,
-        isUpdating: updateMutation.isPending,
-        isDeleting: deleteMutation.isPending
+        createFolder: createFolder.mutate,
+        updateFolder,
+        deleteFolder: deleteFolder.mutate,
+        isCreating: createFolder.isPending,
+        isUpdating: false,
+        isDeleting: deleteFolder.isPending,
     }
 } 

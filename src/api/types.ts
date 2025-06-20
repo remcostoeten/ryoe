@@ -55,13 +55,13 @@ import type { TMutationOptions } from '@/types/mutations'
 export { TMutationOptions }
 
 // Re-export types from services
-export type { TUserProfile, TUserRegistrationData, TUserPreferencesUpdate } from '@/services/types'
+export type { TUserProfile, TUserRegistrationData, TUserPreferencesUpdate } from '@/types'
 
 export type {
 	TNoteWithMetadata,
 	TNoteCreationData,
 	TNoteUpdateData,
 	TSearchResult,
-} from '@/services/types'
+} from '@/types'
 
-export type { TFolderWithStats, TFolderCreationData, TFolderUpdateData } from '@/services/types'
+export type { TFolderWithStats, TFolderCreationData, TFolderUpdateData } from '@/types'

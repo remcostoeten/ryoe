@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { getUserProfile } from '@/services/user-service'
-import type { TUserProfile } from '@/services/types'
+import type { TUserProfile } from '@/types'
 
 export function useCurrentUser() {
     const { data: user, isLoading } = useQuery<TUserProfile>({

@@ -1,5 +1,5 @@
 import { getNotesByFolder } from '@/services/note-service'
-import type { TNoteWithMetadata } from '@/services/types'
+import type { TNoteWithMetadata } from '@/types'
 
 export async function getNotesByFolderQuery(folderId: number | null): Promise<TNoteWithMetadata[]> {
 	const result = await getNotesByFolder(folderId)

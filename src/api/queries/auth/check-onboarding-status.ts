@@ -1,5 +1,5 @@
 import { checkOnboardingStatus } from '@/services/user-service'
-import type { TServiceResult } from '@/services/types'
+import type { TServiceResult } from '@/types'
 
 export async function checkOnboardingStatusQuery(): Promise<boolean> {
 	const result = await checkOnboardingStatus()

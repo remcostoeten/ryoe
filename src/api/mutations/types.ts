@@ -1,4 +1,4 @@
-import type { TServiceResult } from '@/types'
+// import type { TServiceResult } from '@/types' // Unused import removed
 
 export interface TMutationOptions<TData = unknown, TError = Error> {
     onSuccess?: (data: TData) => void

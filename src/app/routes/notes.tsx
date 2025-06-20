@@ -1,135 +1,19 @@
-import { useState, useMemo, lazy, Suspense } from 'react'
-import { useFolders } from '@/application/features/workspace/modules/folder-management/hooks/use-folders'
-import { useFolderOperations } from '@/application/features/workspace/modules/folder-management/hooks/use-folder-operations'
-import type { TFolder } from '@/domain/entities/workspace'
-import type { FolderTreeNode } from '@/domain/entities/workspace'
-import { CreateNoteButton } from '@/application/features/workspace/modules/notes/components/create-note-button'
-import { NoteEditor } from '@/application/features/workspace/modules/notes/components/note-editor'
-import { useNotes } from '@/application/features/workspace/modules/notes/hooks/use-notes'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { FileText } from 'lucide-react'
-import { cn } from '@/shared/utils'
+import { PanelLeftClose, PanelLeft, Plus, FileText } from 'lucide-react'
 import { FolderSidebar } from '@/modules/sidebar/components/folder-sidebar'
-
-// Lazy load heavy components
-const FolderTree = lazy(() =>
-	import('@/modules/folder-management/components/folder-tree').then(module => ({
-		default: module.FolderTree,
-	}))
-)
-const NoteList = lazy(() =>
-	import('@/modules/notes/components/note-list').then(module => ({
-		default: module.NoteList,
-	}))
-)
-import { PanelLeftClose, PanelLeft } from 'lucide-react'
-
-// Helper function to convert TFolder[] to FolderTreeNode[]
-function buildFolderTree(folders: TFolder[]): FolderTreeNode[] {
-	const folderMap = new Map<number, FolderTreeNode>()
-	const rootFolders: FolderTreeNode[] = []
-
-	// First pass: create all nodes
-	folders.forEach(folder => {
-		const node: FolderTreeNode = {
-			...folder,
-			children: [],
-			depth: 0,
-			hasChildren: false,
-		}
-		folderMap.set(folder.id, node)
-	})
-
-	// Second pass: build tree structure
-	folders.forEach(folder => {
-		const node = folderMap.get(folder.id)!
-		if (folder.parentId === null) {
-			rootFolders.push(node)
-		} else {
-			const parent = folderMap.get(folder.parentId)
-			if (parent) {
-				parent.children.push(node)
-				parent.hasChildren = true
-				node.depth = parent.depth + 1
-			}
-		}
-	})
-
-	return rootFolders
-}
+import { cn } from '@/shared/utils'
 
 export default function NotesPage() {
-	const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null)
 	const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null)
-	const [expandedFolderIds, setExpandedFolderIds] = useState<Set<number>>(new Set([1]))
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
-	// Folder management
-	const { folders, loading: foldersLoading } = useFolders()
-	const { createFolder, updateFolder, deleteFolder, moveFolder } = useFolderOperations()
-
-	// Convert folders to tree nodes
-	const folderTree = useMemo(() => buildFolderTree(folders), [folders])
-
-	// Note management
-	const { notes, loading: notesLoading, createNote, deleteNote } = useNotes(selectedFolderId)
-
-	// Get the selected note
-	const selectedNote = notes.find(note => note.id === selectedNoteId)
-
-	const handleFolderSelect = (folder: TFolder) => {
-		setSelectedFolderId(folder.id)
-		setSelectedNoteId(null) // Clear note selection when folder changes
-	}
-
 	const handleNoteSelect = (note: any) => {
-		setSelectedNoteId(note.id)
+		setSelectedNoteId(note.id || note)
 	}
 
-	const handleFolderExpand = (folderId: number, isExpanded: boolean) => {
-		setExpandedFolderIds(prev => {
-			const newSet = new Set(prev)
-			if (isExpanded) {
-				newSet.add(folderId)
-			} else {
-				newSet.delete(folderId)
-			}
-			return newSet
-		})
-	}
-
-	const handleFolderCreate = (parentId: number | null) => {
-		// Create a new folder with a default name
-		createFolder({
-			name: 'New Folder',
-			parentId: parentId || undefined,
-		})
-	}
-
-	const handleFolderRename = async (folderId: number, newName: string): Promise<boolean> => {
-		try {
-			const result = await updateFolder({
-				id: folderId,
-				name: newName,
-			})
-			return result !== null
-		} catch (error) {
-			console.error('Failed to rename folder:', error)
-			return false
-		}
-	}
-
-	const handleFolderDelete = (folder: TFolder) => {
-		if (confirm(`Delete folder "${folder.name}"?`)) {
-			deleteFolder(folder.id)
-		}
-	}
-
-	const handleCreateNote = async (noteData: any) => {
-		const newNote = await createNote(noteData)
-		if (newNote) {
-			setSelectedNoteId(newNote.id)
-		}
+	const handleCreateNote = () => {
+		console.log('Creating new note...')
 	}
 
 	return (
@@ -163,11 +47,13 @@ export default function NotesPage() {
 							</Button>
 						</div>
 
-						<CreateNoteButton
-							selectedFolderId={selectedFolderId}
-							onCreateNote={handleCreateNote}
+						<Button
+							onClick={handleCreateNote}
 							className='w-full shadow-sm hover:shadow-md transition-all duration-200 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-10'
-						/>
+						>
+							<Plus className="w-4 h-4 mr-2" />
+							New Note
+						</Button>
 					</div>
 
 					{/* Folder Tree */}
@@ -198,43 +84,41 @@ export default function NotesPage() {
 					</div>
 				)}
 
-				{/* Note Editor */}
-				<div className='flex-1 relative'>
-					{selectedNote ? (
-						<div className='h-full bg-gradient-to-br from-background via-background/98 to-card/10 shadow-inner'>
-							<NoteEditor
-								key={selectedNote.id}
-								noteId={selectedNote.id}
-								readOnly={false}
-								className='h-full'
-							/>
+				{/* Main Content Area */}
+				<div className='flex-1 p-6'>
+					{selectedNoteId ? (
+						<div className="h-full flex flex-col">
+							<h1 className="text-2xl font-bold mb-4">Note Editor</h1>
+							<div className="flex-1 border border-border rounded-lg p-4">
+								<p className="text-muted-foreground">
+									Note editor for note ID: {selectedNoteId}
+								</p>
+								<p className="text-sm text-muted-foreground mt-2">
+									TODO: Implement full note editor
+								</p>
+							</div>
 						</div>
 					) : (
-						<div className='flex items-center justify-center h-full bg-gradient-to-br from-background via-card/10 to-muted/5'>
-							<div className='text-center max-w-md mx-auto p-8'>
-								<div className='w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center border border-border/30'>
-									<FileText className='w-10 h-10 text-muted-foreground/60' />
+						<div className='flex items-center justify-center h-full'>
+							<div className='text-center space-y-6 max-w-md'>
+								<div className='w-24 h-24 mx-auto rounded-full bg-muted/30 flex items-center justify-center backdrop-blur-sm'>
+									<FileText className='w-12 h-12 text-muted-foreground/40' />
 								</div>
-								<h3 className='text-xl font-semibold text-foreground/90 mb-3'>
-									Select a note to start writing
-								</h3>
-								<p className='text-muted-foreground/70 leading-relaxed mb-6'>
-									Choose a note from the sidebar or create a new one to begin your
-									writing journey
-								</p>
-								<div className='flex flex-col gap-3'>
-									<CreateNoteButton
-										selectedFolderId={selectedFolderId}
-										onCreateNote={handleCreateNote}
-										className='bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-10 shadow-sm hover:shadow-md transition-all duration-200'
-										disabled={!selectedFolderId}
-									/>
-									{!selectedFolderId && (
-										<p className='text-xs text-muted-foreground/60'>
-											Please select a folder first to create a note
-										</p>
-									)}
+								<div className='space-y-3'>
+									<h3 className='text-xl font-semibold tracking-tight text-foreground/90'>
+										Select a note to start editing
+									</h3>
+									<p className='text-muted-foreground/60 leading-relaxed'>
+										Choose a note from the sidebar or create a new one to begin writing.
+									</p>
 								</div>
+								<Button
+									onClick={handleCreateNote}
+									className='bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-200'
+								>
+									<Plus className='w-4 h-4 mr-2' />
+									Create Your First Note
+								</Button>
 							</div>
 						</div>
 					)}

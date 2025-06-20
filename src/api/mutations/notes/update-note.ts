@@ -1,5 +1,5 @@
 import { updateNoteWithValidation } from '@/services/note-service'
-import type { TNoteUpdateData, TNoteWithMetadata } from '@/services/types'
+import type { TNoteUpdateData, TNoteWithMetadata } from '@/types'
 
 export async function updateNoteMutation(
 	id: number,

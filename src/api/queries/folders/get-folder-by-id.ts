@@ -1,5 +1,5 @@
 import { getFolderById } from '@/services/folder-service'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/types'
 
 export async function getFolderByIdQuery(id: number): Promise<TFolderWithStats> {
 	const result = await getFolderById(id)

@@ -7,7 +7,6 @@ interface SignInPageProps {
 	className?: string
 }
 
-// Simple animated background component
 const AnimatedBackground = ({ reverse = false }: { reverse?: boolean }) => {
 	const animationDirection = reverse ? 'reverse' : 'normal'
 
@@ -65,7 +64,6 @@ const SignInPage = ({ className }: SignInPageProps) => {
 		}
 	}
 
-	// Focus first input when code screen appears
 	useEffect(() => {
 		if (step === 'code') {
 			setTimeout(() => {
@@ -80,19 +78,15 @@ const SignInPage = ({ className }: SignInPageProps) => {
 			newCode[index] = value
 			setCode(newCode)
 
-			// Focus next input if value is entered
 			if (value && index < 5) {
 				codeInputRefs.current[index + 1]?.focus()
 			}
 
-			// Check if code is complete
 			if (index === 5 && value) {
 				const isComplete = newCode.every(digit => digit.length === 1)
 				if (isComplete) {
-					// Show the reverse animation
 					setReverseCanvasVisible(true)
 
-					// Transition to success screen after animation
 					setTimeout(() => {
 						setStep('success')
 					}, 2000)
@@ -110,7 +104,6 @@ const SignInPage = ({ className }: SignInPageProps) => {
 	const handleBackClick = () => {
 		setStep('email')
 		setCode(['', '', '', '', '', ''])
-		// Reset animations if going back
 		setReverseCanvasVisible(false)
 	}
 
@@ -120,10 +113,8 @@ const SignInPage = ({ className }: SignInPageProps) => {
 				<AnimatedBackground reverse={reverseCanvasVisible} />
 			</div>
 
-			{/* Content Layer */}
 			<div className='relative z-10 flex flex-col flex-1'>
 				<div className='flex flex-1 flex-col lg:flex-row '>
-					{/* Left side (form) */}
 					<div className='flex-1 flex flex-col justify-center items-center'>
 						<div className='w-full mt-[150px] max-w-sm'>
 							<AnimatePresence mode='wait'>
@@ -172,7 +163,8 @@ const SignInPage = ({ className }: SignInPageProps) => {
 													/>
 													<button
 														type='submit'
-														className='absolute right-1.5 top-1.5 text-white w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors group overflow-hidden'
+														className='absolute right-1.			{/* Content Layer */}
+h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors group overflow-hidden'
 													>
 														<span className='relative w-full h-full block overflow-hidden'>
 															<span className='absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-full'>
@@ -317,11 +309,10 @@ const SignInPage = ({ className }: SignInPageProps) => {
 												Back
 											</motion.button>
 											<motion.button
-												className={`flex-1 rounded-full font-medium py-3 border transition-all duration-300 ${
-													code.every(d => d !== '')
-														? 'bg-white text-black border-transparent hover:bg-white/90 cursor-pointer'
-														: 'bg-[#111] text-white/50 border-white/10 cursor-not-allowed'
-												}`}
+												className={`flex-1 rounded-full font-medium py-3 border transition-all duration-300 ${code.every(d => d !== '')
+													? 'bg-white text-black border-transparent hover:bg-white/90 cursor-pointer'
+													: 'bg-[#111] text-white/50 border-white/10 cursor-not-allowed'
+													}`}
 												disabled={!code.every(d => d !== '')}
 											>
 												Continue

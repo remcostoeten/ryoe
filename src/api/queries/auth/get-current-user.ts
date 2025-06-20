@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/services/user-service'
-import type { TServiceResult, TUserProfile } from '@/services/types'
+import type { TServiceResult, TUserProfile } from '@/types'
 
 export async function getCurrentUserQuery(): Promise<TUserProfile> {
 	const result = await getCurrentUser()

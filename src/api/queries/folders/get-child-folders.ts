@@ -1,5 +1,5 @@
 import { getChildFolders } from '@/services/folder-service'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/types'
 
 export async function getChildFoldersQuery(parentId: number): Promise<TFolderWithStats[]> {
 	const result = await getChildFolders(parentId)

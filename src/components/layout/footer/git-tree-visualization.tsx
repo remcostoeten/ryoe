@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { appConfig } from '@/app/config'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { type GitCommitInfo } from '@/core/git/git-info'
-import { calculateTreePositions, getBranchTypeInfo, fetchGitTree } from './git-tree'
+import { useEffect, useRef, useState } from 'react'
+import { calculateTreePositions, fetchGitTree, getBranchTypeInfo } from './git-tree'
 
 // Enhanced GitCommit type that includes visualization data
 interface GitCommit extends GitCommitInfo {

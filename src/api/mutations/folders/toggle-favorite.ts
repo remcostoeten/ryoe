@@ -1,5 +1,5 @@
 import { toggleFolderFavoriteStatus } from '@/services/folder-service'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/types'
 
 export async function toggleFolderFavoriteMutation(id: number): Promise<TFolderWithStats> {
 	const result = await toggleFolderFavoriteStatus(id)

@@ -1,7 +1,8 @@
 import { registerUser } from '@/services/user-service'
-import type { TUserRegistrationData, TUserProfile } from '@/services/types'
+import type { TRegisterUserVariables } from '@/api/mutations/types'
+import type { TUser } from '@/types'
 
-export async function registerUserMutation(data: TUserRegistrationData): Promise<TUserProfile> {
+export async function registerUserMutation(data: TRegisterUserVariables): Promise<TUser> {
 	const result = await registerUser(data)
 	if (!result.success) {
 		throw new Error(result.error || 'Failed to register user')

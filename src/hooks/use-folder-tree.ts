@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useFolders } from './use-folders'
-import type { TFolder, TFolderTreeNode } from '@/services/types'
+import type { TFolder, TFolderTreeNode } from '@/types'
 
 function buildFolderTree(folders: TFolder[], parentId: number | null = null, level: number = 0): TFolderTreeNode[] {
     const children = folders

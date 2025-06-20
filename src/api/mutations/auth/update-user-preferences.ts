@@ -1,11 +1,11 @@
 import { updateUserPreferences } from '@/services/user-service'
-import type { TUserPreferencesUpdate, TUserProfile } from '@/services/types'
+import type { TUpdateUserPreferencesVariables } from '@/api/mutations/types'
+import type { TUser } from '@/types'
 
 export async function updateUserPreferencesMutation(
-	id: number,
-	preferences: TUserPreferencesUpdate
-): Promise<TUserProfile> {
-	const result = await updateUserPreferences(id, preferences)
+	data: TUpdateUserPreferencesVariables
+): Promise<TUser> {
+	const result = await updateUserPreferences(data)
 	if (!result.success) {
 		throw new Error(result.error || 'Failed to update user preferences')
 	}

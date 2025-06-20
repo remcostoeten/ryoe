@@ -1,5 +1,5 @@
 import { getUserProfile } from '@/services/user-service'
-import type { TServiceResult, TUserProfile } from '@/services/types'
+import type { TServiceResult, TUserProfile } from '@/types'
 
 export async function getUserProfileQuery(id: number): Promise<TUserProfile> {
 	const result = await getUserProfile(id)

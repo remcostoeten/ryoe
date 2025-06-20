@@ -1,18 +1,30 @@
-import { useQuery } from '@tanstack/react-query'
-import { getFolders } from '@/services/folder-service'
-import type { TFolder } from '@/services/types'
+import { useState, useEffect } from 'react'
+import type { TFolder } from '@/types'
 
 export function useFolders() {
-    const { data: folders, isLoading } = useQuery<TFolder[]>({
-        queryKey: ['folders'],
-        queryFn: async () => {
-            const result = await getFolders()
-            if (!result.success) {
-                throw new Error(result.error || 'Failed to fetch folders')
+    const [folders, setFolders] = useState<TFolder[] | undefined>(undefined)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        // TODO: Implement actual folder fetching
+        const mockFolders: TFolder[] = [
+            {
+                id: 1,
+                name: 'Root Folder',
+                parentId: null,
+                position: 0,
+                isFavorite: false,
+                isPublic: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             }
-            return result.data!
-        }
-    })
+        ]
+
+        setTimeout(() => {
+            setFolders(mockFolders)
+            setIsLoading(false)
+        }, 500)
+    }, [])
 
     return { folders, isLoading }
 } 

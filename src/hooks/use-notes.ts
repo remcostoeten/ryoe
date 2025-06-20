@@ -1,18 +1,19 @@
-import { useQuery } from '@tanstack/react-query'
-import { getNotes } from '@/services/note-service'
-import type { TNote } from '@/services/types'
+import { useState, useEffect } from 'react'
+import type { TNote } from '@/types'
 
-export function useNotes() {
-    const { data: notes, isLoading } = useQuery<TNote[]>({
-        queryKey: ['notes'],
-        queryFn: async () => {
-            const result = await getNotes()
-            if (!result.success) {
-                throw new Error(result.error || 'Failed to fetch notes')
-            }
-            return result.data!
-        }
-    })
+export function useNotes(folderId: number | null) {
+    const [notes, setNotes] = useState<TNote[] | undefined>(undefined)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        // TODO: Implement actual note fetching
+        const mockNotes: TNote[] = []
+
+        setTimeout(() => {
+            setNotes(mockNotes)
+            setIsLoading(false)
+        }, 500)
+    }, [folderId])
 
     return { notes, isLoading }
 } 

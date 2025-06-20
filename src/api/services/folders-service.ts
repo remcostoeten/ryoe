@@ -14,7 +14,7 @@ import {
 	moveFolderMutation,
 	toggleFolderFavoriteMutation,
 } from '@/api/mutations/folders'
-import type { TFolderCreationData, TFolderUpdateData, TFolderWithStats } from '@/services/types'
+import type { TFolderCreationData, TFolderUpdateData, TFolderWithStats } from '@/types'
 
 // Query Keys
 export const FOLDERS_QUERY_KEYS = {

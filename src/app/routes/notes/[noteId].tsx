@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { ArrowLeft, Save, MoreHorizontal, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { NoteEditor } from '@/application/features/workspace/modules/notes/components/note-editor'
-import { useUpdateNote } from '@/api/services/notes-service'
 import { useFolderPath } from '@/api/services/folders-service'
-import type { TNote } from '@/domain/entities/workspace'
+import type { TNote } from '@/types'
+import { useUpdateNote } from '@/api/mutations/note-mutations'
+import { NoteEditor } from '@/components/note-editor'
 
 function useNote(noteId: number) {
 	const [note, setNote] = useState<TNote | null>(null)
@@ -17,23 +17,12 @@ function useNote(noteId: number) {
 			try {
 				setLoading(true)
 				setError(null)
-
-				// Import the service dynamically to avoid circular dependencies
-				const { getNoteByIdQuery } = await import('@/api/queries/notes')
-				const response = await getNoteByIdQuery(noteId)
-
-				const noteData: TNote = {
-					id: response.id,
-					title: response.title,
-					content: response.content,
-					folderId: response.folderId || null,
-					position: response.position,
-					isPublic: true, // Default value
-					isFavorite: response.isFavorite || false,
-					createdAt: new Date(response.createdAt),
-					updatedAt: new Date(response.updatedAt),
+				const { getNoteById } = await import('@/api/services/notes-service')
+				const result = await getNoteById(noteId)
+				if (!result) {
+					throw new Error('Failed to fetch note')
 				}
-				setNote(noteData)
+				setNote(result)
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Failed to load note')
 			} finally {
@@ -62,19 +51,15 @@ export default function NotePage() {
 		enabled: !!note?.folderId,
 	})
 
-	const saveNote = async (title: string, content: string) => {
-		if (!note) return
-
+	const saveNote = async (updatedNote: TNote) => {
 		try {
 			await updateNoteMutation.mutateAsync({
-				id: note.id,
-				data: {
-					title,
-					content,
-				},
+				id: updatedNote.id,
+				title: updatedNote.title,
+				content: updatedNote.content,
 			})
 
-			setNote(prev => (prev ? { ...prev, title, content, updatedAt: new Date() } : null))
+			setNote(updatedNote)
 			setHasUnsavedChanges(false)
 			setLastSaved(new Date())
 		} catch (error) {
@@ -193,8 +178,8 @@ export default function NotePage() {
 				{note ? (
 					<NoteEditor
 						key={note.id}
-						noteId={note.id}
-						readOnly={false}
+						note={note}
+						onSave={saveNote}
 						className='h-full'
 					/>
 				) : (

@@ -1,5 +1,5 @@
 import { getRootFolders } from '@/services/folder-service'
-import type { TFolderWithStats } from '@/services/types'
+import type { TFolderWithStats } from '@/types'
 
 export async function getRootFoldersQuery(): Promise<TFolderWithStats[]> {
 	const result = await getRootFolders()
