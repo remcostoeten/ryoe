@@ -17,3 +17,4 @@ src/
             └── modules/
                 └── notes/
                     └── hooks/ → src/api/queries/notes/
+```

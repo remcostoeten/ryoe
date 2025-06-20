@@ -7,22 +7,26 @@ Welcome to the new **scalable, factory-driven architecture** for Ryoe! This guid
 ## 🏗️ Architecture Principles
 
 ### 1. **Separation of Concerns**
+
 - **API Layer** (`src/api/`) - All data operations
 - **Modules** (`src/modules/`) - Feature-specific UI and logic
 - **Shared** (`src/components/`, `src/hooks/`) - Reusable components
 
 ### 2. **Factory-Driven CRUD**
+
 - 90% less boilerplate with CRUD factories
 - Consistent patterns across all entities
 - Type-safe with full TypeScript support
 
 ### 3. **Modular Organization**
- src/api/queries/notes/
+
+src/api/queries/notes/
 ├── get-note-by-id.ts # Generated via factory
 ├── get-notes-by-folder.ts # Generated via factory
 ├── search-notes.ts # Custom implementation
 └── get-recent-notes.ts # Custom implementation
-```
+
+````
 
 ## 🚀 Quick Start
 
@@ -49,23 +53,29 @@ export interface UpdateNoteData {
   content?: string
   folderId?: number | null
 }
-```
+````
 
 2. **Create service**:
+
 ```typescript
 // src/api/services/note-service.ts
 import { createCRUDService } from '@/api/factories/service-factory'
 
-export const noteService = createCRUDService<Note, CreateNoteData, UpdateNoteData>(
-  'notes',
-  db
-)
+export const noteService = createCRUDService<
+  Note,
+  CreateNoteData,
+  UpdateNoteData
+>('notes', db)
 ```
 
 3. **Generate queries and mutations**:
+
 ```typescript
 // src/api/queries/notes/index.ts
-import { createQueryFactory, createQueryHooks } from '@/api/factories/query-factory'
+import {
+  createQueryFactory,
+  createQueryHooks,
+} from '@/api/factories/query-factory'
 import { noteService } from '@/api/services/note-service'
 
 export const noteQueries = createQueryFactory('notes', noteService)
@@ -73,6 +83,7 @@ export const noteHooks = createQueryHooks(noteQueries)
 ```
 
 4. **Use in modules**:
+
 ```typescript
 // src/modules/notes/hooks/use-notes.ts
 import { noteHooks } from '@/api/queries/notes'

@@ -1,27 +1,29 @@
 src/
 ├── api/
-│   └── queries/
-│       └── database/
-│           └── health-check.ts
+│ └── queries/
+│ └── database/
+│ └── health-check.ts
 ├── api/
-│   └── db/
-│       └── index.ts → src/api/queries/database/health-check.ts
+│ └── db/
+│ └── index.ts → src/api/queries/database/health-check.ts
 └── modules/
-    └── database-actions/ui/ → src/api/queries/database/ + src/modules/database-actions/
+└── database-actions/ui/ → src/api/queries/database/ + src/modules/database-actions/
 
 ---
 
 ## ✅ Testing Checklist
 
 ### Factory Testing
+
 - [ ] Test query factory with sample entity
-- [ ] Test mutation factory with sample entity  
+- [ ] Test mutation factory with sample entity
 - [ ] Test service factory with sample entity
 - [ ] Test generated hooks work correctly
 - [ ] Test cache invalidation works
 - [ ] Test error handling works
 
 ### Query Testing
+
 - [ ] All auth queries work
 - [ ] All note queries work
 - [ ] All folder queries work
@@ -31,6 +33,7 @@ src/
 - [ ] Query keys are consistent
 
 ### Integration Testing
+
 - [ ] Queries integrate with components
 - [ ] Loading states work correctly
 - [ ] Error states work correctly

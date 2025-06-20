@@ -11,17 +11,20 @@ CRUD factories automatically generate **90% of your data operations** with consi
 Generates standard queries for any entity:
 
 ```typescript
-import { createQueryFactory, createQueryHooks } from '@/api/factories/query-factory'
+import {
+  createQueryFactory,
+  createQueryHooks,
+} from '@/api/factories/query-factory'
 
 // Create factory
 const noteQueries = createQueryFactory('notes', noteService)
 const noteHooks = createQueryHooks(noteQueries)
 
 // Auto-generated hooks:
-noteHooks.useGetById(1)           // Get note by ID
-noteHooks.useGetAll()             // Get all notes
-noteHooks.useGetByParent(5)       // Get notes by folder ID
-noteHooks.useSearch('react')      // Search notes
+noteHooks.useGetById(1) // Get note by ID
+noteHooks.useGetAll() // Get all notes
+noteHooks.useGetByParent(5) // Get notes by folder ID
+noteHooks.useSearch('react') // Search notes
 ```
 
 ### 2. Mutation Factory
@@ -32,14 +35,14 @@ Generates standard mutations:
 import { createMutationFactory } from '@/api/factories/mutation-factory'
 
 const noteMutations = createMutationFactory('notes', noteService, {
-  onCreateSuccess: (note) => {
+  onCreateSuccess: note => {
     console.log('Created:', note.title)
-  }
+  },
 })
 
 // Auto-generated mutations:
 const createMutation = noteMutations.create()
-const updateMutation = noteMutations.update() 
+const updateMutation = noteMutations.update()
 const deleteMutation = noteMutations.delete()
 ```
 
@@ -55,17 +58,17 @@ const noteService = createCRUDService<Note, CreateNoteData, UpdateNoteData>(
   db,
   {
     transform: {
-      fromDb: (data) => ({
+      fromDb: data => ({
         ...data,
         createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+        updatedAt: new Date(data.updated_at),
       }),
-      toDb: (data) => ({
+      toDb: data => ({
         ...data,
         created_at: data.createdAt?.toISOString(),
-        updated_at: data.updatedAt?.toISOString()
-      })
-    }
+        updated_at: data.updatedAt?.toISOString(),
+      }),
+    },
   }
 )
 ```
@@ -85,7 +88,7 @@ export const useSearchNotes = (query: string, filters?: SearchFilters) => {
       // Custom search with ranking, filters, etc.
       return await complexSearchWithRanking(query, filters)
     },
-    enabled: query.length > 2
+    enabled: query.length > 2,
   })
 }
 ```
@@ -96,19 +99,19 @@ export const useSearchNotes = (query: string, filters?: SearchFilters) => {
 // src/api/mutations/notes/duplicate-note.ts
 export const useDuplicateNote = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (noteId: number) => {
       const original = await noteService.getById(noteId)
       return await noteService.create({
         title: `${original.title} (Copy)`,
         content: original.content,
-        folderId: original.folderId
+        folderId: original.folderId,
       })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] })
-    }
+    },
   })
 }
 ```
@@ -120,21 +123,27 @@ export const useDuplicateNote = () => {
 For entities with parent-child relationships:
 
 ```typescript
-const folderService = createCRUDService<Folder, CreateFolderData, UpdateFolderData>(
-  'folders',
-  db,
-  {
-    hierarchical: true,
-    parentField: 'parent_id'
-  }
-)
+const folderService = createCRUDService<
+  Folder,
+  CreateFolderData,
+  UpdateFolderData
+>('folders', db, {
+  hierarchical: true,
+  parentField: 'parent_id',
+})
 
 const folderQueries = createQueryFactory('folders', {
   ...folderService,
-  getChildren: (parentId: number) => db.query(`
+  getChildren: (parentId: number) =>
+    db.query(
+      `
     SELECT * FROM folders WHERE parent_id = ?
-  `, [parentId]),
-  getAncestors: (id: number) => db.query(`
+  `,
+      [parentId]
+    ),
+  getAncestors: (id: number) =>
+    db.query(
+      `
     WITH RECURSIVE folder_path AS (
       SELECT * FROM folders WHERE id = ?
       UNION ALL
@@ -142,7 +151,9 @@ const folderQueries = createQueryFactory('folders', {
       JOIN folder_path fp ON f.id = fp.parent_id
     )
     SELECT * FROM folder_path
-  `, [id])
+  `,
+      [id]
+    ),
 })
 ```
 
@@ -156,8 +167,8 @@ const noteService = createCRUDService<Note, CreateNoteData, UpdateNoteData>(
     softDelete: true,
     deletedField: 'deleted_at',
     transform: {
-      fromDb: (data) => ({ ...data, isDeleted: !!data.deleted_at })
-    }
+      fromDb: data => ({ ...data, isDeleted: !!data.deleted_at }),
+    },
   }
 )
 ```
@@ -173,17 +184,19 @@ const noteService = createCRUDService<Note, CreateNoteData, UpdateNoteData>(
 ## 🐛 Common Pitfalls
 
 ❌ **Don't bypass the factory for simple operations**
+
 ```typescript
 // Bad
-const { data } = useQuery(['notes', id], () => 
+const { data } = useQuery(['notes', id], () =>
   fetch(`/api/notes/${id}`).then(r => r.json())
 )
 
-// Good  
+// Good
 const { data } = noteHooks.useGetById(id)
 ```
 
 ❌ **Don't put business logic in components**
+
 ```typescript
 // Bad - in component
 const handleCreateNote = async () => {
@@ -194,9 +207,9 @@ const handleCreateNote = async () => {
 
 // Good - in mutation factory
 const noteMutations = createMutationFactory('notes', noteService, {
-  onCreateSuccess: (note) => {
+  onCreateSuccess: note => {
     toast.success('Note created!')
     navigate(`/notes/${note.id}`)
-  }
+  },
 })
-``` 
+```

@@ -5,15 +5,15 @@ export * from './services/workspace-service'
 
 // Re-export types from entities
 export type {
-    TFolder,
-    TNote,
-    TWorkspaceItem,
-    TWorkspaceSidebarProps,
-    TCreateFolderInput,
-    TCreateNoteInput,
-    TUpdateFolderInput,
-    TUpdateNoteInput,
-    TWorkspaceSearchParams,
-    TContextMenuState,
-    TDragState
-} from '@/entities/workspace/types' 
+	TFolder,
+	TNote,
+	TWorkspaceItem,
+	TWorkspaceSidebarProps,
+	TCreateFolderInput,
+	TCreateNoteInput,
+	TUpdateFolderInput,
+	TUpdateNoteInput,
+	TWorkspaceSearchParams,
+	TContextMenuState,
+	TDragState,
+} from '@/entities/workspace/types'

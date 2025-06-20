@@ -5,60 +5,56 @@
 
 // Types
 export type {
-  TMutationResult,
-  TMutationState,
-  TMutationOptions,
-  TOptimisticUpdate,
-  TMutationContext,
-  TRegisterUserVariables,
-  TUpdateUserPreferencesVariables,
-  TSwitchStorageTypeVariables,
-  TCreateNoteVariables,
-  TUpdateNoteVariables,
-  TDeleteNoteVariables,
-  TMoveNoteVariables,
-  TReorderNotesVariables,
-  TDuplicateNoteVariables,
-  TCreateFolderVariables,
-  TUpdateFolderVariables,
-  TDeleteFolderVariables,
-  TMoveFolderVariables,
-  TReorderFoldersVariables
-} from './types'
+	TMutationOptions,
+	TMutationContext,
+	TOptimisticUpdate,
+	TMutationState,
+	TMutationResult,
+	TRegisterUserVariables,
+	TUpdateUserPreferencesVariables,
+	TSwitchStorageTypeVariables,
+	TCreateNoteVariables,
+	TUpdateNoteVariables,
+	TDeleteNoteVariables,
+	TMoveNoteVariables,
+	TReorderNotesVariables,
+	TCreateFolderVariables,
+	TUpdateFolderVariables,
+	TDeleteFolderVariables,
+	TMoveFolderVariables,
+	TReorderFoldersVariables,
+} from '@/api/mutations/types'
 
 // User mutation hooks
 export {
-  useRegisterUser,
-  useUpdateUserPreferences,
-  useSwitchStorageType,
-  createOptimisticUserUpdate,
-  handleUserMutationError,
-  handleUserMutationSuccess
-} from './user-mutations'
+	useRegisterUser,
+	useUpdateUserPreferences,
+	useSwitchStorageType,
+} from '@/api/mutations/user-mutations'
 
 // Note mutation hooks
 export {
-  useCreateNote,
-  useUpdateNote,
-  useDeleteNote,
-  useMoveNote,
-  useDuplicateNote,
-  useReorderNotes
-} from './note-mutations'
+	useCreateNote,
+	useUpdateNote,
+	useDeleteNote,
+	useMoveNote,
+	useDuplicateNote,
+	useReorderNotes,
+} from '@/api/mutations/note-mutations'
 
 // Folder mutation hooks
 export {
-  useCreateFolder,
-  useUpdateFolder,
-  useDeleteFolder,
-  useMoveFolder,
-  useReorderFolders
-} from './folder-mutations'
+	useCreateFolder,
+	useUpdateFolder,
+	useDeleteFolder,
+	useMoveFolder,
+	useReorderFolders,
+} from '@/api/mutations/folder-mutations'
 
 // Database reset mutation hooks
 export {
-  useResetAllData,
-  useHardResetDatabase,
-  useValidateReset,
-  useResetAndReload
-} from './database-reset-mutations'
+	useResetAllData,
+	useHardResetDatabase,
+	useValidateReset,
+	useResetAndReload,
+} from '@/api/mutations/database-reset-mutations'

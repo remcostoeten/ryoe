@@ -11,7 +11,9 @@ The application uses strategic code splitting to reduce initial bundle sizes:
 ```typescript
 // Lazy load heavy components
 const BlockNoteEditor = lazy(() => import('./BlockNoteEditor'))
-const FolderTree = lazy(() => import('@/modules/folder-management/components/folder-tree'))
+const FolderTree = lazy(
+  () => import('@/modules/folder-management/components/folder-tree')
+)
 const NoteList = lazy(() => import('@/modules/notes/components/note-list'))
 ```
 
@@ -42,11 +44,13 @@ build: {
 ## Bundle Size Results
 
 ### Before Optimization:
+
 - **notes page**: 766.85 kB (231.68 kB gzipped)
 
 ### After Optimization:
+
 - **notes page**: 14.59 kB (4.31 kB gzipped) - **98% reduction**
-- **editor-vendor**: 950.28 kB (291.35 kB gzipped) - *lazy loaded*
+- **editor-vendor**: 950.28 kB (291.35 kB gzipped) - _lazy loaded_
 
 ## Component Optimizations
 
@@ -56,15 +60,15 @@ The note editor supports both lightweight and rich text modes:
 
 ```typescript
 // Simple text editor (default) - no heavy dependencies
-<textarea 
-  value={content} 
+<textarea
+  value={content}
   onChange={onChange}
   className="w-full h-full min-h-[400px] p-4"
 />
 
 // Rich text editor (lazy loaded) - BlockNote editor
 <Suspense fallback={<LoadingSpinner />}>
-  <BlockNoteEditor 
+  <BlockNoteEditor
     initialContent={content}
     onChange={onChange}
   />

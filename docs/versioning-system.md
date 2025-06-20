@@ -21,10 +21,10 @@ The application now has an automatic versioning system that:
 
 - Git pre-commit hook runs `scripts/increment-version.js`
 - Updates version in all files:
-    - `package.json`
-    - `src/app/config.ts`
-    - `src-tauri/Cargo.toml`
-    - `src-tauri/tauri.conf.json`
+  - `package.json`
+  - `src/app/config.ts`
+  - `src-tauri/Cargo.toml`
+  - `src-tauri/tauri.conf.json`
 - Adds updated files to the commit
 
 ### 3. **Minimal Footer Display**

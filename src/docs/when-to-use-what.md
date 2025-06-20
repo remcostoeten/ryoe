@@ -40,21 +40,22 @@ This guide provides specific scenarios and clear decisions for choosing the righ
 ## Scenario-Based Decisions
 
 ### **Scenario 1: Simple Form Input**
+
 ```typescript
 // ✅ Use: Local useState
 function CreateFolderForm() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  
+
   return (
     <form>
-      <input 
-        value={name} 
-        onChange={(e) => setName(e.target.value)} 
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
       />
-      <textarea 
-        value={description} 
-        onChange={(e) => setDescription(e.target.value)} 
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
     </form>
   )
@@ -65,11 +66,12 @@ function CreateFolderForm() {
 ```
 
 ### **Scenario 2: Folder List in Sidebar**
+
 ```typescript
 // ✅ Use: Hook → Service → Repository
 function FolderSidebar() {
   const { folders, loading, error } = useFolders()
-  
+
   // Single component, reusable logic, data fetching
   // Perfect use case for a custom hook
 }
@@ -77,17 +79,18 @@ function FolderSidebar() {
 // Hook implementation
 function useFolders() {
   const [folders, setFolders] = useState([])
-  
+
   useEffect(() => {
     getRootFolders() // Service call
       .then(response => setFolders(response.data))
   }, [])
-  
+
   return { folders, loading, error }
 }
 ```
 
 ### **Scenario 3: Folder Management Dashboard**
+
 ```typescript
 // ✅ Use: Context → Multiple Hooks
 function FolderDashboard() {
@@ -107,6 +110,7 @@ function FolderDashboard() {
 ```
 
 ### **Scenario 4: User Authentication**
+
 ```typescript
 // ✅ Use: Context (Global State)
 function App() {
@@ -126,12 +130,13 @@ function App() {
 ```
 
 ### **Scenario 5: API Data Fetching**
+
 ```typescript
 // ✅ Use: Hook → Service
 function useNotes(folderId: number) {
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
-  
+
   useEffect(() => {
     getNotesByFolder(folderId) // Service call
       .then(response => {
@@ -139,7 +144,7 @@ function useNotes(folderId: number) {
         setLoading(false)
       })
   }, [folderId])
-  
+
   return { notes, loading }
 }
 
@@ -149,25 +154,26 @@ function useNotes(folderId: number) {
 
 ## Layer Decision Matrix
 
-| Need | Repository | Service | Hook | Context |
-|------|------------|---------|------|---------|
-| Save to database | ✅ | ❌ | ❌ | ❌ |
-| Business validation | ❌ | ✅ | ❌ | ❌ |
-| Component state | ❌ | ❌ | ✅ | ❌ |
-| Global state | ❌ | ❌ | ❌ | ✅ |
-| Data transformation | ❌ | ✅ | ❌ | ❌ |
-| UI coordination | ❌ | ❌ | ✅ | ✅ |
-| Error handling | ✅ | ✅ | ✅ | ✅ |
-| Caching | ❌ | ❌ | ✅ | ✅ |
+| Need                | Repository | Service | Hook | Context |
+| ------------------- | ---------- | ------- | ---- | ------- |
+| Save to database    | ✅         | ❌      | ❌   | ❌      |
+| Business validation | ❌         | ✅      | ❌   | ❌      |
+| Component state     | ❌         | ❌      | ✅   | ❌      |
+| Global state        | ❌         | ❌      | ❌   | ✅      |
+| Data transformation | ❌         | ✅      | ❌   | ❌      |
+| UI coordination     | ❌         | ❌      | ✅   | ✅      |
+| Error handling      | ✅         | ✅      | ✅   | ✅      |
+| Caching             | ❌         | ❌      | ✅   | ✅      |
 
 ## Common Patterns in Your Codebase
 
 ### **Pattern 1: Simple Data Display**
+
 ```typescript
 // Component → Hook → Service → Repository
 function NoteList({ folderId }: { folderId: number }) {
   const { notes, loading } = useNotes(folderId)
-  
+
   return (
     <div>
       {loading ? <Spinner /> : notes.map(note => <NoteItem key={note.id} note={note} />)}
@@ -177,6 +183,7 @@ function NoteList({ folderId }: { folderId: number }) {
 ```
 
 ### **Pattern 2: Complex State Management**
+
 ```typescript
 // Component → Context → Hook → Service → Repository
 function NotesApp() {
@@ -193,17 +200,18 @@ function NotesApp() {
 ```
 
 ### **Pattern 3: Business Operations**
+
 ```typescript
 // Hook → Service (with business logic) → Repository
 function useNoteOperations() {
   const createNote = async (data: CreateNoteInput) => {
     // Hook handles UI concerns
     setLoading(true)
-    
+
     try {
       // Service handles business logic
       const result = await createNoteWithValidation(data)
-      
+
       if (result.success) {
         toast.success('Note created!')
         return result.data
@@ -215,7 +223,7 @@ function useNoteOperations() {
       setLoading(false)
     }
   }
-  
+
   return { createNote }
 }
 ```
@@ -223,6 +231,7 @@ function useNoteOperations() {
 ## When NOT to Use Each Pattern
 
 ### **❌ Don't Use Context When:**
+
 - Only one component needs the data
 - State changes frequently (performance issues)
 - Simple form inputs
@@ -244,6 +253,7 @@ function Modal() {
 ```
 
 ### **❌ Don't Use Hooks When:**
+
 - Logic is only used once
 - No state or side effects needed
 - Simple calculations
@@ -261,6 +271,7 @@ function calculateTotal(items: Item[]) {
 ```
 
 ### **❌ Don't Use Services When:**
+
 - Simple CRUD with no business logic
 - Pure data transformation
 - UI-specific logic
@@ -275,11 +286,11 @@ async function getUserById(id: number) {
 async function getUserWithPermissions(id: number) {
   const user = await findUserById(id)
   if (!user.success) return user
-  
+
   const permissions = await getUserPermissions(id)
   return {
     ...user,
-    data: { ...user.data, permissions: permissions.data }
+    data: { ...user.data, permissions: permissions.data },
   }
 }
 ```
@@ -287,21 +298,25 @@ async function getUserWithPermissions(id: number) {
 ## Quick Decision Checklist
 
 **Before creating a new hook, ask:**
+
 - [ ] Is this logic reused in multiple components?
 - [ ] Does it manage state or side effects?
 - [ ] Is it more than a simple calculation?
 
 **Before creating a context, ask:**
+
 - [ ] Do multiple components need this state?
 - [ ] Is the state global or semi-global?
 - [ ] Do components need to coordinate operations?
 
 **Before creating a service, ask:**
+
 - [ ] Is there business logic beyond simple CRUD?
 - [ ] Do I need validation or complex rules?
 - [ ] Am I coordinating multiple repositories?
 
 **Before creating a repository function, ask:**
+
 - [ ] Is this a pure data operation?
 - [ ] Am I just mapping between database and app types?
 - [ ] Is there no business logic involved?

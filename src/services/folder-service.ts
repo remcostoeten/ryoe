@@ -1,488 +1,96 @@
-/**
- * Folder service - business logic for folder operations
- * Pure functions only, no classes
- */
+import type { TServiceResult, TFolder } from '@/types'
+import type { TCreateFolderVariables, TUpdateFolderVariables } from '@/api/mutations/types'
 
-import {
-  findFolderById,
-  findRootFolders,
-  findChildFolders,
-  createFolder,
-  updateFolder,
-  deleteFolder,
-  moveFolder,
-  reorderFolders,
-  getFolderHierarchy,
-  getFolderPath,
-  toggleFolderFavorite,
-  findFavoriteFolders
-} from '@/repositories'
-import { findNotesByFolderId } from '@/repositories'
-import { validateFolderName } from '@/shared/utils'
-import type { 
-  TServiceResult, 
-  TServiceListResult,
-  TFolderCreationData, 
-  TFolderUpdateData, 
-  TFolderWithStats
-} from './types'
-import type { TCreateFolderData, TUpdateFolderData, TFolder } from '@/domain/entities/workspace'
-
-function validateFolderCreation(data: TFolderCreationData): TServiceResult<null> {
-  if (!data.name || !validateFolderName(data.name)) {
-    return {
-      success: false,
-      error: 'Folder name must be 1-50 characters long and contain only valid characters',
-      code: 'INVALID_FOLDER_NAME'
-    }
-  }
-
-  return { success: true }
-}
-
-async function mapFolderToStats(folder: TFolder): Promise<TFolderWithStats> {
-  // Get notes count for this folder
-  const notesResult = await findNotesByFolderId(folder.id)
-  const noteCount = notesResult.success ? (notesResult.data?.length || 0) : 0
-
-  // Get subfolders count
-  const subfoldersResult = await findChildFolders(folder.id)
-  const subfolderCount = subfoldersResult.success ? (subfoldersResult.data?.length || 0) : 0
-
-  // Calculate total size (simplified - just character count of all notes)
-  let totalSize = 0
-  if (notesResult.success && notesResult.data) {
-    totalSize = notesResult.data.reduce((sum, note) => sum + note.content.length, 0)
-  }
-
-  return {
-    id: folder.id,
-    name: folder.name,
-    parentId: folder.parentId,
-    position: folder.position,
-    isFavorite: folder.isFavorite,
-    noteCount,
-    subfolderCount,
-    totalSize,
-    createdAt: folder.createdAt,
-    updatedAt: folder.updatedAt
-  }
-}
-
-export async function createFolderWithValidation(data: TFolderCreationData): Promise<TServiceResult<TFolderWithStats>> {
-  try {
-    const validation = validateFolderCreation(data)
-    if (!validation.success) {
-      return {
-        success: false,
-        error: validation.error,
-        code: validation.code
-      }
-    }
-
-    const createData: TCreateFolderData = {
-      name: data.name.trim(),
-      parentId: data.parentId
-    }
-
-    const result = await createFolder(createData)
-    if (!result.success || !result.data) {
-      return {
-        success: false,
-        error: result.error || 'Failed to create folder',
-        code: 'CREATE_FOLDER_FAILED'
-      }
-    }
-
-    const folderWithStats = await mapFolderToStats(result.data)
-    return { success: true, data: folderWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'CREATE_FOLDER_ERROR'
-    }
-  }
-}
-
-export async function updateFolderWithValidation(
-  id: number, 
-  data: TFolderUpdateData
-): Promise<TServiceResult<TFolderWithStats>> {
-  try {
-    if (data.name !== undefined && !validateFolderName(data.name)) {
-      return {
-        success: false,
-        error: 'Folder name must be 1-50 characters long and contain only valid characters',
-        code: 'INVALID_FOLDER_NAME'
-      }
-    }
-
-    const updateData: TUpdateFolderData = {}
-    if (data.name !== undefined) updateData.name = data.name.trim()
-    if (data.parentId !== undefined) updateData.parentId = data.parentId
-
-    const result = await updateFolder(id, updateData)
-    if (!result.success || !result.data) {
-      return {
-        success: false,
-        error: result.error || 'Failed to update folder',
-        code: 'UPDATE_FOLDER_FAILED'
-      }
-    }
-
-    const folderWithStats = await mapFolderToStats(result.data)
-    return { success: true, data: folderWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'UPDATE_FOLDER_ERROR'
-    }
-  }
-}
-
-export async function getFolderById(id: number): Promise<TServiceResult<TFolderWithStats>> {
-  try {
-    const result = await findFolderById(id)
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error,
-        code: 'FETCH_FOLDER_FAILED'
-      }
-    }
-
-    if (!result.data) {
-      return {
-        success: false,
-        error: 'Folder not found',
-        code: 'FOLDER_NOT_FOUND'
-      }
-    }
-
-    const folderWithStats = await mapFolderToStats(result.data)
-    return { success: true, data: folderWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_FOLDER_ERROR'
-    }
-  }
-}
-
-export async function getRootFolders(): Promise<TServiceListResult<TFolderWithStats>> {
-  try {
-    const result = await findRootFolders()
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error,
-        code: 'FETCH_ROOT_FOLDERS_FAILED'
-      }
-    }
-
-    const foldersWithStats = await Promise.all(
-      (result.data || []).map(mapFolderToStats)
-    )
-
-    return { 
-      success: true, 
-      data: foldersWithStats,
-      total: foldersWithStats.length
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_ROOT_FOLDERS_ERROR'
-    }
-  }
-}
-
-export async function getChildFolders(parentId: number): Promise<TServiceListResult<TFolderWithStats>> {
-  try {
-    const result = await findChildFolders(parentId)
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error,
-        code: 'FETCH_CHILD_FOLDERS_FAILED'
-      }
-    }
-
-    const foldersWithStats = await Promise.all(
-      (result.data || []).map(mapFolderToStats)
-    )
-
-    return { 
-      success: true, 
-      data: foldersWithStats,
-      total: foldersWithStats.length
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_CHILD_FOLDERS_ERROR'
-    }
-  }
-}
-
-export async function getFolderDeletionStats(id: number): Promise<TServiceResult<{ childFoldersCount: number; notesCount: number }>> {
-  try {
-    const childFolders = await findChildFolders(id)
-    const childFoldersCount = childFolders.success && childFolders.data ? childFolders.data.length : 0
-
-    const notes = await findNotesByFolderId(id)
-    const notesCount = notes.success && notes.data ? notes.data.length : 0
-
-    return {
-      success: true,
-      data: { childFoldersCount, notesCount }
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_FOLDER_STATS_ERROR'
-    }
-  }
-}
-
-export async function deleteFolderById(id: number, options?: { force?: boolean }): Promise<TServiceResult<boolean>> {
-  try {
-    const { force = false } = options || {}
-
-    if (!force) {
-      const childFolders = await findChildFolders(id)
-      if (childFolders.success && childFolders.data && childFolders.data.length > 0) {
-        return {
-          success: false,
-          error: 'Cannot delete folder that contains subfolders',
-          code: 'FOLDER_HAS_CHILDREN'
-        }
-      }
-
-      const notes = await findNotesByFolderId(id)
-      if (notes.success && notes.data && notes.data.length > 0) {
-        return {
-          success: false,
-          error: 'Cannot delete folder that contains notes',
-          code: 'FOLDER_HAS_NOTES'
-        }
-      }
-    } else {
-      // Force delete: recursively delete all children first
-      const childFolders = await findChildFolders(id)
-      if (childFolders.success && childFolders.data) {
-        for (const childFolder of childFolders.data) {
-          const childResult = await deleteFolderById(childFolder.id, { force: true })
-          if (!childResult.success) {
-            return {
-              success: false,
-              error: `Failed to delete child folder: ${childResult.error}`,
-              code: 'DELETE_CHILD_FOLDER_FAILED'
+class FolderService {
+    async create(data: TCreateFolderVariables): Promise<TServiceResult<TFolder>> {
+        try {
+            // TODO: Implement folder creation
+            const folder: TFolder = {
+                id: 1,
+                name: data.name,
+                parentId: data.parentId || null,
+                position: data.position || 0,
+                isPublic: data.isPublic || false,
+                isFavorite: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             }
-          }
-        }
-      }
-
-      // Delete all notes in this folder
-      const notes = await findNotesByFolderId(id)
-      if (notes.success && notes.data) {
-        const { deleteNoteById } = await import('./note-service')
-        for (const note of notes.data) {
-          const noteResult = await deleteNoteById(note.id)
-          if (!noteResult.success) {
+            return { success: true, data: folder }
+        } catch (error) {
             return {
-              success: false,
-              error: `Failed to delete note: ${noteResult.error}`,
-              code: 'DELETE_NOTE_FAILED'
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to create folder',
             }
-          }
         }
-      }
     }
 
-    const result = await deleteFolder(id)
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Failed to delete folder',
-        code: 'DELETE_FOLDER_FAILED'
-      }
+    async update(id: number, data: TUpdateFolderVariables): Promise<TServiceResult<TFolder>> {
+        try {
+            // TODO: Implement folder update
+            const folder: TFolder = {
+                id,
+                name: data.name || 'Untitled',
+                parentId: data.parentId || null,
+                position: data.position || 0,
+                isPublic: data.isPublic || false,
+                isFavorite: data.isFavorite || false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            }
+            return { success: true, data: folder }
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to update folder',
+            }
+        }
     }
 
-    return { success: true, data: result.data }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'DELETE_FOLDER_ERROR'
+    async delete(id: number, deleteChildren?: boolean, force?: boolean): Promise<TServiceResult<void>> {
+        try {
+            // TODO: Implement folder deletion
+            return { success: true }
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to delete folder',
+            }
+        }
     }
-  }
+
+    async move(id: number, parentId: number | null): Promise<TServiceResult<TFolder>> {
+        try {
+            // TODO: Implement folder move
+            const folder: TFolder = {
+                id,
+                name: 'Moved Folder',
+                parentId,
+                position: 0,
+                isPublic: false,
+                isFavorite: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            }
+            return { success: true, data: folder }
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to move folder',
+            }
+        }
+    }
+
+    async reorder(parentId: number | null, folderIds: number[]): Promise<TServiceResult<void>> {
+        try {
+            // TODO: Implement folder reordering
+            return { success: true }
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to reorder folders',
+            }
+        }
+    }
 }
 
-export async function moveFolderToParent(
-  id: number, 
-  newParentId: number | null, 
-  newPosition?: number
-): Promise<TServiceResult<TFolderWithStats>> {
-  try {
-    // Prevent moving folder into itself or its descendants
-    if (newParentId === id) {
-      return {
-        success: false,
-        error: 'Cannot move folder into itself',
-        code: 'INVALID_MOVE_TARGET'
-      }
-    }
-
-    // TODO: Add check for circular references (moving into descendant)
-
-    const result = await moveFolder(id, newParentId, newPosition)
-    if (!result.success || !result.data) {
-      return {
-        success: false,
-        error: result.error || 'Failed to move folder',
-        code: 'MOVE_FOLDER_FAILED'
-      }
-    }
-
-    const folderWithStats = await mapFolderToStats(result.data)
-    return { success: true, data: folderWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'MOVE_FOLDER_ERROR'
-    }
-  }
-}
-
-export async function reorderFoldersInParent(
-  parentId: number | null, 
-  folderIds: number[]
-): Promise<TServiceResult<boolean>> {
-  try {
-    const result = await reorderFolders(parentId, folderIds)
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Failed to reorder folders',
-        code: 'REORDER_FOLDERS_FAILED'
-      }
-    }
-
-    return { success: true, data: result.data }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'REORDER_FOLDERS_ERROR'
-    }
-  }
-}
-
-export async function getFolderHierarchyWithStats(): Promise<TServiceResult<TFolderWithStats[]>> {
-  try {
-    const result = await getFolderHierarchy()
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Failed to get folder hierarchy',
-        code: 'GET_HIERARCHY_FAILED'
-      }
-    }
-
-    const foldersWithStats = await Promise.all(
-      (result.data || []).map(mapFolderToStats)
-    )
-
-    return { success: true, data: foldersWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_HIERARCHY_ERROR'
-    }
-  }
-}
-
-export async function getFolderPathWithStats(id: number): Promise<TServiceResult<TFolderWithStats[]>> {
-  try {
-    const result = await getFolderPath(id)
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Failed to get folder path',
-        code: 'GET_PATH_FAILED'
-      }
-    }
-
-    const foldersWithStats = await Promise.all(
-      (result.data || []).map(mapFolderToStats)
-    )
-
-    return { success: true, data: foldersWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_PATH_ERROR'
-    }
-  }
-}
-
-export async function toggleFolderFavoriteStatus(id: number): Promise<TServiceResult<TFolderWithStats>> {
-  try {
-    const result = await toggleFolderFavorite(id)
-    if (!result.success || !result.data) {
-      return {
-        success: false,
-        error: result.error || 'Failed to toggle folder favorite status',
-        code: 'TOGGLE_FAVORITE_FAILED'
-      }
-    }
-
-    const folderWithStats = await mapFolderToStats(result.data)
-    return { success: true, data: folderWithStats }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'TOGGLE_FAVORITE_ERROR'
-    }
-  }
-}
-
-export async function getFavoriteFoldersWithStats(): Promise<TServiceListResult<TFolderWithStats>> {
-  try {
-    const result = await findFavoriteFolders()
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Failed to get favorite folders',
-        code: 'GET_FAVORITES_FAILED'
-      }
-    }
-
-    const foldersWithStats = await Promise.all(
-      (result.data || []).map(mapFolderToStats)
-    )
-
-    return {
-      success: true,
-      data: foldersWithStats,
-      total: foldersWithStats.length
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      code: 'GET_FAVORITES_ERROR'
-    }
-  }
-}
+export const folderService = new FolderService() 

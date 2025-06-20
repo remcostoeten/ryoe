@@ -1,9 +1,8 @@
-
 ---
 
 ### `api-migration.mdx`
 
-```mdx
+````mdx
 ## API Migration
 
 ### Git
@@ -17,3 +16,5 @@ src/
     └── layout/
         └── footer/
             └── git-tree-visualization.ts → src/modules/git/components/
+```
+````

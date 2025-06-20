@@ -1,12 +1,27 @@
-// Services (main API layer)
-export * from './services/auth-service'
-export * from './services/notes-service'
-export * from './services/folders-service'
-export * from './services/database-service'
-export * from './services/git-service'
+/**
+ * API layer exports
+ * Centralized exports for all API functionality
+ */
+
+// Query factories
+export {
+    type CRUDQueryFactory,
+    createQueryFactory,
+    createQueryHooks,
+} from './query-factory'
+
+// Mutation factories
+export {
+    type CRUDMutationFactory,
+    createMutationFactory,
+    createMutationHooks,
+} from './mutation-factory'
+
+// Mutation types and hooks
+export * from './mutations'
 
 // Types
-export type { TServiceResult, TServiceListResult } from '@/services/types'
+export type { TServiceResult } from '@/types'
 
 // Database connection
-export { initializeDatabase, checkDatabaseHealth, executeQuery } from './db' 
+export { initializeDatabase, checkDatabaseHealth, executeQuery } from './db'

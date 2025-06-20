@@ -1,30 +1,25 @@
-"use client"
+'use client'
 
-import { useLocation } from "react-router"
-import { TopActionBar } from "./top-action-bar"
-import { DocsActionBar } from "./docs-action-bar"
+import { useLocation } from 'react-router'
+import { TopActionBar } from './top-action-bar'
+import { DocsActionBar } from './docs-action-bar'
 
 type TActionBarResolverProps = {
-  onSearch: (query: string) => void
-  onCancelSearch: () => void
+	onSearch: (query: string) => void
+	onCancelSearch: () => void
 }
 
 export function ActionBarResolver({ onSearch, onCancelSearch }: TActionBarResolverProps) {
-  const location = useLocation()
-  const pathname = location.pathname
+	const location = useLocation()
+	const pathname = location.pathname
 
-  // Determine which action bar to show based on current route
-  const isDocsPage = pathname.startsWith('/docs')
+	// Determine which action bar to show based on current route
+	const isDocsPage = pathname.startsWith('/docs')
 
-  if (isDocsPage) {
-    return (
-      <DocsActionBar 
-        onSearch={onSearch}
-        onCancelSearch={onCancelSearch}
-      />
-    )
-  }
+	if (isDocsPage) {
+		return <DocsActionBar onSearch={onSearch} onCancelSearch={onCancelSearch} />
+	}
 
-  // Default to folder action bar for all other authenticated pages
-  return <TopActionBar />
+	// Default to folder action bar for all other authenticated pages
+	return <TopActionBar />
 }

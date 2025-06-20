@@ -33,13 +33,13 @@ The factory automatically selects the best storage implementation based on the c
 ```typescript
 // In src/core/storage/index.ts
 export async function createStorageProvider(
-    storeName: string = 'app-storage.dat'
+	storeName: string = 'app-storage.dat'
 ): Promise<TStorageProvider> {
-    if (isTauriEnvironment()) {
-        return await createFallbackProvider(storeName)
-    } else {
-        return createLocalStorageProvider()
-    }
+	if (isTauriEnvironment()) {
+		return await createFallbackProvider(storeName)
+	} else {
+		return createLocalStorageProvider()
+	}
 }
 ```
 
@@ -49,7 +49,7 @@ The system detects whether it's running in a Tauri environment:
 
 ```typescript
 function isTauriEnvironment(): boolean {
-    return typeof window !== 'undefined' && '__TAURI__' in window
+	return typeof window !== 'undefined' && '__TAURI__' in window
 }
 ```
 
@@ -60,48 +60,46 @@ function isTauriEnvironment(): boolean {
 Uses Tauri's persistent storage for desktop environments:
 
 ```typescript
-async function createTauriStoreProvider(
-    storeName: string
-): Promise<TStorageProvider> {
-    const store = await Store.load(storeName)
+async function createTauriStoreProvider(storeName: string): Promise<TStorageProvider> {
+	const store = await Store.load(storeName)
 
-    return {
-        async get<T>(key: string): Promise<T | null> {
-            try {
-                return await store.get(key)
-            } catch (error) {
-                console.error(`Error getting ${key} from store:`, error)
-                return null
-            }
-        },
+	return {
+		async get<T>(key: string): Promise<T | null> {
+			try {
+				return await store.get(key)
+			} catch (error) {
+				console.error(`Error getting ${key} from store:`, error)
+				return null
+			}
+		},
 
-        async set<T>(key: string, value: T): Promise<void> {
-            try {
-                await store.set(key, value)
-                await store.save()
-            } catch (error) {
-                console.error(`Error setting ${key} in store:`, error)
-            }
-        },
+		async set<T>(key: string, value: T): Promise<void> {
+			try {
+				await store.set(key, value)
+				await store.save()
+			} catch (error) {
+				console.error(`Error setting ${key} in store:`, error)
+			}
+		},
 
-        async delete(key: string): Promise<void> {
-            try {
-                await store.delete(key)
-                await store.save()
-            } catch (error) {
-                console.error(`Error deleting ${key} from store:`, error)
-            }
-        },
+		async delete(key: string): Promise<void> {
+			try {
+				await store.delete(key)
+				await store.save()
+			} catch (error) {
+				console.error(`Error deleting ${key} from store:`, error)
+			}
+		},
 
-        async clear(): Promise<void> {
-            try {
-                await store.clear()
-                await store.save()
-            } catch (error) {
-                console.error('Error clearing store:', error)
-            }
-        }
-    }
+		async clear(): Promise<void> {
+			try {
+				await store.clear()
+				await store.save()
+			} catch (error) {
+				console.error('Error clearing store:', error)
+			}
+		},
+	}
 }
 ```
 
@@ -111,41 +109,41 @@ Uses browser's localStorage for web environments:
 
 ```typescript
 function createLocalStorageProvider(): TStorageProvider {
-    return {
-        async get<T>(key: string): Promise<T | null> {
-            try {
-                const item = localStorage.getItem(key)
-                return item ? JSON.parse(item) : null
-            } catch (error) {
-                console.error(`Error getting ${key} from localStorage:`, error)
-                return null
-            }
-        },
+	return {
+		async get<T>(key: string): Promise<T | null> {
+			try {
+				const item = localStorage.getItem(key)
+				return item ? JSON.parse(item) : null
+			} catch (error) {
+				console.error(`Error getting ${key} from localStorage:`, error)
+				return null
+			}
+		},
 
-        async set<T>(key: string, value: T): Promise<void> {
-            try {
-                localStorage.setItem(key, JSON.stringify(value))
-            } catch (error) {
-                console.error(`Error setting ${key} in localStorage:`, error)
-            }
-        },
+		async set<T>(key: string, value: T): Promise<void> {
+			try {
+				localStorage.setItem(key, JSON.stringify(value))
+			} catch (error) {
+				console.error(`Error setting ${key} in localStorage:`, error)
+			}
+		},
 
-        async delete(key: string): Promise<void> {
-            try {
-                localStorage.removeItem(key)
-            } catch (error) {
-                console.error(`Error deleting ${key} from localStorage:`, error)
-            }
-        },
+		async delete(key: string): Promise<void> {
+			try {
+				localStorage.removeItem(key)
+			} catch (error) {
+				console.error(`Error deleting ${key} from localStorage:`, error)
+			}
+		},
 
-        async clear(): Promise<void> {
-            try {
-                localStorage.clear()
-            } catch (error) {
-                console.error('Error clearing localStorage:', error)
-            }
-        }
-    }
+		async clear(): Promise<void> {
+			try {
+				localStorage.clear()
+			} catch (error) {
+				console.error('Error clearing localStorage:', error)
+			}
+		},
+	}
 }
 ```
 
@@ -154,52 +152,47 @@ function createLocalStorageProvider(): TStorageProvider {
 Automatically falls back to localStorage if Tauri store fails:
 
 ```typescript
-async function createFallbackProvider(
-    storeName: string
-): Promise<TStorageProvider> {
-    const tauriProvider = await createTauriStoreProvider(storeName)
-    const localStorageProvider = createLocalStorageProvider()
+async function createFallbackProvider(storeName: string): Promise<TStorageProvider> {
+	const tauriProvider = await createTauriStoreProvider(storeName)
+	const localStorageProvider = createLocalStorageProvider()
 
-    return {
-        async get<T>(key: string): Promise<T | null> {
-            try {
-                return await tauriProvider.get(key)
-            } catch (error) {
-                console.warn('Falling back to localStorage for get:', error)
-                return await localStorageProvider.get(key)
-            }
-        },
+	return {
+		async get<T>(key: string): Promise<T | null> {
+			try {
+				return await tauriProvider.get(key)
+			} catch (error) {
+				console.warn('Falling back to localStorage for get:', error)
+				return await localStorageProvider.get(key)
+			}
+		},
 
-        async set<T>(key: string, value: T): Promise<void> {
-            try {
-                await tauriProvider.set(key, value)
-            } catch (error) {
-                console.warn('Falling back to localStorage for set:', error)
-                await localStorageProvider.set(key, value)
-            }
-        },
+		async set<T>(key: string, value: T): Promise<void> {
+			try {
+				await tauriProvider.set(key, value)
+			} catch (error) {
+				console.warn('Falling back to localStorage for set:', error)
+				await localStorageProvider.set(key, value)
+			}
+		},
 
-        async delete(key: string): Promise<void> {
-            try {
-                await tauriProvider.delete(key)
-            } catch (error) {
-                console.warn('Falling back to localStorage for delete:', error)
-                await localStorageProvider.delete(key)
-            }
-        },
+		async delete(key: string): Promise<void> {
+			try {
+				await tauriProvider.delete(key)
+			} catch (error) {
+				console.warn('Falling back to localStorage for delete:', error)
+				await localStorageProvider.delete(key)
+			}
+		},
 
-        async clear(): Promise<void> {
-            try {
-                await tauriProvider.clear()
-            } catch (error) {
-                console.warn(
-                    'Falling back to localStorage for clearing storage:',
-                    error
-                )
-                await localStorageProvider.clear()
-            }
-        }
-    }
+		async clear(): Promise<void> {
+			try {
+				await tauriProvider.clear()
+			} catch (error) {
+				console.warn('Falling back to localStorage for clearing storage:', error)
+				await localStorageProvider.clear()
+			}
+		},
+	}
 }
 ```
 
@@ -211,13 +204,13 @@ async function createFallbackProvider(
 import { getAppStorage } from '@/core/storage'
 
 async function saveUserPreferences(preferences: UserPreferences) {
-    const storage = await getAppStorage()
-    await storage.set('user.preferences', preferences)
+	const storage = await getAppStorage()
+	await storage.set('user.preferences', preferences)
 }
 
 async function getUserPreferences(): Promise<UserPreferences | null> {
-    const storage = await getAppStorage()
-    return await storage.get('user.preferences')
+	const storage = await getAppStorage()
+	return await storage.get('user.preferences')
 }
 ```
 
@@ -227,27 +220,27 @@ async function getUserPreferences(): Promise<UserPreferences | null> {
 import { createStorageProvider } from '@/core/storage'
 
 class AppStateManager {
-    private storage: TStorageProvider
+	private storage: TStorageProvider
 
-    constructor() {
-        this.initialize()
-    }
+	constructor() {
+		this.initialize()
+	}
 
-    private async initialize() {
-        this.storage = await createStorageProvider('app-state.dat')
-    }
+	private async initialize() {
+		this.storage = await createStorageProvider('app-state.dat')
+	}
 
-    async saveState(state: AppState): Promise<void> {
-        await this.storage.set('app.state', state)
-    }
+	async saveState(state: AppState): Promise<void> {
+		await this.storage.set('app.state', state)
+	}
 
-    async loadState(): Promise<AppState | null> {
-        return await this.storage.get('app.state')
-    }
+	async loadState(): Promise<AppState | null> {
+		return await this.storage.get('app.state')
+	}
 
-    async resetState(): Promise<void> {
-        await this.storage.delete('app.state')
-    }
+	async resetState(): Promise<void> {
+		await this.storage.delete('app.state')
+	}
 }
 ```
 
@@ -268,9 +261,7 @@ const appWindow = getCurrentWindow()
 const position = await appWindow.outerPosition()
 const size = await appWindow.outerSize()
 
-console.log(
-    `Window: ${size.width}x${size.height} at (${position.x}, ${position.y})`
-)
+console.log(`Window: ${size.width}x${size.height} at (${position.x}, ${position.y})`)
 ```
 
 > **Note**: Window state persistence is only available in Tauri desktop environment. See the [Window Management documentation](/docs/window-management) for detailed information.
@@ -281,22 +272,22 @@ console.log(
 import { getAppStorage } from '@/core/storage'
 
 async function storeMultipleItems() {
-    const storage = await getAppStorage()
+	const storage = await getAppStorage()
 
-    // Store different types of data
-    await storage.set('user.id', 12345)
-    await storage.set('user.name', 'John Doe')
-    await storage.set('user.isActive', true)
-    await storage.set('user.lastLogin', new Date().toISOString())
-    await storage.set('user.tags', ['developer', 'designer'])
-    await storage.set('user.profile', {
-        bio: 'Full-stack developer',
-        avatar: 'avatar.png',
-        social: {
-            github: 'johndoe',
-            twitter: '@johndoe'
-        }
-    })
+	// Store different types of data
+	await storage.set('user.id', 12345)
+	await storage.set('user.name', 'John Doe')
+	await storage.set('user.isActive', true)
+	await storage.set('user.lastLogin', new Date().toISOString())
+	await storage.set('user.tags', ['developer', 'designer'])
+	await storage.set('user.profile', {
+		bio: 'Full-stack developer',
+		avatar: 'avatar.png',
+		social: {
+			github: 'johndoe',
+			twitter: '@johndoe',
+		},
+	})
 }
 ```
 
@@ -336,9 +327,9 @@ Creates a storage provider with the given store name.
 
 ```typescript
 interface TStorageProvider {
-    get<T>(key: string): Promise<T | null>
-    set<T>(key: string, value: T): Promise<void>
-    delete(key: string): Promise<void>
-    clear(): Promise<void>
+	get<T>(key: string): Promise<T | null>
+	set<T>(key: string, value: T): Promise<void>
+	delete(key: string): Promise<void>
+	clear(): Promise<void>
 }
 ```

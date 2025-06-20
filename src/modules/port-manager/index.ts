@@ -9,17 +9,13 @@ export { usePortManager } from './hooks/use-port-manager'
 
 // Re-export types
 export type {
-  TPortInfo,
-  TPortScanResult,
-  TPortManagerState,
-  TPortManagerConfig,
-  TPortAction,
-  TPortStatus,
-  TPortGroup
+	TPortInfo,
+	TPortScanResult,
+	TPortManagerState,
+	TPortManagerConfig,
+	TPortAction,
+	TPortStatus,
+	TPortGroup,
 } from '@/types/port-manager'
 
-export { 
-  DEV_PORT_CATEGORIES,
-  getPortCategory,
-  isCommonDevPort
-} from '@/types/port-manager'
+export { DEV_PORT_CATEGORIES, getPortCategory, isCommonDevPort } from '@/types/port-manager'

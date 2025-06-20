@@ -1,83 +1,84 @@
 <!doctype html>
 <html lang="en" class="dark">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" href="/logo.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="theme-color" content="#000000" />
-        <title>ryoe</title>
-        <script>
-            // Prevent theme flash by applying theme immediately before any rendering
-            (function() {
-                // Function to apply theme to DOM
-                function applyTheme(theme) {
-                    const html = document.documentElement;
-                    if (theme === 'dark') {
-                        html.classList.add('dark');
-                        html.style.colorScheme = 'dark';
-                    } else {
-                        html.classList.remove('dark');
-                        html.style.colorScheme = 'light';
-                    }
-                }
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="icon" type="image/png" href="/logo.png" />
+		<link rel="manifest" href="/manifest.json" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#000000" />
+		<title>ryoe</title>
+		<script>
+			// Prevent theme flash by applying theme immediately before any rendering
+			;(function () {
+				// Function to apply theme to DOM
+				function applyTheme(theme) {
+					const html = document.documentElement
+					if (theme === 'dark') {
+						html.classList.add('dark')
+						html.style.colorScheme = 'dark'
+					} else {
+						html.classList.remove('dark')
+						html.style.colorScheme = 'light'
+					}
+				}
 
-                // Function to get system theme preference
-                function getSystemTheme() {
-                    if (typeof window === 'undefined' || !window.matchMedia) {
-                        return 'dark'; // Default fallback
-                    }
-                    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                }
+				// Function to get system theme preference
+				function getSystemTheme() {
+					if (typeof window === 'undefined' || !window.matchMedia) {
+						return 'dark' // Default fallback
+					}
+					return window.matchMedia('(prefers-color-scheme: dark)').matches
+						? 'dark'
+						: 'light'
+				}
 
-                try {
-                    // Check if we're in Tauri environment (will be false during initial load)
-                    const isTauri = typeof window !== 'undefined' && window.__TAURI__;
-                    let storedTheme = null;
+				try {
+					// Check if we're in Tauri environment (will be false during initial load)
+					const isTauri = typeof window !== 'undefined' && window.__TAURI__
+					let storedTheme = null
 
-                    if (!isTauri) {
-                        // For web, try to read from localStorage synchronously
-                        try {
-                            const stored = localStorage.getItem('ryoe.theme');
-                            if (stored && stored !== 'undefined' && stored !== 'null') {
-                                storedTheme = JSON.parse(stored);
-                            }
-                        } catch (e) {
-                            // Ignore localStorage errors, continue with default
-                        }
-                    }
+					if (!isTauri) {
+						// For web, try to read from localStorage synchronously
+						try {
+							const stored = localStorage.getItem('ryoe.theme')
+							if (stored && stored !== 'undefined' && stored !== 'null') {
+								storedTheme = JSON.parse(stored)
+							}
+						} catch (e) {
+							// Ignore localStorage errors, continue with default
+						}
+					}
 
-                    // Determine which theme to apply
-                    let themeToApply = 'dark'; // Default to dark
+					// Determine which theme to apply
+					let themeToApply = 'dark' // Default to dark
 
-                    if (storedTheme) {
-                        if (storedTheme === 'system') {
-                            themeToApply = getSystemTheme();
-                        } else if (storedTheme === 'light' || storedTheme === 'dark') {
-                            themeToApply = storedTheme;
-                        }
-                    }
+					if (storedTheme) {
+						if (storedTheme === 'system') {
+							themeToApply = getSystemTheme()
+						} else if (storedTheme === 'light' || storedTheme === 'dark') {
+							themeToApply = storedTheme
+						}
+					}
 
-                    // Apply the theme immediately
-                    applyTheme(themeToApply);
+					// Apply the theme immediately
+					applyTheme(themeToApply)
 
-                    // Store the applied theme for React to pick up later
-                    window.__INITIAL_THEME__ = themeToApply;
+					// Store the applied theme for React to pick up later
+					window.__INITIAL_THEME__ = themeToApply
+				} catch (error) {
+					// Fallback to dark theme on any error
+					applyTheme('dark')
+					window.__INITIAL_THEME__ = 'dark'
+				}
+			})()
+		</script>
+	</head>
 
-                } catch (error) {
-                    // Fallback to dark theme on any error
-                    applyTheme('dark');
-                    window.__INITIAL_THEME__ = 'dark';
-                }
-            })();
-        </script>
-    </head>
-
-    <body>
-        <div id="root"></div>
-        <script type="module" src="/src/main.tsx"></script>
-    </body>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
 </html>

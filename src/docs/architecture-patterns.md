@@ -40,12 +40,14 @@ This document explains the architectural layers in our enterprise application an
 ### ✅ **Use Context When:**
 
 1. **Global State Management**
+
    - User authentication state
    - Application-wide settings
    - Theme/UI preferences
    - Current workspace/project
 
 2. **Cross-Component Communication**
+
    - Multiple components need the same data
    - Avoiding prop drilling through many levels
    - Shared UI state (modals, notifications)
@@ -58,11 +60,13 @@ This document explains the architectural layers in our enterprise application an
 ### ❌ **Don't Use Context When:**
 
 1. **Simple Local State**
+
    - Component-specific state
    - Form inputs
    - Toggle states
 
 2. **Performance-Critical Operations**
+
    - Frequently changing data
    - Large datasets that change often
    - Real-time updates
@@ -95,11 +99,13 @@ const [name, setName] = useState('') // Use local state instead
 ### ✅ **Use Custom Hooks When:**
 
 1. **Reusable Logic**
+
    - Same logic used across multiple components
    - Stateful logic that can be abstracted
    - Complex state management patterns
 
 2. **API Integration**
+
    - Data fetching and caching
    - CRUD operations
    - Real-time subscriptions
@@ -112,40 +118,43 @@ const [name, setName] = useState('') // Use local state instead
 ### **Hook Categories:**
 
 #### **Data Hooks** (Service Layer Integration)
+
 ```tsx
 // ✅ Hooks that call services directly
 function useFolders(parentId?: number | null) {
   const [folders, setFolders] = useState<TFolder[]>([])
   const [loading, setLoading] = useState(true)
-  
+
   const loadFolders = useCallback(async () => {
     const response = await getRootFolders() // Service call
     if (response.success) {
       setFolders(response.data)
     }
   }, [])
-  
+
   return { folders, loading, loadFolders }
 }
 ```
 
 #### **UI State Hooks** (Component Logic)
+
 ```tsx
 // ✅ Hooks for UI-specific state management
 function useInlineEditing() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editValue, setEditValue] = useState('')
-  
+
   const startEditing = (id: number, currentValue: string) => {
     setEditingId(id)
     setEditValue(currentValue)
   }
-  
+
   return { editingId, editValue, startEditing }
 }
 ```
 
 #### **Operation Hooks** (Business Logic)
+
 ```tsx
 // ✅ Hooks that orchestrate multiple operations
 function useFolderOperations() {
@@ -158,7 +167,7 @@ function useFolderOperations() {
     toast.error(result.error)
     return null
   }, [])
-  
+
   return { createFolder }
 }
 ```
@@ -166,12 +175,14 @@ function useFolderOperations() {
 ## Service Layer: Business Logic
 
 ### **Purpose:**
+
 - Implement business rules and validation
 - Coordinate between repositories
 - Handle complex operations
 - Provide clean API for hooks
 
 ### **Service Flow:**
+
 ```
 Hook → Service → Repository → Database
 ```
@@ -187,20 +198,20 @@ export async function createFolderWithValidation(
   if (!data.name.trim()) {
     return { success: false, error: 'Folder name is required' }
   }
-  
+
   // 2. Check for duplicates
   const existing = await findFolderByName(data.name, data.parentId)
   if (existing.success && existing.data) {
     return { success: false, error: 'Folder name already exists' }
   }
-  
+
   // 3. Create folder via repository
   const result = await createFolder({
     name: data.name.trim(),
     parentId: data.parentId,
-    position: data.position
+    position: data.position,
   })
-  
+
   // 4. Return with additional metadata
   if (result.success && result.data) {
     return {
@@ -209,11 +220,11 @@ export async function createFolderWithValidation(
         ...result.data,
         noteCount: 0,
         subfolderCount: 0,
-        totalSize: 0
-      }
+        totalSize: 0,
+      },
     }
   }
-  
+
   return result
 }
 ```
@@ -221,12 +232,14 @@ export async function createFolderWithValidation(
 ## Repository Layer: Data Access
 
 ### **Purpose:**
+
 - Pure data operations (CRUD)
 - Database abstraction
 - No business logic
 - Consistent error handling
 
 ### **Repository Flow:**
+
 ```
 Service → Repository → Database Provider → SQLite
 ```
@@ -244,16 +257,16 @@ export async function createFolder(
     const siblings = await findChildFolders(data.parentId || null)
     position = siblings.success ? siblings.data!.length : 0
   }
-  
+
   // Map to database row format
   const rowData = {
     name: data.name,
     parent_id: data.parentId || null,
     position,
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   }
-  
+
   // Execute database operation
   return create(TABLE_NAME, rowData, mapRowToFolder)
 }
@@ -262,6 +275,7 @@ export async function createFolder(
 ## Data Flow Patterns
 
 ### **Pattern 1: Simple Data Fetching**
+
 ```
 Component → Hook → Service → Repository → Database
 ```
@@ -292,6 +306,7 @@ async function findRootFolders() {
 ```
 
 ### **Pattern 2: Complex Operations with Context**
+
 ```
 Component → Context → Hook → Service → Repository → Database
 ```
@@ -312,7 +327,7 @@ function FolderProvider() {
 
 // Hook
 function useFolderOperations() {
-  const createFolder = async (input) => {
+  const createFolder = async input => {
     return await createFolderWithValidation(input) // Service
   }
 }
@@ -321,6 +336,7 @@ function useFolderOperations() {
 ### **Pattern 3: Mutations vs Queries**
 
 #### **Queries (Read Operations):**
+
 ```tsx
 // ✅ Direct service calls in hooks
 function useFolders() {
@@ -332,10 +348,11 @@ function useFolders() {
 ```
 
 #### **Mutations (Write Operations):**
+
 ```tsx
 // ✅ Service calls with additional logic
 function useFolderOperations() {
-  const createFolder = async (input) => {
+  const createFolder = async input => {
     const result = await createFolderWithValidation(input) // Service
     if (result.success) {
       // Additional UI logic
@@ -349,38 +366,42 @@ function useFolderOperations() {
 
 ## Decision Matrix
 
-| Scenario | Use | Reason |
-|----------|-----|--------|
-| Global user state | Context | Shared across entire app |
-| Folder CRUD operations | Hook → Service | Reusable business logic |
-| Simple form state | Local useState | Component-specific |
-| Complex folder tree UI | Context | Multiple components need coordination |
-| Database operations | Repository | Pure data access |
-| Business validation | Service | Business rules enforcement |
-| API caching | Hook | Reusable data management |
-| Modal state | Context (if global) or Hook (if local) | Depends on scope |
+| Scenario               | Use                                    | Reason                                |
+| ---------------------- | -------------------------------------- | ------------------------------------- |
+| Global user state      | Context                                | Shared across entire app              |
+| Folder CRUD operations | Hook → Service                         | Reusable business logic               |
+| Simple form state      | Local useState                         | Component-specific                    |
+| Complex folder tree UI | Context                                | Multiple components need coordination |
+| Database operations    | Repository                             | Pure data access                      |
+| Business validation    | Service                                | Business rules enforcement            |
+| API caching            | Hook                                   | Reusable data management              |
+| Modal state            | Context (if global) or Hook (if local) | Depends on scope                      |
 
 ## Best Practices
 
 ### **Context Best Practices:**
+
 1. Keep context focused and specific
 2. Avoid putting everything in one context
 3. Use multiple providers for different domains
 4. Memoize context values to prevent re-renders
 
 ### **Hook Best Practices:**
+
 1. One responsibility per hook
 2. Return consistent interfaces
 3. Handle loading and error states
 4. Use proper dependency arrays
 
 ### **Service Best Practices:**
+
 1. Pure functions only
 2. Validate inputs
 3. Handle errors gracefully
 4. Return consistent result types
 
 ### **Repository Best Practices:**
+
 1. No business logic
 2. Consistent error handling
 3. Type-safe operations

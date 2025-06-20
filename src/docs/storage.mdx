@@ -105,11 +105,11 @@ const snippetsPath = await join(dataDir, 'snippets', 'javascript')
 import { readTextFile } from '@tauri-apps/api/fs'
 
 try {
-    const content = await readTextFile(configPath)
-    const config = JSON.parse(content)
-    console.log('Configuration:', config)
+	const content = await readTextFile(configPath)
+	const config = JSON.parse(content)
+	console.log('Configuration:', config)
 } catch (error) {
-    console.error('Failed to read config:', error)
+	console.error('Failed to read config:', error)
 }
 ```
 
@@ -123,15 +123,12 @@ await createDir(snippetsPath, { recursive: true })
 
 // Write file
 const snippet = {
-    title: 'React Hook',
-    content: 'const [state, setState] = useState()',
-    language: 'typescript'
+	title: 'React Hook',
+	content: 'const [state, setState] = useState()',
+	language: 'typescript',
 }
 
-await writeTextFile(
-    await join(snippetsPath, 'react-hook.json'),
-    JSON.stringify(snippet, null, 2)
-)
+await writeTextFile(await join(snippetsPath, 'react-hook.json'), JSON.stringify(snippet, null, 2))
 ```
 
 ## Database Storage
@@ -141,6 +138,7 @@ await writeTextFile(
 Our application uses Turso, a cloud-based SQLite database that works in both web and desktop environments.
 
 **Configuration:**
+
 - Database URL: Set via `VITE_TURSO_DATABASE_URL` environment variable
 - Auth Token: Set via `VITE_TURSO_AUTH_TOKEN` environment variable
 
@@ -169,25 +167,28 @@ CREATE TABLE snippets (
 ### Setup Instructions
 
 1. **Create a Turso database:**
-   ```bash
-   turso db create your-app-name
-   ```
+
+    ```bash
+    turso db create your-app-name
+    ```
 
 2. **Get the database URL:**
-   ```bash
-   turso db show your-app-name
-   ```
+
+    ```bash
+    turso db show your-app-name
+    ```
 
 3. **Create an auth token:**
-   ```bash
-   turso db tokens create your-app-name
-   ```
+
+    ```bash
+    turso db tokens create your-app-name
+    ```
 
 4. **Set environment variables:**
-   ```env
-   VITE_TURSO_DATABASE_URL=libsql://your-database-name.turso.io
-   VITE_TURSO_AUTH_TOKEN=your-auth-token-here
-   ```
+    ```env
+    VITE_TURSO_DATABASE_URL=libsql://your-database-name.turso.io
+    VITE_TURSO_AUTH_TOKEN=your-auth-token-here
+    ```
 
 ## Storage Utilities
 
@@ -196,24 +197,24 @@ CREATE TABLE snippets (
 ```typescript
 // src/core/storage/config.ts
 export class ConfigManager {
-    private configPath: string
+	private configPath: string
 
-    constructor(configPath: string) {
-        this.configPath = configPath
-    }
+	constructor(configPath: string) {
+		this.configPath = configPath
+	}
 
-    async load<T>(): Promise<T | null> {
-        try {
-            const content = await readTextFile(this.configPath)
-            return JSON.parse(content)
-        } catch {
-            return null
-        }
-    }
+	async load<T>(): Promise<T | null> {
+		try {
+			const content = await readTextFile(this.configPath)
+			return JSON.parse(content)
+		} catch {
+			return null
+		}
+	}
 
-    async save<T>(data: T): Promise<void> {
-        await writeTextFile(this.configPath, JSON.stringify(data, null, 2))
-    }
+	async save<T>(data: T): Promise<void> {
+		await writeTextFile(this.configPath, JSON.stringify(data, null, 2))
+	}
 }
 ```
 
@@ -222,18 +223,16 @@ export class ConfigManager {
 ```typescript
 import { ConfigManager } from '@/core/storage/config'
 
-const configManager = new ConfigManager(
-    await join(await appDataDir(), 'config', 'settings.json')
-)
+const configManager = new ConfigManager(await join(await appDataDir(), 'config', 'settings.json'))
 
 // Load configuration
 const settings = await configManager.load<AppSettings>()
 
 // Save configuration
 await configManager.save({
-    theme: 'dark',
-    autoSave: true,
-    fontSize: 14
+	theme: 'dark',
+	autoSave: true,
+	fontSize: 14,
 })
 ```
 
@@ -245,14 +244,14 @@ Always wrap file operations in try-catch blocks:
 
 ```typescript
 async function saveUserData(data: UserData) {
-    try {
-        await writeTextFile(userDataPath, JSON.stringify(data))
-        console.log('Data saved successfully')
-    } catch (error) {
-        console.error('Failed to save data:', error)
-        // Show user-friendly error message
-        showErrorToast('Failed to save your data. Please try again.')
-    }
+	try {
+		await writeTextFile(userDataPath, JSON.stringify(data))
+		console.log('Data saved successfully')
+	} catch (error) {
+		console.error('Failed to save data:', error)
+		// Show user-friendly error message
+		showErrorToast('Failed to save your data. Please try again.')
+	}
 }
 ```
 
@@ -264,9 +263,9 @@ Ensure directories exist before writing files:
 import { createDir, exists } from '@tauri-apps/api/fs'
 
 async function ensureDirectoryExists(path: string) {
-    if (!(await exists(path))) {
-        await createDir(path, { recursive: true })
-    }
+	if (!(await exists(path))) {
+		await createDir(path, { recursive: true })
+	}
 }
 ```
 
@@ -278,17 +277,17 @@ Validate data before storage:
 import { z } from 'zod'
 
 const UserDataSchema = z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    preferences: z.object({
-        theme: z.enum(['light', 'dark']),
-        notifications: z.boolean()
-    })
+	name: z.string().min(1),
+	email: z.string().email(),
+	preferences: z.object({
+		theme: z.enum(['light', 'dark']),
+		notifications: z.boolean(),
+	}),
 })
 
 async function saveUserData(data: unknown) {
-    const validatedData = UserDataSchema.parse(data)
-    await writeTextFile(userDataPath, JSON.stringify(validatedData))
+	const validatedData = UserDataSchema.parse(data)
+	await writeTextFile(userDataPath, JSON.stringify(validatedData))
 }
 ```
 

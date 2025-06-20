@@ -55,16 +55,16 @@ tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-works
 ```json
 // src-tauri/tauri.conf.json
 {
-    "app": {
-        "windows": [
-            {
-                "title": "ryoe",
-                "width": 1000,
-                "height": 600,
-                "dragDropEnabled": false
-            }
-        ]
-    }
+	"app": {
+		"windows": [
+			{
+				"title": "ryoe",
+				"width": 1000,
+				"height": 600,
+				"dragDropEnabled": false
+			}
+		]
+	}
 }
 ```
 
@@ -121,13 +121,13 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 const appWindow = getCurrentWindow()
 
 // Listen for window move events
-await appWindow.listen('tauri://move', (event) => {
-    console.log('Window moved:', event.payload)
+await appWindow.listen('tauri://move', event => {
+	console.log('Window moved:', event.payload)
 })
 
 // Listen for window resize events
-await appWindow.listen('tauri://resize', (event) => {
-    console.log('Window resized:', event.payload)
+await appWindow.listen('tauri://resize', event => {
+	console.log('Window resized:', event.payload)
 })
 ```
 
@@ -188,11 +188,11 @@ Window position persistence is only available in the Tauri desktop environment:
 import { isTauriEnvironment } from '@/utilities/environment'
 
 if (isTauriEnvironment()) {
-    // Window management features available
-    console.log('Window state persistence enabled')
+	// Window management features available
+	console.log('Window state persistence enabled')
 } else {
-    // Web environment - feature not available
-    console.log('Running in web mode - window persistence disabled')
+	// Web environment - feature not available
+	console.log('Running in web mode - window persistence disabled')
 }
 ```
 
