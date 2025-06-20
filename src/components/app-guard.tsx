@@ -1,13 +1,13 @@
-import { Spinner } from '@/components/ui/loaders/spinner'
-import { useOnboardingStatus } from '@/hooks/useOnboarding'
+import { useOnboardingStatus } from '@/hooks/use-onboarding'
+import { useNavigate, useLocation } from 'react-router'
 import { useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { Spinner } from '@/components/ui/loaders/spinner'
 
-type TProps = {
+interface AppGuardProps {
 	children: React.ReactNode
 }
 
-export function AppGuard({ children }: TProps) {
+export function AppGuard({ children }: AppGuardProps) {
 	const { isComplete, isLoading } = useOnboardingStatus()
 	const navigate = useNavigate()
 	const location = useLocation()

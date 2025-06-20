@@ -1,9 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { getCurrentUser } from '@/services/user-service'
-import type { TUserProfile } from '@/types'
-
+import { useCurrentUser } from './use-current-user'
 
 export function useOnboardingStatus() {
     const navigate = useNavigate()
@@ -16,4 +13,4 @@ export function useOnboardingStatus() {
     }, [user, isLoading, navigate])
 
     return { isComplete: user?.isSetupComplete ?? false, isLoading }
-} 
+}

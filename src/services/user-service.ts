@@ -1,5 +1,5 @@
-import type { TServiceResult, TUserProfile } from '@/types'
-import type { TRegisterUserVariables, TUpdateUserPreferencesVariables, TSwitchStorageTypeVariables } from '@/api/mutations/types'
+import type { TServiceResult } from '@/types'
+import type { TUserProfile } from '@/domain/entities/workspace'
 import {
     createUser as createUserInDb,
     updateUser as updateUserInDb,
@@ -10,48 +10,17 @@ import {
 } from '@/repositories/user-repository'
 import type { TCreateUserData, TUpdateUserData } from '@/repositories/types'
 
-// For backwards compatibility, map old interfaces to new ones
-function mapRegisterVariablesToCreateData(data: TRegisterUserVariables): TCreateUserData {
-    return {
-        name: data.name,
-        snippetsPath: `${process.env.HOME || '~'}/.config/ryoe`,
-        storageType: 'local',
-        preferences: {
-            theme: 'system',
-            sidebarCollapsed: false,
-            autoSave: true,
-            showLineNumbers: true,
-            fontSize: 14,
-            editorTheme: 'default',
-        },
-    }
-}
-
-function mapUpdateVariablesToUpdateData(data: TUpdateUserPreferencesVariables): TUpdateUserData {
-    return {
-        preferences: {
-            theme: data.theme,
-            ...(data.mdxStoragePath && {}),
-        },
-        ...(data.storageType && { storageType: data.storageType }),
-    }
-}
-
+// Map database user to user profile
 function mapDbUserToProfile(dbUser: any): TUserProfile {
     return {
         id: dbUser.id,
-        email: '', // Not stored in local database
         name: dbUser.name,
-        preferences: {
-            theme: dbUser.preferences?.theme || 'system',
-            storageType: dbUser.storageType,
-            mdxStoragePath: dbUser.snippetsPath,
-        },
         snippetsPath: dbUser.snippetsPath,
         isSetupComplete: dbUser.isSetupComplete,
         storageType: dbUser.storageType,
-        createdAt: new Date(dbUser.createdAt).toISOString(),
-        updatedAt: new Date(dbUser.updatedAt || dbUser.createdAt).toISOString(),
+        preferences: dbUser.preferences,
+        createdAt: dbUser.createdAt,
+        updatedAt: dbUser.updatedAt,
     }
 }
 
@@ -59,24 +28,24 @@ class UserService {
     private currentUserId: number | null = null
 
     async getCurrentUserId(): Promise<number | null> {
-        if (this.currentUserId) return this.currentUserId
+        if (this.currentUserId) {
+            return this.currentUserId
+        }
 
-        // For local app, check if we have any users and use the first one
-        // or create a default user if none exists
-        const userCountResult = await getUserCount()
-        if (userCountResult.success && userCountResult.data! > 0) {
-            // For simplicity, use user ID 1 as the default user
-            this.currentUserId = 1
-            return 1
+        // Try to find any user in the database
+        const count = await getUserCount()
+        if (count.success && count.data! > 0) {
+            // For this local desktop app, we assume the first user is the current user
+            // In a real app, you'd have proper session management
+            return 1 // Assuming first user has ID 1
         }
 
         return null
     }
 
-    async register(data: TRegisterUserVariables): Promise<TServiceResult<TUserProfile>> {
+    async register(data: TCreateUserData): Promise<TServiceResult<TUserProfile>> {
         try {
-            const createData = mapRegisterVariablesToCreateData(data)
-            const result = await createUserInDb(createData)
+            const result = await createUserInDb(data)
 
             if (!result.success) {
                 return {
@@ -98,7 +67,7 @@ class UserService {
         }
     }
 
-    async updatePreferences(data: TUpdateUserPreferencesVariables): Promise<TServiceResult<TUserProfile>> {
+    async updatePreferences(data: TUpdateUserData): Promise<TServiceResult<TUserProfile>> {
         try {
             const userId = await this.getCurrentUserId()
             if (!userId) {
@@ -108,8 +77,7 @@ class UserService {
                 }
             }
 
-            const updateData = mapUpdateVariablesToUpdateData(data)
-            const result = await updateUserInDb(userId, updateData)
+            const result = await updateUserInDb(userId, data)
 
             if (!result.success) {
                 return {
@@ -130,57 +98,27 @@ class UserService {
         }
     }
 
-    async switchStorageType(data: TSwitchStorageTypeVariables): Promise<TServiceResult<void>> {
+    async getCurrentUser(): Promise<TServiceResult<TUserProfile | null>> {
         try {
             const userId = await this.getCurrentUserId()
             if (!userId) {
                 return {
-                    success: false,
-                    error: 'No user found',
-                }
-            }
-
-            const result = await updateUserInDb(userId, {
-                storageType: data.type || 'local'
-            })
-
-            if (!result.success) {
-                return {
-                    success: false,
-                    error: result.error || 'Failed to switch storage type',
-                }
-            }
-
-            return { success: true }
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to switch storage type',
-            }
-        }
-    }
-
-    async getCurrentUser(): Promise<TServiceResult<TUserProfile>> {
-        try {
-            const userId = await this.getCurrentUserId()
-            if (!userId) {
-                return {
-                    success: false,
-                    error: 'No user found',
+                    success: true,
+                    data: null,
                 }
             }
 
             const result = await findUserById(userId)
-            if (!result.success || !result.data) {
+            if (!result.success) {
                 return {
                     success: false,
-                    error: result.error || 'User not found',
+                    error: result.error || 'Failed to fetch current user',
                 }
             }
 
             return {
                 success: true,
-                data: mapDbUserToProfile(result.data)
+                data: result.data ? mapDbUserToProfile(result.data) : null,
             }
         } catch (error) {
             return {
@@ -190,19 +128,44 @@ class UserService {
         }
     }
 
+    async markSetupComplete(userId: number): Promise<TServiceResult<void>> {
+        try {
+            const result = await markSetupCompleteInDb(userId)
+            if (!result.success) {
+                return {
+                    success: false,
+                    error: result.error || 'Failed to mark setup complete',
+                }
+            }
+            return { success: true }
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to mark setup complete',
+            }
+        }
+    }
+
     async getUserProfile(userId: number): Promise<TServiceResult<TUserProfile>> {
         try {
             const result = await findUserById(userId)
-            if (!result.success || !result.data) {
+            if (!result.success) {
                 return {
                     success: false,
-                    error: result.error || 'User not found',
+                    error: result.error || 'Failed to fetch user profile',
+                }
+            }
+
+            if (!result.data) {
+                return {
+                    success: false,
+                    error: 'User not found',
                 }
             }
 
             return {
                 success: true,
-                data: mapDbUserToProfile(result.data)
+                data: mapDbUserToProfile(result.data),
             }
         } catch (error) {
             return {
@@ -212,21 +175,34 @@ class UserService {
         }
     }
 
-    async checkOnboardingStatus(): Promise<TServiceResult<{ isComplete: boolean }>> {
+    async deleteUser(userId: number): Promise<TServiceResult<void>> {
         try {
-            const userId = await this.getCurrentUserId()
-            if (!userId) {
-                return { success: true, data: { isComplete: false } }
+            const result = await deleteUserFromDb(userId)
+            if (result.success && this.currentUserId === userId) {
+                this.currentUserId = null
             }
+            return result
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to delete user',
+            }
+        }
+    }
 
-            const result = await findUserById(userId)
-            if (!result.success || !result.data) {
-                return { success: true, data: { isComplete: false } }
+    async checkOnboardingStatus(): Promise<TServiceResult<boolean>> {
+        try {
+            const user = await this.getCurrentUser()
+            if (!user.success || !user.data) {
+                return {
+                    success: true,
+                    data: false, // No user means onboarding is not complete
+                }
             }
 
             return {
                 success: true,
-                data: { isComplete: result.data.isSetupComplete }
+                data: user.data.isSetupComplete,
             }
         } catch (error) {
             return {
@@ -236,137 +212,39 @@ class UserService {
         }
     }
 
-    async markOnboardingComplete(userId: number): Promise<TServiceResult<TUserProfile>> {
-        try {
-            const result = await markSetupCompleteInDb(userId)
-            if (!result.success || !result.data) {
-                return {
-                    success: false,
-                    error: result.error || 'Failed to mark onboarding complete',
-                }
-            }
-
-            this.currentUserId = userId
-            return {
-                success: true,
-                data: mapDbUserToProfile(result.data)
-            }
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to mark onboarding complete',
-            }
-        }
-    }
-
-    async logout(): Promise<TServiceResult<void>> {
+    async switchStorageType(storageType: 'local' | 'turso'): Promise<TServiceResult<TUserProfile>> {
         try {
             const userId = await this.getCurrentUserId()
             if (!userId) {
                 return {
                     success: false,
-                    error: 'No user to logout',
+                    error: 'No user found',
                 }
             }
 
-            // Delete the user from database
-            const deleteResult = await deleteUserFromDb(userId)
-            if (!deleteResult.success) {
-                return {
-                    success: false,
-                    error: deleteResult.error || 'Failed to delete user',
-                }
+            const updateData: TUpdateUserData = {
+                storageType,
             }
 
-            // Clear current user state
-            this.currentUserId = null
-
-            // Clear any cached data
-            if (typeof window !== 'undefined') {
-                // Clear localStorage if any
-                localStorage.clear()
-
-                // Clear sessionStorage
-                sessionStorage.clear()
-            }
-
-            return { success: true }
+            return await this.updatePreferences(updateData)
         } catch (error) {
             return {
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to logout',
+                error: error instanceof Error ? error.message : 'Failed to switch storage type',
             }
         }
-    }
-
-    async removeUserAndRestartOnboarding(): Promise<TServiceResult<void>> {
-        try {
-            const logoutResult = await this.logout()
-            if (!logoutResult.success) {
-                return logoutResult
-            }
-
-            // Force reload to restart onboarding
-            if (typeof window !== 'undefined') {
-                window.location.reload()
-            }
-
-            return { success: true }
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to restart onboarding',
-            }
-        }
-    }
-
-    // Legacy methods for compatibility - these now use database instead of localStorage
-    async getOnboardingStep(): Promise<TServiceResult<number>> {
-        try {
-            const status = await this.checkOnboardingStatus()
-            if (!status.success) {
-                return { success: false, error: status.error }
-            }
-
-            // If onboarding is complete, return 0, otherwise return 1
-            return {
-                success: true,
-                data: status.data!.isComplete ? 0 : 1
-            }
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to get onboarding step',
-            }
-        }
-    }
-
-    async setOnboardingStep(step: number): Promise<TServiceResult<void>> {
-        // For database storage, we don't track individual steps
-        // Step completion is handled by the actual database operations
-        return { success: true }
-    }
-
-    async resetDemoUser(): Promise<TServiceResult<void>> {
-        // Use the new logout functionality instead
-        return this.logout()
     }
 }
 
+// Singleton instance
 export const userService = new UserService()
 
-// Export individual functions for compatibility
-export const registerUser = (data: TRegisterUserVariables) => userService.register(data)
-export const updateUserPreferences = (data: TUpdateUserPreferencesVariables) => userService.updatePreferences(data)
-export const switchStorageType = (data: TSwitchStorageTypeVariables) => userService.switchStorageType(data)
+// Export individual functions for modern clean API
+export const registerUser = (data: TCreateUserData) => userService.register(data)
+export const updateUserPreferences = (data: TUpdateUserData) => userService.updatePreferences(data)
 export const getCurrentUser = () => userService.getCurrentUser()
 export const getUserProfile = (userId: number) => userService.getUserProfile(userId)
+export const markUserSetupComplete = (userId: number) => userService.markSetupComplete(userId)
+export const deleteUser = (userId: number) => userService.deleteUser(userId)
 export const checkOnboardingStatus = () => userService.checkOnboardingStatus()
-export const markOnboardingComplete = (userId: number) => userService.markOnboardingComplete(userId)
-export const getOnboardingStep = () => userService.getOnboardingStep()
-export const setOnboardingStep = (step: number) => userService.setOnboardingStep(step)
-export const resetDemoUser = () => userService.resetDemoUser()
-
-// New logout functions
-export const logout = () => userService.logout()
-export const removeUserAndRestartOnboarding = () => userService.removeUserAndRestartOnboarding() 
+export const switchStorageType = (storageType: 'local' | 'turso') => userService.switchStorageType(storageType) 

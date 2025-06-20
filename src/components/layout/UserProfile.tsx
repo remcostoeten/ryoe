@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Settings, LogOut, Database, HardDrive, User, AlertTriangle, Trash2 } from 'lucide-react'
-import { useCurrentUser } from '@/hooks/useOnboarding'
-import { logout, removeUserAndRestartOnboarding } from '@/services/user-service'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 

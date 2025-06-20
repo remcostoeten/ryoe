@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getCurrentUser } from "@/services/user-service"
-import type { TUserProfile } from "@/types"
+import type { TUserProfile } from "@/domain/entities/workspace"
 
 export function useCurrentUser() {
     const { data: user, isLoading, error } = useQuery<TUserProfile | null>({
@@ -22,14 +22,15 @@ export function useCurrentUser() {
 }
 
 /**
- * ProfilePageContent
+ * useCurrentUser
  *
- * Displays a profile page with user information and settings.
+ * Fetches the current user profile from the database.
  *
- * Props:
+ * Returns:
  * - user (TUserProfile): The user profile object.
  * - isLoading (boolean): Whether the user profile is currently loading.
- *
+ * - error (Error): The error object if the user profile fails to load.
+ *  
  * Example usage:
  * 
  * const {user,isLoading} = useCurrentUser()

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -8,8 +7,9 @@ import {
     Wrench,
     Sparkles
 } from 'lucide-react'
-import { DatabaseManagement } from '@/modules/development/database'
 import { DemoShowcase } from '@/modules/development/demo-showcase'
+import { DatabaseManagement } from '@/modules/development/database/components/DatabaseManagement'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
 
 export function DevelopmentPage() {
     const [activeTab, setActiveTab] = useState('showcase')
@@ -39,7 +39,6 @@ export function DevelopmentPage() {
                 </div>
             </div>
 
-            {/* Main Content */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-8">
                     <TabsTrigger value="showcase" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">

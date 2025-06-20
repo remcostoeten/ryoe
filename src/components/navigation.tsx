@@ -4,8 +4,7 @@ import { Link, useLocation } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/shared/utils'
 import { Home, FileText, Folder, BookOpen, LogIn, User, LogOut } from 'lucide-react'
-import { useCurrentUser } from '@/hooks/useOnboarding'
-import { logout } from '@/services/user-service'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { Logo } from './logo'
@@ -57,19 +56,16 @@ export function Navigation() {
 
 	const handleLogout = async () => {
 		try {
-			const result = await logout()
-			if (!result.success) {
-				throw new Error(result.error || 'Failed to logout')
-			}
-
 			// Clear query cache
 			queryClient.clear()
+
+			// Clear local storage
+			localStorage.clear()
 
 			// Navigate to onboarding
 			navigate('/onboarding')
 		} catch (error) {
 			console.error('Failed to logout:', error)
-			alert('Failed to logout. Please try again.')
 		}
 	}
 
