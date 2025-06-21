@@ -10,27 +10,14 @@ export type {
     TOptimisticUpdate,
     TMutationState,
     TMutationResult,
-    TRegisterUserVariables,
-    TUpdateUserPreferencesVariables,
     TSwitchStorageTypeVariables,
     TCreateNoteVariables,
     TUpdateNoteVariables,
     TDeleteNoteVariables,
-    TMoveNoteVariables,
     TReorderNotesVariables,
-    TCreateFolderVariables,
-    TUpdateFolderVariables,
     TDeleteFolderVariables,
-    TMoveFolderVariables,
     TReorderFoldersVariables,
 } from './types'
-
-// User mutation hooks
-export {
-    useRegisterUser,
-    useUpdateUserPreferences,
-    useSwitchStorageType,
-} from './user-mutations'
 
 // Note mutation hooks
 export {

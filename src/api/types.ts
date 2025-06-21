@@ -11,11 +11,9 @@ export interface ServiceListResult<T> extends ServiceResult<T[]> {
 	total?: number
 }
 
-// Legacy compatibility
 export type TServiceResult<T = any> = ServiceResult<T>
 export type TApiResponse<T = any> = ServiceResult<T>
 
-// Query Keys for React Query
 export const QUERY_KEYS = {
 	// Auth
 	AUTH: ['auth'] as const,
@@ -28,7 +26,6 @@ export const QUERY_KEYS = {
 	NOTE: (id: number) => ['notes', id] as const,
 	NOTES_BY_FOLDER: (folderId: number | null) => ['notes', 'folder', folderId] as const,
 	NOTES_SEARCH: (query: string) => ['notes', 'search', query] as const,
-	FAVORITE_NOTES: ['notes', 'favorites'] as const,
 
 	// Folders
 	FOLDERS: ['folders'] as const,
@@ -37,7 +34,6 @@ export const QUERY_KEYS = {
 	CHILD_FOLDERS: (parentId: number) => ['folders', 'children', parentId] as const,
 	FOLDER_HIERARCHY: (id: number) => ['folders', 'hierarchy', id] as const,
 	FOLDER_PATH: (id: number) => ['folders', 'path', id] as const,
-	FAVORITE_FOLDERS: ['folders', 'favorites'] as const,
 
 	// Tags
 	TAGS: ['tags'] as const,
@@ -55,7 +51,7 @@ import type { TMutationOptions } from '@/types/mutations'
 export { TMutationOptions }
 
 // Re-export types from services
-export type { TUserProfile, TUserRegistrationData, TUserPreferencesUpdate } from '@/types'
+export type { TUserProfile, TUserPreferences } from '@/types'
 
 export type {
 	TNoteWithMetadata,
@@ -64,4 +60,4 @@ export type {
 	TSearchResult,
 } from '@/types'
 
-export type { TFolderWithStats, TFolderCreationData, TFolderUpdateData } from '@/types'
+export type { TFolderWithStats } from '@/types'

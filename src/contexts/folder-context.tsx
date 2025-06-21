@@ -1,9 +1,19 @@
 import { createContext, useContext, ReactNode, useState, useCallback, useMemo } from 'react'
-import { useFolders } from '@/hooks/use-folders'
+import { useFolderHierarchy } from '@/api/services/folders-service'
 import { useFolderTree } from '@/hooks/use-folder-tree'
 import { useFolderOperations } from '@/hooks/use-folder-operations'
-import type { TFolder, TFolderTreeNode } from '@/types'
-import type { TCreateFolderData, TUpdateFolderData } from '@/services/folder-service'
+import type { TFolder } from '@/types'
+import type { TFolderTreeNode } from '@/services/types'
+
+interface TCreateFolderData {
+	name: string
+	parentId?: number
+}
+
+interface TUpdateFolderData {
+	id: number
+	name: string
+}
 
 interface FolderContextValue {
 	folders: TFolder[]
@@ -25,7 +35,7 @@ interface FolderContextValue {
 const FolderContext = createContext<FolderContextValue | null>(null)
 
 export function FolderProvider({ children }: { children: ReactNode }) {
-	const { folders, isLoading: isFoldersLoading } = useFolders()
+	const { data: folders, isLoading: isFoldersLoading } = useFolderHierarchy()
 	const { tree, isLoading: isTreeLoading } = useFolderTree()
 	const {
 		createFolder,

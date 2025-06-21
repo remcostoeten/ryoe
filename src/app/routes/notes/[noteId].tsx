@@ -6,6 +6,7 @@ import { useFolderPath } from '@/api/services/folders-service'
 import type { TNote } from '@/types'
 import { useUpdateNote } from '@/api/mutations/note-mutations'
 import { NoteEditor } from '@/components/note-editor'
+import { getNoteById } from '@/services/note-service'
 
 function useNote(noteId: number) {
 	const [note, setNote] = useState<TNote | null>(null)
@@ -17,12 +18,11 @@ function useNote(noteId: number) {
 			try {
 				setLoading(true)
 				setError(null)
-				const { getNoteById } = await import('@/api/services/notes-service')
 				const result = await getNoteById(noteId)
-				if (!result) {
-					throw new Error('Failed to fetch note')
+				if (!result.success || !result.data) {
+					throw new Error(result.error || 'Failed to fetch note')
 				}
-				setNote(result)
+				setNote(result.data)
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Failed to load note')
 			} finally {
@@ -69,7 +69,7 @@ export default function NotePage() {
 
 	const handleManualSave = () => {
 		if (!note) return
-		saveNote(note.title, note.content)
+		saveNote(note)
 	}
 
 	if (!noteIdNumber) {
@@ -180,7 +180,6 @@ export default function NotePage() {
 						key={note.id}
 						note={note}
 						onSave={saveNote}
-						className='h-full'
 					/>
 				) : (
 					<div className='flex items-center justify-center h-full text-muted-foreground'>

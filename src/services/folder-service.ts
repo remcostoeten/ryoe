@@ -1,5 +1,5 @@
-import type { TServiceResult, TFolder, TFolderWithStats, TFolderCreationData } from '@/types'
-import { toggleFolderFavorite } from '@/repositories'
+import type { TServiceResult, TFolder, TFolderCreationData } from '@/services/types'
+import type { TFolderWithStats } from '@/types'
 
 class FolderService {
     private folders: Map<number, TFolderWithStats> = new Map()
@@ -146,39 +146,6 @@ class FolderService {
             return { success: false, error: error instanceof Error ? error.message : 'Failed to get folder path' }
         }
     }
-
-    async toggleFavorite(id: number): Promise<TServiceResult<TFolderWithStats>> {
-        try {
-            const result = await toggleFolderFavorite(id)
-            if (!result.success) {
-                return { success: false, error: result.error || 'Failed to toggle folder favorite' }
-            }
-
-            // Convert repository format to service format
-            const folder = result.data
-            if (!folder) {
-                return { success: false, error: 'Folder not found' }
-            }
-
-            return {
-                success: true,
-                data: {
-                    ...folder,
-                    createdAt: new Date(folder.createdAt).toISOString(),
-                    updatedAt: new Date(folder.updatedAt).toISOString(),
-                    noteCount: 0,
-                    childFolderCount: 0,
-                    totalNoteCount: 0,
-                    lastModified: new Date(folder.updatedAt).toISOString(),
-                }
-            }
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to toggle folder favorite',
-            }
-        }
-    }
 }
 
 const folderService = new FolderService()
@@ -192,5 +159,4 @@ export const getChildFolders = (parentId: number | null) => folderService.getChi
 export const moveFolder = (id: number, newParentId: number | null) => folderService.move(id, newParentId)
 export const reorderFolders = (parentId: number | null, folderIds: number[]) => folderService.reorder(parentId, folderIds)
 export const getFolderHierarchy = (rootId?: number) => folderService.getFolderHierarchy(rootId)
-export const getFolderPath = (id: number) => folderService.getFolderPath(id)
-export const toggleFolderFavoriteStatus = (id: number) => folderService.toggleFavorite(id) 
+export const getFolderPath = (id: number) => folderService.getFolderPath(id) 

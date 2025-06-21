@@ -7,7 +7,6 @@ import { cn } from '@/shared/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToc } from '@/hooks/use-toc'
 import { NoteMetadataSidebar } from '@/components/note-metadata-sidebar'
-import { useToggleNoteFavorite } from '@/mutations/note-mutations'
 import type { TNote } from '@/types'
 
 type TocItem = {
@@ -129,14 +128,15 @@ function useNoteData(noteId: number | null) {
 				// For now, create a mock note
 				const noteData: TNote = {
 					id: noteId!,
+					type: 'note',
 					title: 'Note Title',
 					content: 'Note content...',
 					folderId: null,
 					position: 0,
 					isPublic: true,
 					isFavorite: false,
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
+					createdAt: new Date(),
+					updatedAt: new Date(),
 				}
 				setNote(noteData)
 			} catch (error) {
@@ -157,7 +157,6 @@ export function RightSidebar({ documentTitle = 'Untitled Document' }: { document
 	const location = useLocation()
 	const params = useParams<{ noteId: string }>()
 	const { toc, isLoading } = useToc()
-	const toggleNoteFavoriteMutation = useToggleNoteFavorite()
 
 	const isDocsPage = location.pathname.startsWith('/docs')
 	const isNotesPage = location.pathname.startsWith('/notes')
@@ -165,15 +164,6 @@ export function RightSidebar({ documentTitle = 'Untitled Document' }: { document
 
 	const noteId = params.noteId ? parseInt(params.noteId, 10) : null
 	const { note, loading: noteLoading } = useNoteData(noteId)
-
-	const handleToggleFavorite = async (note: TNote) => {
-		try {
-			await toggleNoteFavoriteMutation.mutateAsync(note.id)
-			console.log('Note favorite status toggled:', note.title)
-		} catch (error) {
-			console.error('Failed to toggle note favorite:', error)
-		}
-	}
 
 	const handleToggleVisibility = (note: TNote) => {
 		// TODO: Implement visibility toggle when isPublic field is properly implemented
@@ -185,7 +175,6 @@ export function RightSidebar({ documentTitle = 'Untitled Document' }: { document
 		return (
 			<NoteMetadataSidebar
 				note={note}
-				onToggleFavorite={handleToggleFavorite}
 				onToggleVisibility={handleToggleVisibility}
 				onClose={() => { }}
 			/>

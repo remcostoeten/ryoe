@@ -1,7 +1,7 @@
 'use client'
 
 import { memo } from 'react'
-import { Calendar, Clock, User, Hash, Star, Eye, EyeOff } from 'lucide-react'
+import { Calendar, Clock, User, Hash, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/shared/utils'
@@ -9,7 +9,6 @@ import type { TNote } from '@/types'
 
 interface NoteMetadataSidebarProps {
     note: TNote
-    onToggleFavorite?: (note: TNote) => void
     onToggleVisibility?: (note: TNote) => void
     onClose?: () => void
     className?: string
@@ -17,7 +16,6 @@ interface NoteMetadataSidebarProps {
 
 export const NoteMetadataSidebar = memo(({
     note,
-    onToggleFavorite,
     onToggleVisibility,
     onClose,
     className,
@@ -68,19 +66,6 @@ export const NoteMetadataSidebar = memo(({
                             <Button
                                 variant='ghost'
                                 size='sm'
-                                onClick={() => onToggleFavorite?.(note)}
-                                className='w-full justify-start text-sm h-8'
-                            >
-                                <Star className={cn(
-                                    'h-3 w-3 mr-2',
-                                    note.isFavorite && 'fill-current text-amber-500'
-                                )} />
-                                {note.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                            </Button>
-
-                            <Button
-                                variant='ghost'
-                                size='sm'
                                 onClick={() => onToggleVisibility?.(note)}
                                 className='w-full justify-start text-sm h-8'
                             >
@@ -102,7 +87,6 @@ export const NoteMetadataSidebar = memo(({
                             {note.folderId && <div>Folder ID: {note.folderId}</div>}
                             <div>Position: {note.position}</div>
                             <div>Public: {note.isPublic ? 'Yes' : 'No'}</div>
-                            <div>Favorite: {note.isFavorite ? 'Yes' : 'No'}</div>
                         </div>
                     </div>
                 </div>

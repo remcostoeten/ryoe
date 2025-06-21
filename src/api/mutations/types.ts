@@ -1,33 +1,34 @@
 // import type { TServiceResult } from '@/types' // Unused import removed
 
-export interface TMutationOptions<TData = unknown, TError = Error> {
-    onSuccess?: (data: TData) => void
-    onError?: (error: TError) => void
-    onSettled?: () => void
+// Basic mutation types
+export type TMutationResult<T = any> = {
+    data?: T
+    error?: Error
+}
+
+export type TMutationState = 'idle' | 'loading' | 'success' | 'error'
+
+export type TOptimisticUpdate<T = any> = (oldData: T) => T
+
+export interface TMutationOptions<TData = unknown, TError = Error, TVariables = void> {
+    onSuccess?: (data: TData, variables: TVariables) => void
+    onError?: (error: TError, variables: TVariables) => void
+    onSettled?: (data: TData | undefined, error: TError | null, variables: TVariables) => void
+    onMutate?: (variables: TVariables) => void
 }
 
 export interface TMutationContext<T = unknown> {
     previousData?: T
     optimisticData?: T
+    meta?: Record<string, any>
 }
 
-export interface TOptimisticUpdate<T = unknown> {
-    data: T
-    rollback: () => void
-}
-
-export interface TMutationState<TData = unknown, TError = Error> {
-    isLoading: boolean
-    isSuccess: boolean
-    isError: boolean
-    data?: TData
-    error?: TError
-}
-
-export interface TMutationResult<TData = unknown, TError = Error> extends TMutationState<TData, TError> {
-    mutate: (variables: unknown) => void
-    reset: () => void
-}
+// Re-export from services for consistency
+export type {
+    TServiceResult,
+    TNoteCreationData as TCreateNoteVariables,
+    TNoteUpdateData as TUpdateNoteVariables,
+} from '@/types'
 
 // User mutations
 export interface TRegisterUserVariables {
@@ -37,48 +38,26 @@ export interface TRegisterUserVariables {
 }
 
 export interface TUpdateUserPreferencesVariables {
-    theme?: 'light' | 'dark' | 'system'
-    storageType?: 'local' | 'turso'
-    mdxStoragePath?: string
+    userId: number
+    preferences: {
+        theme?: 'light' | 'dark' | 'system'
+        storageType?: 'local' | 'turso'
+        mdxStoragePath?: string
+    }
 }
 
 export interface TSwitchStorageTypeVariables {
-    type: 'local' | 'turso'
-    path?: string
+    storageType: 'local' | 'turso'
+    migrationOptions?: {
+        preserveData: boolean
+        deleteOldData: boolean
+    }
 }
 
 // Note mutations
-export interface TCreateNoteVariables {
-    title: string
-    content: string
-    folderId?: number | null
-    position?: number
-    isPublic?: boolean
-}
-
-export interface TUpdateNoteVariables {
-    id: number
-    title?: string
-    content?: string
-    folderId?: number | null
-    position?: number
-    isPublic?: boolean
-    isFavorite?: boolean
-}
-
 export interface TDeleteNoteVariables {
     id: number
     force?: boolean
-}
-
-export interface TMoveNoteVariables {
-    id: number
-    folderId: number | null
-}
-
-export interface TReorderNotesVariables {
-    folderId: number | null
-    noteIds: number[]
 }
 
 // Folder mutations
@@ -100,7 +79,6 @@ export interface TUpdateFolderVariables {
 
 export interface TDeleteFolderVariables {
     id: number
-    deleteChildren?: boolean
     force?: boolean
 }
 
@@ -112,4 +90,48 @@ export interface TMoveFolderVariables {
 export interface TReorderFoldersVariables {
     parentId: number | null
     folderIds: number[]
+}
+
+export interface TReorderNotesVariables {
+    folderId: number | null
+    noteIds: number[]
+}
+
+// Database reset variables
+export interface TDatabaseResetVariables {
+    resetType: 'soft' | 'hard'
+    preserveUsers?: boolean
+    preserveSettings?: boolean
+}
+
+// Bulk operations
+export interface TBulkDeleteVariables {
+    ids: number[]
+    type: 'notes' | 'folders'
+}
+
+export interface TBulkMoveVariables {
+    ids: number[]
+    targetFolderId: number | null
+    type: 'notes' | 'folders'
+}
+
+// Toggle favorite variables
+export interface TToggleFavoriteVariables {
+    id: number
+    type: 'note' | 'folder'
+}
+
+// Export success/error response types
+export interface TMutationSuccessResponse<T = any> {
+    success: true
+    data: T
+    message?: string
+}
+
+export interface TMutationErrorResponse {
+    success: false
+    error: string
+    code?: string
+    details?: any
 } 

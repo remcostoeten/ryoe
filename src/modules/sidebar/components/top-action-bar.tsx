@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Star, Search, MoreHorizontal, FolderPlus } from 'lucide-react'
+import { Plus, Search, MoreHorizontal, FolderPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useState } from 'react'
@@ -9,20 +9,14 @@ import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { useFolderContext } from '@/contexts/folder-context'
 import { FolderCreationInput } from './folder-creation-input'
 import { SearchInput } from './search-input'
-import { useFavorites } from '@/queries/use-favorites'
-import { FavoritesPanel } from './favorites-panel'
-import { useFavoritesNavigation } from '../hooks/use-favorites-navigation'
-import type { TNote } from '@/domain/entities/workspace'
 
 export function TopActionBar() {
 	const [isCreatingFolder, setIsCreatingFolder] = useState(false)
 	// const [showDebugger, setShowDebugger] = useState(false); // Temporarily disabled
 	const [isSearching, setIsSearching] = useState(false)
-	const [showingFavorites, setShowingFavorites] = useState(false)
-	const { createFolder, setSearchFilter, selectedFolderId, folders, expandFolder } =
+	const [searchFilter, setSearchFilter] = useState('')
+	const { createFolder, selectedFolderId, folders, expandFolder } =
 		useFolderContext()
-	const { folders: favoriteFolders, notes: favoriteNotes } = useFavorites()
-	const { navigateToFolder, navigateToNote } = useFavoritesNavigation()
 
 	// Get the selected folder name for tooltip context
 	const selectedFolder = folders.find(f => f.id === selectedFolderId)
@@ -30,13 +24,13 @@ export function TopActionBar() {
 
 	async function handleCreateFolder(folderName: string) {
 		try {
-			const newFolder = await createFolder({
+			await createFolder({
 				name: folderName,
-				parentId: selectedFolderId, // Create as child of selected folder, or root if none selected
+				parentId: selectedFolderId || undefined, // Create as child of selected folder, or root if none selected
 			})
 
 			// If we created a child folder, expand the parent to show it
-			if (newFolder && selectedFolderId) {
+			if (selectedFolderId) {
 				expandFolder(selectedFolderId)
 			}
 
@@ -60,24 +54,8 @@ export function TopActionBar() {
 		setIsCreatingFolder(false)
 	}
 
-	function handleToggleFavorites() {
-		setShowingFavorites(!showingFavorites)
-	}
-
-	function handleFolderSelect(folderId: number) {
-		navigateToFolder(folderId)
-	}
-
-	function handleNoteSelect(note: TNote) {
-		navigateToNote(note)
-	}
-
 	useKeyboardShortcut({ key: '/', metaKey: true }, () => {
 		setIsSearching(true)
-	})
-
-	useKeyboardShortcut({ key: 'f', metaKey: true, shiftKey: true }, () => {
-		handleToggleFavorites()
 	})
 
 	// useKeyboardShortcut(
@@ -200,32 +178,9 @@ export function TopActionBar() {
 											variant='ghost'
 											size='sm'
 											className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground'
+											onClick={() => setIsSearching(true)}
 										>
-											<Plus className='h-4 w-4' />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent
-										side='bottom'
-										className='bg-background AAA-primary border-sidebar-border text-sidebar-foreground'
-									>
-										<p>Add item</p>
-									</TooltipContent>
-								</Tooltip>
-
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											variant='ghost'
-											size='sm'
-											className={`h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground ${showingFavorites
-													? 'bg-background AAA-accent text-sidebar-accent-foreground'
-													: ''
-												}`}
-											onClick={handleToggleFavorites}
-										>
-											<Star
-												className={`h-4 w-4 ${showingFavorites ? 'fill-current' : ''}`}
-											/>
+											<Search className='h-4 w-4' />
 										</Button>
 									</TooltipTrigger>
 									<TooltipContent
@@ -233,21 +188,15 @@ export function TopActionBar() {
 										className='bg-background AAA-primary border-sidebar-border text-sidebar-foreground'
 									>
 										<div className='flex flex-col'>
-											<p>
-												{showingFavorites
-													? 'Hide favorites'
-													: 'Show favorites'}
-											</p>
-											<p className='text-xs opacity-70'>
-												{favoriteFolders.length} folders,{' '}
-												{favoriteNotes.length} notes
-											</p>
+											<p>Search folders</p>
 											<kbd className='ml-auto text-xs opacity-70 mt-1'>
-												⌘⇧F
+												⌘/
 											</kbd>
 										</div>
 									</TooltipContent>
 								</Tooltip>
+
+								<div className='flex-1' />
 
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -263,27 +212,7 @@ export function TopActionBar() {
 										side='bottom'
 										className='bg-background AAA-primary border-sidebar-border text-sidebar-foreground'
 									>
-										<p>More options</p>
-									</TooltipContent>
-								</Tooltip>
-
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											variant='ghost'
-											size='sm'
-											className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-background AAA-accent hover:text-sidebar-accent-foreground ml-auto'
-											onClick={() => setIsSearching(true)}
-										>
-											<Search className='h-4 w-4' />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent
-										side='bottom'
-										className='bg-background AAA-primary border-sidebar-border text-sidebar-foreground'
-									>
-										<p>Search</p>
-										<kbd className='ml-2 text-xs opacity-70'>/</kbd>
+										More options
 									</TooltipContent>
 								</Tooltip>
 							</motion.div>
@@ -291,16 +220,6 @@ export function TopActionBar() {
 					</AnimatePresence>
 				</div>
 			</TooltipProvider>
-
-			{/* Favorites Panel */}
-			<FavoritesPanel
-				isOpen={showingFavorites}
-				onClose={() => setShowingFavorites(false)}
-				onFolderSelect={handleFolderSelect}
-				onNoteSelect={handleNoteSelect}
-			/>
-
-			{/* <KeyboardDebugger visible={showDebugger} /> */}
 		</>
 	)
 }

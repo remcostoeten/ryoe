@@ -12,7 +12,7 @@ import type {
 	TUpdateUserPreferencesVariables,
 	TSwitchStorageTypeVariables,
 } from './types'
-import type { TUserProfile } from '@/domain/entities/workspace'
+import type { TUserProfile } from '@/types'
 import { setUserProfileCache, invalidateUserQueries } from '@/queries'
 import { registerUser, updateUserPreferences, switchStorageType } from '@/services'
 

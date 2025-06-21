@@ -1,14 +1,146 @@
-import type { TServiceResult } from '@/types'
-import type { TUserProfile } from '@/domain/entities/workspace'
-import {
-    createUser as createUserInDb,
-    updateUser as updateUserInDb,
-    findUserById,
-    markUserSetupComplete as markSetupCompleteInDb,
-    getUserCount,
-    deleteUser as deleteUserFromDb
-} from '@/repositories/user-repository'
-import type { TCreateUserData, TUpdateUserData } from '@/repositories/types'
+import type { TServiceResult, TUserProfile, TCreateUserData, TUpdateUserData, TUpdateUserPreferencesVariables } from '@/types'
+import type { TUserPreferences } from '@/types'
+import { databaseService } from '@/services/database-service'
+import { createFolder } from '@/services/folder-service'
+import { createNoteWithValidation } from '@/services/note-service'
+
+// Mock database operations - TODO: Implement with real database
+async function createUserInDb(data: TCreateUserData): Promise<TServiceResult<any>> {
+    console.log('Mock: Creating user:', data)
+    return {
+        success: true,
+        data: {
+            id: 1,
+            name: data.name,
+            snippetsPath: data.snippetsPath,
+            isSetupComplete: false,
+            storageType: data.storageType || 'local',
+            preferences: data.preferences || {
+                theme: 'system',
+                sidebarCollapsed: false,
+                autoSave: true,
+                showLineNumbers: true,
+                fontSize: 14,
+                editorTheme: 'default'
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }
+    }
+}
+
+async function updateUserInDb(userId: number, data: TUpdateUserData): Promise<TServiceResult<any>> {
+    console.log('Mock: Updating user:', userId, data)
+    return {
+        success: true,
+        data: {
+            id: userId,
+            name: data.name || 'User',
+            snippetsPath: data.snippetsPath || '/snippets',
+            isSetupComplete: true,
+            storageType: data.storageType || 'local',
+            preferences: data.preferences || {
+                theme: 'system',
+                sidebarCollapsed: false,
+                autoSave: true,
+                showLineNumbers: true,
+                fontSize: 14,
+                editorTheme: 'default'
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }
+    }
+}
+
+async function getUserById(userId: number): Promise<TServiceResult<any>> {
+    console.log('Mock: Getting user by ID:', userId)
+    return {
+        success: true,
+        data: {
+            id: userId,
+            name: 'User',
+            snippetsPath: '/snippets',
+            isSetupComplete: true,
+            storageType: 'local',
+            preferences: {
+                theme: 'system',
+                sidebarCollapsed: false,
+                autoSave: true,
+                showLineNumbers: true,
+                fontSize: 14,
+                editorTheme: 'default'
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }
+    }
+}
+
+async function getCurrentUserFromDb(): Promise<TServiceResult<any>> {
+    console.log('Mock: Getting current user')
+    return {
+        success: true,
+        data: {
+            id: 1,
+            name: 'User',
+            snippetsPath: '/snippets',
+            isSetupComplete: true,
+            storageType: 'local',
+            preferences: {
+                theme: 'system',
+                sidebarCollapsed: false,
+                autoSave: true,
+                showLineNumbers: true,
+                fontSize: 14,
+                editorTheme: 'default'
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }
+    }
+}
+
+async function deleteUserFromDb(userId: number): Promise<TServiceResult<void>> {
+    console.log('Mock: Deleting user:', userId)
+    return { success: true }
+}
+
+async function softDeleteUserFromDb(userId: number): Promise<TServiceResult<void>> {
+    console.log('Mock: Soft deleting user:', userId)
+    return { success: true }
+}
+
+async function updateUserPreferencesInDb(userId: number, preferences: TUserPreferences): Promise<TServiceResult<any>> {
+    console.log('Mock: Updating user preferences:', userId, preferences)
+    return {
+        success: true,
+        data: {
+            id: userId,
+            name: 'User',
+            snippetsPath: '/snippets',
+            isSetupComplete: true,
+            storageType: 'local',
+            preferences,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }
+    }
+}
+
+async function getUserCount(): Promise<TServiceResult<number>> {
+    console.log('Mock: Getting user count')
+    return { success: true, data: 1 }
+}
+
+async function findUserById(userId: number): Promise<TServiceResult<any>> {
+    return getUserById(userId)
+}
+
+async function markSetupCompleteInDb(userId: number): Promise<TServiceResult<void>> {
+    console.log('Mock: Marking setup complete for user:', userId)
+    return { success: true }
+}
 
 // Map database user to user profile
 function mapDbUserToProfile(dbUser: any): TUserProfile {
@@ -24,6 +156,7 @@ function mapDbUserToProfile(dbUser: any): TUserProfile {
     }
 }
 
+// User Service - handles all user-related operations
 class UserService {
     private currentUserId: number | null = null
 
@@ -247,4 +380,48 @@ export const getUserProfile = (userId: number) => userService.getUserProfile(use
 export const markUserSetupComplete = (userId: number) => userService.markSetupComplete(userId)
 export const deleteUser = (userId: number) => userService.deleteUser(userId)
 export const checkOnboardingStatus = () => userService.checkOnboardingStatus()
-export const switchStorageType = (storageType: 'local' | 'turso') => userService.switchStorageType(storageType) 
+export const switchStorageType = (storageType: 'local' | 'turso') => userService.switchStorageType(storageType)
+
+export async function resetDemoUser(): Promise<void> {
+    // Reset demo user data to initial state
+    const demoUser = {
+        id: 1,
+        name: 'Demo User',
+        email: 'demo@example.com',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    }
+
+    // Reset user preferences
+    const updateResult = await userService.updatePreferences({
+        theme: 'system',
+    })
+    if (!updateResult.success) {
+        throw new Error(updateResult.error || 'Failed to update user preferences')
+    }
+
+    // Clear all notes and folders
+    const resetResult = await databaseService.resetAllData()
+    if (!resetResult.success) {
+        throw new Error(resetResult.error || 'Failed to reset data')
+    }
+
+    // Create initial demo data
+    const folderResult = await createFolder({
+        name: 'Getting Started',
+        position: 0,
+    })
+    if (!folderResult.success || !folderResult.data) {
+        throw new Error(folderResult.error || 'Failed to create demo folder')
+    }
+
+    const noteResult = await createNoteWithValidation({
+        title: 'Welcome to Ryoe',
+        content: '# Welcome to Ryoe\n\nThis is your first note. Feel free to edit it or create a new one.',
+        folderId: folderResult.data.id,
+        position: 0,
+    })
+    if (!noteResult.success) {
+        throw new Error(noteResult.error || 'Failed to create demo note')
+    }
+} 

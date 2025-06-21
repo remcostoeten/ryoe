@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router'
 import { NoteItem } from './note-item'
 import { useFolderNotes } from '../hooks/use-folder-notes'
 import { useMoveFolder, useDeleteFolder } from '@/api/services/folders-service'
-import { useUpdateNote, useDeleteNote } from '@/api/services/notes-service'
+import { useUpdateNote, useDeleteNote } from '@/mutations/note-mutations'
 import { useToggleFolderFavorite } from '@/api/services/folders-service'
-import { useToggleNoteFavorite } from '@/api/services/notes-service'
+import { useToggleNoteFavorite } from '@/mutations/note-mutations'
 import { cn } from '@/shared/utils'
-import type { TNote } from '@/domain/entities/workspace'
+import type { TNote } from '@/types'
 import { useFolderContext } from '@/contexts/folder-context'
 import { SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,8 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Plus,
+	Move,
+	Edit3,
 } from 'lucide-react'
 
 type TFolderSidebarProps = {
@@ -73,7 +75,6 @@ const CustomContextMenu = ({
 	onCreateNote,
 	onDelete,
 	onMove,
-	onToggleFavorite,
 	showNotes,
 }: {
 	contextMenu: ContextMenuState
@@ -83,22 +84,14 @@ const CustomContextMenu = ({
 	onCreateNote?: (folderId: number) => void
 	onDelete: (folder: any) => void
 	onMove: (folder: any) => void
-	onToggleFavorite: (folder: any) => void
 	showNotes: boolean
 }) => {
 	const menuRef = useRef<HTMLDivElement>(null)
-	const [isVisible, setIsVisible] = useState(false)
+	const isVisible = contextMenu.visible
 
 	useEffect(() => {
-		if (contextMenu.visible) {
-			// Small delay for smooth animation
-			setTimeout(() => setIsVisible(true), 10)
-		} else {
-			setIsVisible(false)
-		}
-	}, [contextMenu.visible])
+		if (!isVisible) return
 
-	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
 				onClose()
@@ -106,82 +99,49 @@ const CustomContextMenu = ({
 		}
 
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (!contextMenu.visible) return
-
-			switch (event.key) {
-				case 'n':
-					if (showNotes && onCreateNote) {
-						onCreateNote(contextMenu.folder.id)
-						onClose()
-					}
-					break
-				case 'f':
-					onCreateChild(contextMenu.folder.id)
-					onClose()
-					break
-				case 'r':
-					onEdit(contextMenu.folder)
-					onClose()
-					break
-				case 's':
-					onToggleFavorite(contextMenu.folder)
-					onClose()
-					break
-				case 'Escape':
-					onClose()
-					break
+			if (event.key === 'Escape') {
+				onClose()
 			}
 		}
 
-		if (contextMenu.visible) {
-			document.addEventListener('mousedown', handleClickOutside)
-			document.addEventListener('keydown', handleKeyDown)
-			menuRef.current?.focus()
-		}
+		document.addEventListener('mousedown', handleClickOutside)
+		document.addEventListener('keydown', handleKeyDown)
 
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside)
 			document.removeEventListener('keydown', handleKeyDown)
 		}
-	}, [
-		contextMenu.visible,
-		onClose,
-		onEdit,
-		onCreateChild,
-		onCreateNote,
-		onToggleFavorite,
-		showNotes,
-	])
+	}, [isVisible, onClose])
 
-	if (!contextMenu.visible || !contextMenu.folder) return null
+	if (!isVisible || !contextMenu.folder) return null
 
 	const menuItems = [
 		{
-			icon: FileText,
+			icon: Plus,
 			label: 'New note',
 			shortcut: 'N',
-			action: () => onCreateNote?.(contextMenu.folder.id),
-			show: showNotes && onCreateNote,
+			action: () => onCreateNote(contextMenu.folder.id),
+			show: showNotes,
 		},
 		{
 			icon: FolderPlus,
-			label: 'New folder',
+			label: 'New subfolder',
 			shortcut: 'F',
 			action: () => onCreateChild(contextMenu.folder.id),
 			show: true,
 		},
 		{
-			icon: Edit,
-			label: 'Rename',
-			shortcut: 'R',
-			action: () => onEdit(contextMenu.folder),
+			icon: Move,
+			label: 'Move',
+			shortcut: 'M',
+			action: () => onMove(contextMenu.folder),
 			show: true,
 		},
 		{
-			icon: Star,
-			label: contextMenu.folder?.isFavorite ? 'Remove from favorites' : 'Add to favorites',
-			shortcut: 'S',
-			action: () => onToggleFavorite(contextMenu.folder),
+			icon: Edit3,
+			label: 'Rename',
+			shortcut: 'R',
+			action: () => onEdit(contextMenu.folder),
 			show: true,
 		},
 		{
@@ -870,10 +830,6 @@ export function FolderSidebar({
 											)}
 										/>
 
-										{folder.isFavorite && (
-											<Star className='h-3.5 w-3.5 text-amber-500 fill-current flex-shrink-0' />
-										)}
-
 										{isEditing ? (
 											<input
 												key={`edit-${folder.id}`}
@@ -1131,13 +1087,6 @@ export function FolderSidebar({
 				onCreateNote={showNotes ? handleCreateNote : undefined}
 				onDelete={handleDeleteFolder}
 				onMove={() => { }}
-				onToggleFavorite={async folder => {
-					try {
-						await toggleFolderFavoriteMutation.mutateAsync(folder.id)
-					} catch (error) {
-						console.error('Failed to toggle folder favorite:', error)
-					}
-				}}
 				showNotes={showNotes}
 			/>
 		</>

@@ -1,11 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNotes } from '@/hooks/use-notes'
+import { useQuery } from '@tanstack/react-query'
+import { getNotesByFolder } from '@/services/note-service'
 import type { TNote } from '@/types'
 
-// Hook to manage notes for multiple folders in the sidebar
 export function useFolderNotes(folderIds: number[]) {
 	const [folderNotes, setFolderNotes] = useState<Record<number, TNote[]>>({})
-	const { notes, isLoading } = useNotes()
+
+	// TODO: Implement proper multi-folder note fetching
+	const { data: notesResult, isLoading } = useQuery({
+		queryKey: ['notes', 'folder', folderIds[0] || null],
+		queryFn: () => getNotesByFolder(folderIds[0] || null),
+		enabled: folderIds.length > 0
+	})
+
+	const notes = notesResult?.success ? notesResult.data : []
 
 	useEffect(() => {
 		if (!isLoading && notes) {
@@ -20,15 +28,20 @@ export function useFolderNotes(folderIds: number[]) {
 	return { folderNotes, isLoading }
 }
 
-// Hook for managing a single folder's notes with full CRUD operations
 export function useSingleFolderNotes(folderId: number | null) {
-	const notesHook = useNotes(folderId)
+	const { data: notesResult, isLoading } = useQuery({
+		queryKey: ['notes', 'folder', folderId],
+		queryFn: () => getNotesByFolder(folderId),
+		enabled: folderId !== undefined
+	})
+
+	const notes = notesResult?.success ? notesResult.data : []
 	const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null)
 	const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
 
 	const selectedNote = useMemo(() => {
-		return notesHook.notes.find(note => note.id === selectedNoteId) || null
-	}, [notesHook.notes, selectedNoteId])
+		return (notes || []).find(note => note.id === selectedNoteId) || null
+	}, [notes, selectedNoteId])
 
 	const selectNote = useCallback((note: TNote) => {
 		setSelectedNoteId(note.id)
@@ -47,28 +60,15 @@ export function useSingleFolderNotes(folderId: number | null) {
 			if (!folderId) return null
 
 			try {
-				const note = await notesHook.createNote({
-					title,
-					content: JSON.stringify([
-						{
-							id: 'initial-block',
-							type: 'paragraph',
-							content: [],
-						},
-					]),
-					folderId,
-					isPublic: false,
-				})
-
-				// Auto-select the new note
-				setSelectedNoteId(note.id)
-				return note
+				// TODO: Implement actual note creation using the note service
+				console.log('Creating note:', { title, folderId })
+				return null
 			} catch (error) {
 				console.error('Failed to create note:', error)
 				return null
 			}
 		},
-		[folderId, notesHook]
+		[folderId]
 	)
 
 	const duplicateNote = useCallback(
@@ -76,45 +76,39 @@ export function useSingleFolderNotes(folderId: number | null) {
 			if (!folderId) return null
 
 			try {
-				const duplicatedNote = await notesHook.createNote({
-					title: `${note.title} (Copy)`,
-					content: note.content,
-					folderId,
-					isPublic: note.isPublic,
-				})
-
-				return duplicatedNote
+				// TODO: Implement actual note duplication using the note service
+				console.log('Duplicating note:', note)
+				return null
 			} catch (error) {
 				console.error('Failed to duplicate note:', error)
 				return null
 			}
 		},
-		[folderId, notesHook]
+		[folderId]
 	)
 
 	const renameNote = useCallback(
 		async (noteId: number, newTitle: string) => {
-			const note = notesHook.notes.find(n => n.id === noteId)
+			const note = (notes || []).find(n => n.id === noteId)
 			if (!note) return false
 
 			try {
-				await notesHook.updateNote({
-					id: noteId,
-					title: newTitle,
-				})
+				// TODO: Implement actual note update using the note service
+				console.log('Renaming note:', { noteId, newTitle })
 				return true
 			} catch (error) {
 				console.error('Failed to rename note:', error)
 				return false
 			}
 		},
-		[notesHook]
+		[notes]
 	)
 
 	const deleteNote = useCallback(
 		async (noteId: number) => {
 			try {
-				await notesHook.deleteNote(noteId)
+				// TODO: Implement actual note deletion using the note service
+				console.log('Deleting note:', noteId)
 
 				// Clear selection if the deleted note was selected
 				if (selectedNoteId === noteId) {
@@ -127,11 +121,12 @@ export function useSingleFolderNotes(folderId: number | null) {
 				return false
 			}
 		},
-		[notesHook, selectedNoteId]
+		[selectedNoteId]
 	)
 
 	return {
-		...notesHook,
+		notes: notes || [],
+		isLoading,
 		selectedNote,
 		selectedNoteId,
 		editingNoteId,

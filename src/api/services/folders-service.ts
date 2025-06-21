@@ -5,26 +5,24 @@ import {
 	getChildFoldersQuery,
 	getFolderHierarchyQuery,
 	getFolderPathQuery,
-	getFavoriteFoldersQuery,
 } from '@/api/queries/folders'
 import {
-	createFolderMutation,
-	updateFolderMutation,
-	deleteFolderMutation,
-	moveFolderMutation,
-	toggleFolderFavoriteMutation,
+	useCreateFolder as createFolderMutation,
+	useUpdateFolder as updateFolderMutation,
+	useDeleteFolder as deleteFolderMutation,
+	useMoveFolder as moveFolderMutation,
 } from '@/api/mutations/folders'
-import type { TFolderCreationData, TFolderUpdateData, TFolderWithStats } from '@/types'
+import { updateFolder } from '@/services/folder-service'
+import type { TFolderWithStats } from '@/types'
+import { TUpdateFolderVariables } from '../mutations/types'
 
 // Query Keys
-export const FOLDERS_QUERY_KEYS = {
-	FOLDERS: ['folders'] as const,
-	FOLDER_BY_ID: (id: number) => ['folders', 'by-id', id] as const,
+const FOLDERS_QUERY_KEYS = {
+	FOLDER_BY_ID: (id: number) => ['folders', id] as const,
 	ROOT_FOLDERS: ['folders', 'root'] as const,
 	CHILD_FOLDERS: (parentId: number) => ['folders', 'children', parentId] as const,
 	FOLDER_HIERARCHY: ['folders', 'hierarchy'] as const,
 	FOLDER_PATH: (id: number) => ['folders', 'path', id] as const,
-	FAVORITE_FOLDERS: ['folders', 'favorites'] as const,
 } as const
 
 // Query Hooks
@@ -88,163 +86,6 @@ export function useFolderPath(id: number, options?: { enabled?: boolean }) {
 	})
 }
 
-export function useFavoriteFolders(options?: { enabled?: boolean }) {
-	return useQuery({
-		queryKey: FOLDERS_QUERY_KEYS.FAVORITE_FOLDERS,
-		queryFn: getFavoriteFoldersQuery,
-		enabled: options?.enabled !== false,
-		staleTime: 3 * 60 * 1000, // 3 minutes
-		gcTime: 8 * 60 * 1000, // 8 minutes
-		refetchOnWindowFocus: false,
-		retry: 3,
-	})
-}
-
-// Mutation Hooks
-export function useCreateFolder() {
-	const queryClient = useQueryClient()
-
-	return useMutation({
-		mutationFn: createFolderMutation,
-		onSuccess: data => {
-			// Add to cache
-			queryClient.setQueryData(FOLDERS_QUERY_KEYS.FOLDER_BY_ID(data.id), data)
-
-			// Invalidate parent queries
-			if (data.parentId) {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.CHILD_FOLDERS(data.parentId),
-				})
-			} else {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.ROOT_FOLDERS,
-				})
-			}
-
-			// Invalidate hierarchy
-			queryClient.invalidateQueries({
-				queryKey: FOLDERS_QUERY_KEYS.FOLDER_HIERARCHY,
-			})
-		},
-	})
-}
-
-export function useUpdateFolder() {
-	const queryClient = useQueryClient()
-
-	return useMutation({
-		mutationFn: ({ id, data }: { id: number; data: TFolderUpdateData }) =>
-			updateFolderMutation(id, data),
-		onSuccess: data => {
-			// Update individual folder cache
-			queryClient.setQueryData(FOLDERS_QUERY_KEYS.FOLDER_BY_ID(data.id), data)
-
-			// Invalidate parent queries
-			if (data.parentId) {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.CHILD_FOLDERS(data.parentId),
-				})
-			} else {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.ROOT_FOLDERS,
-				})
-			}
-
-			// Invalidate hierarchy and path
-			queryClient.invalidateQueries({
-				queryKey: FOLDERS_QUERY_KEYS.FOLDER_HIERARCHY,
-			})
-			queryClient.invalidateQueries({ queryKey: ['folders', 'path'] })
-
-			// Invalidate favorites if needed
-			if (data.isFavorite !== undefined) {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.FAVORITE_FOLDERS,
-				})
-			}
-		},
-	})
-}
-
-export function useDeleteFolder() {
-	const queryClient = useQueryClient()
-
-	return useMutation({
-		mutationFn: ({ id, force }: { id: number; force?: boolean }) =>
-			deleteFolderMutation(id, { force }),
-		onSuccess: (_, variables) => {
-			// Remove from cache
-			queryClient.removeQueries({
-				queryKey: FOLDERS_QUERY_KEYS.FOLDER_BY_ID(variables.id),
-			})
-
-			// Invalidate all folder queries
-			queryClient.invalidateQueries({ queryKey: ['folders'] })
-
-			// Invalidate related notes queries
-			queryClient.invalidateQueries({ queryKey: ['notes'] })
-		},
-	})
-}
-
-export function useMoveFolder() {
-	const queryClient = useQueryClient()
-
-	return useMutation({
-		mutationFn: ({
-			id,
-			newParentId,
-			newPosition,
-		}: {
-			id: number
-			newParentId: number | null
-			newPosition?: number
-		}) => moveFolderMutation(id, newParentId, newPosition),
-		onSuccess: data => {
-			// Update individual folder cache
-			queryClient.setQueryData(FOLDERS_QUERY_KEYS.FOLDER_BY_ID(data.id), data)
-
-			// Invalidate all parent/child queries since structure changed
-			queryClient.invalidateQueries({
-				queryKey: FOLDERS_QUERY_KEYS.ROOT_FOLDERS,
-			})
-			queryClient.invalidateQueries({ queryKey: ['folders', 'children'] })
-			queryClient.invalidateQueries({
-				queryKey: FOLDERS_QUERY_KEYS.FOLDER_HIERARCHY,
-			})
-			queryClient.invalidateQueries({ queryKey: ['folders', 'path'] })
-		},
-	})
-}
-
-export function useToggleFolderFavorite() {
-	const queryClient = useQueryClient()
-
-	return useMutation({
-		mutationFn: toggleFolderFavoriteMutation,
-		onSuccess: data => {
-			// Update individual folder cache
-			queryClient.setQueryData(FOLDERS_QUERY_KEYS.FOLDER_BY_ID(data.id), data)
-
-			// Invalidate favorites
-			queryClient.invalidateQueries({
-				queryKey: FOLDERS_QUERY_KEYS.FAVORITE_FOLDERS,
-			})
-
-			// Invalidate parent queries
-			if (data.parentId) {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.CHILD_FOLDERS(data.parentId),
-				})
-			} else {
-				queryClient.invalidateQueries({
-					queryKey: FOLDERS_QUERY_KEYS.ROOT_FOLDERS,
-				})
-			}
-		},
-	})
-}
-
 // Cache utilities
 export function getFolderFromCache(
 	queryClient: ReturnType<typeof useQueryClient>,
@@ -276,4 +117,32 @@ export function invalidateFolderQueries(
 		}
 	}
 	queryClient.invalidateQueries({ queryKey: ['folders'] })
+}
+
+// Re-export mutation hooks
+export { createFolderMutation as useCreateFolder }
+export { updateFolderMutation as useUpdateFolder }
+export { deleteFolderMutation as useDeleteFolder }
+export { moveFolderMutation as useMoveFolder }
+
+export function useToggleFolderFavorite() {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async (id: number) => {
+			const folder = getFolderFromCache(queryClient, id)
+			if (!folder) {
+				throw new Error('Folder not found')
+			}
+			const result = await updateFolder(id, { isFavorite: !folder.isFavorite })
+			if (!result.success) {
+				throw new Error(result.error || 'Failed to toggle folder favorite')
+			}
+			return result.data!
+		},
+		onSuccess: (data) => {
+			setFolderCache(queryClient, data)
+			invalidateFolderQueries(queryClient, data.parentId)
+		},
+	})
 }

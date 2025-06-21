@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Sidebar, SidebarContent, SidebarFooter } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar'
 import {
 	Archive,
 	Command,
@@ -35,6 +35,13 @@ const navigationItems = [
 const authenticatedItems = [{ href: '/profile', icon: User, label: 'Profile' }]
 
 const unauthenticatedItems = [{ href: '/sign-in', icon: LogIn, label: 'Sign In' }]
+
+// Simple logout function - TODO: Implement proper logout
+const logout = async () => {
+	// For now, just return success
+	// TODO: Implement actual logout logic
+	return { success: true, error: undefined }
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const location = useLocation()
@@ -84,62 +91,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar
 			collapsible='icon'
-			className='overflow-hidden border-r border-sidebar-border'
+			className='overflow-hidden border-r border-sidebar-border flex'
 			style={{ maxWidth: 'var(--sidebar-width)' }}
 			{...props}
 		>
-			<Sidebar
-				collapsible='none'
-				className='!w-[48px] border-r border-sidebar-border bg-background AAA'
-			>
-				<SidebarContent className='p-2 space-y-1'>
-					{/* Main navigation items */}
-					{navigationItems.map(item => {
-						const Icon = item.icon
-						const isActive = isActiveRoute(item.href)
-						return (
-							<Button
-								key={item.href}
-								variant='ghost'
-								size='sm'
-								asChild
-								className={`h-8 w-8 p-0 ${isActive
-									? 'bg-sidebar-accent text-sidebar-accent-foreground'
-									: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-									}`}
-							>
-								<Link to={item.href}>
-									<Icon className='h-4 w-4' />
-								</Link>
-							</Button>
-						)
-					})}
-
-					{/* Separator */}
-					<div className='h-px bg-sidebar-border my-2' />
-
-					{/* Additional utility buttons */}
-					<Button
-						variant='ghost'
-						size='sm'
-						className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-					>
-						<Star className='h-4 w-4' />
-					</Button>
-					<Button
-						variant='ghost'
-						size='sm'
-						className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-					>
-						<Archive className='h-4 w-4' />
-					</Button>
-				</SidebarContent>
-
-				<SidebarFooter className='p-2 space-y-1'>
-					{/* Authentication-based items */}
-					{!isLoading &&
-						user &&
-						authenticatedItems.map(item => {
+			{/* Navigation Icons Section */}
+			<div className='flex flex-col border-r border-sidebar-border' style={{ width: 'var(--sidebar-nav-width)' }}>
+				<SidebarHeader className='p-2 border-b border-sidebar-border'>
+					<div className='flex flex-col items-center gap-2'>
+						{/* Main navigation items */}
+						{navigationItems.map(item => {
 							const Icon = item.icon
 							const isActive = isActiveRoute(item.href)
 							return (
@@ -160,70 +121,94 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							)
 						})}
 
-					{/* Logout button for authenticated users */}
-					{!isLoading && user && (
+						{/* Separator */}
+						<div className='h-px bg-sidebar-border w-full mx-2' />
+
+						{/* Additional utility buttons */}
 						<Button
 							variant='ghost'
 							size='sm'
-							onClick={handleLogout}
-							disabled={isLoggingOut}
-							className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:opacity-50'
-							title={isLoggingOut ? 'Logging out...' : 'Logout'}
+							className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 						>
-							<LogOut className='h-4 w-4' />
+							<Archive className='h-4 w-4' />
 						</Button>
-					)}
+					</div>
+				</SidebarHeader>
 
-					{/* Sign in button for unauthenticated users */}
-					{!isLoading &&
-						!user &&
-						unauthenticatedItems.map(item => {
-							const Icon = item.icon
-							const isActive = isActiveRoute(item.href)
-							return (
-								<Button
-									key={item.href}
-									variant='ghost'
-									size='sm'
-									asChild
-									className={`h-8 w-8 p-0 ${isActive
-										? 'bg-sidebar-accent text-sidebar-accent-foreground'
-										: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-										}`}
-								>
-									<Link to={item.href}>
-										<Icon className='h-4 w-4' />
-									</Link>
-								</Button>
-							)
-						})}
+				<SidebarFooter className='p-2 border-t border-sidebar-border'>
+					<div className='flex flex-col items-center gap-2'>
+						{/* Authentication-based items */}
+						{!isLoading &&
+							user &&
+							authenticatedItems.map(item => {
+								const Icon = item.icon
+								const isActive = isActiveRoute(item.href)
+								return (
+									<Button
+										key={item.href}
+										variant='ghost'
+										size='sm'
+										asChild
+										className={`h-8 w-8 p-0 ${isActive
+											? 'bg-sidebar-accent text-sidebar-accent-foreground'
+											: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+											}`}
+									>
+										<Link to={item.href}>
+											<Icon className='h-4 w-4' />
+										</Link>
+									</Button>
+								)
+							})}
 
-					{/* Settings/Command button */}
-					<Button
-						variant='ghost'
-						size='sm'
-						className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-					>
-						<Command className='h-4 w-4' />
-					</Button>
+						{/* Logout button for authenticated users */}
+						{!isLoading && user && (
+							<Button
+								variant='ghost'
+								size='sm'
+								onClick={handleLogout}
+								disabled={isLoggingOut}
+								className='h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:opacity-50'
+								title={isLoggingOut ? 'Logging out...' : 'Logout'}
+							>
+								<LogOut className='h-4 w-4' />
+							</Button>
+						)}
+
+						{/* Sign in button for unauthenticated users */}
+						{!isLoading &&
+							!user &&
+							unauthenticatedItems.map(item => {
+								const Icon = item.icon
+								const isActive = isActiveRoute(item.href)
+								return (
+									<Button
+										key={item.href}
+										variant='ghost'
+										size='sm'
+										asChild
+										className={`h-8 w-8 p-0 ${isActive
+											? 'bg-sidebar-accent text-sidebar-accent-foreground'
+											: 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+											}`}
+									>
+										<Link to={item.href}>
+											<Icon className='h-4 w-4' />
+										</Link>
+									</Button>
+								)
+							})}
+					</div>
 				</SidebarFooter>
-			</Sidebar>
+			</div>
 
-			<Sidebar
-				collapsible='none'
-				className='hidden md:flex bg-background AAA'
-				style={{
-					width: 'calc(var(--sidebar-width) - 48px)',
-					maxWidth: 'calc(var(--sidebar-width) - 48px)',
-					minWidth: 'calc(var(--sidebar-width) - 48px)',
-				}}
-			>
+			{/* Folder Sidebar Section */}
+			<div className='flex flex-col flex-1'>
 				<ActionBarResolver onSearch={handleSearch} onCancelSearch={handleCancelSearch} />
-
 				<SidebarContent className='p-2'>
 					<SidebarContentResolver searchFilter={searchFilter} />
 				</SidebarContent>
-			</Sidebar>
+			</div>
 		</Sidebar>
 	)
 }

@@ -1,21 +1,21 @@
 import type { TServiceResult, TNote, TNoteWithMetadata } from '@/types'
 import type { TCreateNoteVariables, TUpdateNoteVariables } from '@/api/mutations/types'
-import { toggleNoteFavorite } from '@/repositories'
 
 class NoteService {
     async create(data: TCreateNoteVariables): Promise<TServiceResult<TNote>> {
         try {
             // TODO: Implement note creation
             const note: TNote = {
-                id: 1,
-                title: data.title,
-                content: data.content,
+                id: Math.floor(Math.random() * 1000000),
+                type: 'note',
+                title: data.title || 'Untitled',
+                content: data.content || '',
                 folderId: data.folderId || null,
                 position: data.position || 0,
                 isPublic: data.isPublic || false,
                 isFavorite: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
             }
             return { success: true, data: note }
         } catch (error) {
@@ -31,14 +31,15 @@ class NoteService {
             // TODO: Implement note update
             const note: TNote = {
                 id,
+                type: 'note',
                 title: data.title || 'Untitled',
                 content: data.content || '',
                 folderId: data.folderId || null,
                 position: data.position || 0,
                 isPublic: data.isPublic || false,
-                isFavorite: data.isFavorite || false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                isFavorite: false,
+                createdAt: new Date(),
+                updatedAt: new Date(),
             }
             return { success: true, data: note }
         } catch (error) {
@@ -66,14 +67,15 @@ class NoteService {
             // TODO: Implement note move
             const note: TNote = {
                 id,
+                type: 'note',
                 title: 'Moved Note',
                 content: '',
                 folderId,
                 position: 0,
                 isPublic: false,
                 isFavorite: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
             }
             return { success: true, data: note }
         } catch (error) {
@@ -89,14 +91,15 @@ class NoteService {
             // TODO: Implement note duplication
             const note: TNote = {
                 id: id + 1,
+                type: 'note',
                 title: 'Duplicated Note',
                 content: '',
                 folderId: null,
                 position: 0,
                 isPublic: false,
                 isFavorite: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
             }
             return { success: true, data: note }
         } catch (error) {
@@ -124,14 +127,15 @@ class NoteService {
             // TODO: Implement get note by ID
             const note: TNote = {
                 id,
+                type: 'note',
                 title: 'Sample Note',
                 content: 'Sample content',
                 folderId: null,
                 position: 0,
                 isPublic: false,
                 isFavorite: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
             }
             return { success: true, data: note }
         } catch (error) {
@@ -154,18 +158,6 @@ class NoteService {
         }
     }
 
-    async getFavoriteNotes(): Promise<TServiceResult<TNoteWithMetadata[]>> {
-        try {
-            // TODO: Implement get favorite notes
-            return { success: true, data: [] }
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to get favorite notes',
-            }
-        }
-    }
-
     async searchNotes(query: string): Promise<TServiceResult<TNote[]>> {
         try {
             // TODO: Implement note search
@@ -180,25 +172,16 @@ class NoteService {
 
     async toggleFavorite(id: number): Promise<TServiceResult<TNote>> {
         try {
-            const result = await toggleNoteFavorite(id)
-            if (!result.success) {
-                return { success: false, error: result.error || 'Failed to toggle note favorite' }
+            const note = await this.getById(id)
+            if (!note.success || !note.data) {
+                throw new Error('Note not found')
             }
-
-            // Convert repository format to service format
-            const note = result.data
-            if (!note) {
-                return { success: false, error: 'Note not found' }
+            const updatedNote = {
+                ...note.data,
+                isFavorite: !note.data.isFavorite,
+                updatedAt: new Date(),
             }
-
-            return {
-                success: true,
-                data: {
-                    ...note,
-                    createdAt: new Date(note.createdAt).toISOString(),
-                    updatedAt: new Date(note.updatedAt).toISOString(),
-                }
-            }
+            return { success: true, data: updatedNote }
         } catch (error) {
             return {
                 success: false,
@@ -219,6 +202,5 @@ export const duplicateNote = (id: number) => noteService.duplicate(id)
 export const reorderNotes = (folderId: number | null, noteIds: number[]) => noteService.reorder(folderId, noteIds)
 export const getNoteById = (id: number) => noteService.getById(id)
 export const getNotesByFolder = (folderId: number | null) => noteService.getNotesByFolder(folderId)
-export const getFavoriteNotesWithMetadata = () => noteService.getFavoriteNotes()
 export const searchNotes = (query: string) => noteService.searchNotes(query)
-export const toggleNoteFavoriteStatus = (id: number) => noteService.toggleFavorite(id) 
+export const toggleNoteFavorite = (id: number) => noteService.toggleFavorite(id) 

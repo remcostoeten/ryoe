@@ -38,36 +38,6 @@ function SidebarLayout() {
 		return pathname.split('/').pop() || 'Untitled Document'
 	}
 
-	// Add keyboard shortcut for right sidebar toggle (Cmd+Shift+B) - on docs and note pages
-	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (
-				event.key === 'b' &&
-				(event.metaKey || event.ctrlKey) &&
-				event.shiftKey &&
-				(isDocsPage || isNotePage) // Allow on docs and note pages
-			) {
-				event.preventDefault()
-				handleToggleRightSidebar()
-			}
-		}
-
-		// Listen for right sidebar toggle from menu - on docs and note pages
-		const handleRightSidebarToggle = () => {
-			if (isDocsPage || isNotePage) {
-				handleToggleRightSidebar()
-			}
-		}
-
-		window.addEventListener('keydown', handleKeyDown)
-		window.addEventListener('toggle-right-sidebar', handleRightSidebarToggle)
-
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown)
-			window.removeEventListener('toggle-right-sidebar', handleRightSidebarToggle)
-		}
-	}, [isDocsPage, isNotePage])
-
 	return (
 		<div className='min-h-screen flex flex-1'>
 			<AppSidebar />
@@ -81,15 +51,15 @@ function SidebarLayout() {
 						onToggleSidebar={toggleSidebar}
 						showSidebarToggle={true}
 						isSidebarOpen={open}
-						showRightSidebarToggle={isDocsPage || !!isNotePage}
+						showRightSidebarToggle={isDocsPage}
 					/>
 					<main className='flex-1 bg-main'>
 						<Outlet />
 					</main>
 				</div>
 			</SidebarInset>
-			{/* Right sidebar with smooth animation - show on docs and note pages */}
-			{(isDocsPage || isNotePage) && (
+			{/* Right sidebar with smooth animation - show only on docs pages */}
+			{isDocsPage && (
 				<AnimatePresence mode='wait'>
 					{isRightSidebarOpen && (
 						<motion.div
@@ -132,7 +102,7 @@ export function RootLayout() {
 	return (
 		<AppGuard>
 			{showSidebar ? (
-				<FolderProvider parentId={null}>
+				<FolderProvider>
 					<SidebarProvider>
 						<SidebarLayout />
 					</SidebarProvider>

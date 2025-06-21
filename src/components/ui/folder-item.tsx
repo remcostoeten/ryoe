@@ -6,7 +6,7 @@ import { useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { ChevronDown, ChevronRight, Folder, FolderOpen, Star } from 'lucide-react'
-import type { TFolder, TNote, TDragState } from '@/domain/entities/workspace'
+import type { TFolder, TNote, TDragState } from '@/types'
 import { cn } from '@/shared/utils'
 
 type TProps = {

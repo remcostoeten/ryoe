@@ -16,14 +16,8 @@ export type TMutationContext = {
 // Re-export from services for consistency
 export type {
     TServiceResult,
-    TMoveNoteVariables,
-    TMoveFolderVariables,
     TNoteCreationData as TCreateNoteVariables,
     TNoteUpdateData as TUpdateNoteVariables,
-    TFolderCreationData as TCreateFolderVariables,
-    TFolderUpdateData as TUpdateFolderVariables,
-    TUserRegistrationData as TRegisterUserVariables,
-    TUserPreferencesUpdate as TUpdateUserPreferencesVariables,
 } from '@/types'
 
 // Storage switch variables

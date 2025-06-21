@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getCurrentUser } from "@/services/user-service"
-import type { TUserProfile } from "@/domain/entities/workspace"
+import type { TUserProfile } from "@/types"
 
 export function useCurrentUser() {
     const { data: user, isLoading, error } = useQuery<TUserProfile | null>({

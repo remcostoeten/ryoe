@@ -21,7 +21,7 @@ import {
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { cn } from '@/shared/utils'
-import type { TNote } from '@/domain/entities/workspace'
+import type { TNote } from '@/types'
 
 type TNoteItemProps = {
 	note: TNote
@@ -35,7 +35,6 @@ type TNoteItemProps = {
 	onDuplicate?: (note: TNote) => void
 	onMove?: (note: TNote) => void
 	onToggleVisibility?: (note: TNote) => void
-	onToggleFavorite?: (note: TNote) => void
 	enableDragDrop?: boolean
 	onDragStart?: (note: TNote) => void
 	onDragEnd?: () => void
@@ -50,7 +49,6 @@ function NoteContextMenu({
 	onDuplicate,
 	onMove,
 	onToggleVisibility,
-	onToggleFavorite,
 	children,
 }: {
 	note: TNote
@@ -59,7 +57,6 @@ function NoteContextMenu({
 	onDuplicate?: (note: TNote) => void
 	onMove?: (note: TNote) => void
 	onToggleVisibility?: (note: TNote) => void
-	onToggleFavorite?: (note: TNote) => void
 	children: React.ReactNode
 }) {
 	return (
@@ -93,15 +90,6 @@ function NoteContextMenu({
 				>
 					<Move className='h-4 w-4 mr-2' />
 					Move
-				</ContextMenuItem>
-
-				<ContextMenuItem
-					onClick={() => onToggleFavorite?.(note)}
-					disabled={!onToggleFavorite}
-					className='hover:bg-accent/50 focus:bg-accent/50 transition-colors'
-				>
-					<Star className='h-4 w-4 mr-2' />
-					{note.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 				</ContextMenuItem>
 
 				<ContextMenuItem
@@ -145,7 +133,6 @@ export function NoteItem({
 	onDuplicate,
 	onMove,
 	onToggleVisibility,
-	onToggleFavorite,
 	enableDragDrop = false,
 	onDragStart,
 	onDragEnd,
@@ -208,7 +195,6 @@ export function NoteItem({
 				onDuplicate={onDuplicate}
 				onMove={onMove}
 				onToggleVisibility={onToggleVisibility}
-				onToggleFavorite={onToggleFavorite}
 			>
 				<Button
 					variant='ghost'
@@ -231,12 +217,6 @@ export function NoteItem({
 								)}
 							/>
 						</div>
-
-						{note.isFavorite && (
-							<div className='flex-shrink-0'>
-								<Star className='h-3.5 w-3.5 text-amber-500 fill-current' />
-							</div>
-						)}
 
 						<div className='flex-1 min-w-0'>
 							{isEditing ? (

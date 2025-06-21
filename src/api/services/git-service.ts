@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchLatestCommitInfo } from '@/core/git/git-info'
 import { fetchGitTree } from '@/components/layout/footer/git-tree'
-import type { GitCommitInfo } from '@/core/git/git-info'
 
-// Query Keys
 export const GIT_QUERY_KEYS = {
 	LATEST_COMMIT: (owner: string, repo: string, branch: string) =>
 		['git', 'commit', owner, repo, branch] as const,
@@ -11,7 +9,6 @@ export const GIT_QUERY_KEYS = {
 		['git', 'tree', repoUrl, branch, maxCommits] as const,
 } as const
 
-// Query Hooks
 export function useLatestCommit(
 	owner: string = 'remcostoeten',
 	repo: string = 'ryoe',

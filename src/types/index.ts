@@ -1,101 +1,67 @@
-// Service result type
-export interface TServiceResult<T = unknown> {
-    success: boolean
-    data?: T
-    error?: string
-}
-
-// Database types
-export type DatabaseHealthStatus = 'checking' | 'healthy' | 'error' | 'disconnected'
-
-export interface DatabaseHealth {
-    status: DatabaseHealthStatus
-    message: string
-    lastChecked: Date
-    responseTime?: number
-}
-
-export interface DatabaseClient {
-    execute: (sql: string, params?: unknown[]) => Promise<any>
-    close: () => Promise<void>
-}
-
-export interface DatabaseConfig {
-    url: string
-    authToken?: string
-}
-
-export interface ExecuteOptions {
-    sql: string
-    args?: unknown[]
-}
-
-// User types
-export interface TUser {
+// Clean types for notes app
+export type TBaseEntity = {
     id: number
-    email: string
+    createdAt: Date
+    updatedAt: Date
+    position: number
+    isFavorite: boolean
+    isPublic: boolean
+}
+
+// Folder types
+export type TFolder = TBaseEntity & {
+    type: 'folder'
     name: string
-    preferences: {
-        theme: 'light' | 'dark' | 'system'
-        storageType: 'local' | 'turso'
-        mdxStoragePath?: string
-    }
-    createdAt: string
-    updatedAt: string
+    parentId: number | null
+    children?: TFolder[]
+    depth?: number
+    hasChildren?: boolean
+    isTemp?: boolean
 }
 
-// User profile (extended user type)
-export interface TUserProfile extends TUser {
-    snippetsPath: string
-    isSetupComplete: boolean
-    storageType: 'local' | 'turso'
+export type TFolderWithStats = TFolder & {
+    noteCount?: number
+    childCount?: number
+    path?: string[]
+    isExpanded?: boolean
 }
 
-// User registration data
-export interface TUserRegistrationData {
-    email: string
+export interface TCreateFolderData {
     name: string
-    snippetsPath?: string
-    storageType?: 'local' | 'turso'
+    parentId?: number | null
+    position?: number
 }
 
-// User preferences update
-export interface TUserPreferencesUpdate {
-    theme?: 'light' | 'dark' | 'system'
-    storageType?: 'local' | 'turso'
-    mdxStoragePath?: string
+export interface TUpdateFolderData {
+    name?: string
+    parentId?: number | null
+    position?: number
+    isExpanded?: boolean
+    isFavorite?: boolean
 }
 
 // Note types
-export interface TNote {
-    id: number
+export type TNote = TBaseEntity & {
+    type: 'note'
     title: string
     content: string
     folderId: number | null
-    position: number
-    isPublic: boolean
-    isFavorite: boolean
-    createdAt: string
-    updatedAt: string
 }
 
-// Note with metadata
-export interface TNoteWithMetadata extends TNote {
-    wordCount: number
-    readingTime: number
-    tags: string[]
+export type TNoteWithMetadata = TNote & {
+    folderPath?: string
+    wordCount?: number
+    lastModified?: string
 }
 
-// Note creation data
-export interface TNoteCreationData {
+export interface TCreateNoteData {
     title: string
-    content: string
+    content?: string
     folderId?: number | null
     position?: number
     isPublic?: boolean
 }
 
-// Note update data
 export interface TNoteUpdateData {
     title?: string
     content?: string
@@ -105,100 +71,93 @@ export interface TNoteUpdateData {
     isFavorite?: boolean
 }
 
-// Folder types
-export interface TFolder {
+export interface TNoteCreationData extends TCreateNoteData { }
+
+// User types
+export interface TUser {
     id: number
     name: string
-    parentId: number | null
-    position: number
-    isPublic: boolean
-    isFavorite: boolean
+    email?: string
     createdAt: string
     updatedAt: string
 }
 
-// Folder with stats
-export interface TFolderWithStats extends TFolder {
-    noteCount: number
-    childFolderCount: number
-    totalNoteCount: number // includes notes in child folders
-    lastModified: string
-}
-
-// Folder creation data
-export interface TFolderCreationData {
-    name: string
-    parentId?: number | null
-    position?: number
-    isPublic?: boolean
-    isFavorite?: boolean
-}
-
-// Folder update data
-export interface TFolderUpdateData {
-    name?: string
-    parentId?: number | null
-    position?: number
-    isPublic?: boolean
-    isFavorite?: boolean
-}
-
-// Tree node types
-export interface TTreeNode<T> {
+export interface TUserProfile {
     id: number
-    children: TTreeNode<T>[]
-    data: T
-    level: number
-    parentId: number | null
+    name: string
+    snippetsPath: string
+    isSetupComplete: boolean
+    storageType: 'local' | 'turso'
+    preferences: TUserPreferences
+    createdAt: Date
+    updatedAt: Date
 }
 
-export type TFolderTreeNode = TTreeNode<TFolder>
-export type TNoteTreeNode = TTreeNode<TNote>
-
-// Legacy alias for compatibility
-export interface FolderTreeNode extends TFolder {
-    children: FolderTreeNode[]
-    depth: number
-    hasChildren: boolean
+export interface TUserPreferences {
+    theme: 'light' | 'dark' | 'system'
+    sidebarCollapsed: boolean
+    autoSave: boolean
+    showLineNumbers: boolean
+    fontSize: number
+    editorTheme: string
 }
+
+export interface TCreateUserData {
+    name: string
+    snippetsPath: string
+    storageType: 'local' | 'turso'
+    preferences?: Partial<TUserPreferences>
+}
+
+export interface TUpdateUserData extends Partial<TCreateUserData> { }
 
 // Search types
-export interface TSearchResult {
-    type: 'note' | 'folder'
-    id: number
-    title: string
-    content?: string
-    matchType: 'title' | 'content'
-    snippet: string
-}
-
-// Entity types
-export interface TEntity {
-    id: number
-    createdAt: string
-    updatedAt: string
-}
-
-// Common types
-export interface TPaginationParams {
-    page?: number
+export interface TSearchOptions {
+    query: string
+    folderId?: number | null
+    includeContent?: boolean
+    caseSensitive?: boolean
     limit?: number
     offset?: number
 }
 
-export interface TSortParams {
-    field: string
-    order: 'asc' | 'desc'
+export interface TSearchResult {
+    notes: TNoteWithMetadata[]
+    total: number
+    hasMore: boolean
 }
 
-export interface TFilterParams {
-    field: string
-    value: unknown
-    operator?: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'in' | 'nin'
+// UI State types
+export interface TDragState {
+    isDragging: boolean
+    draggedItem: TItem | null
+    draggedOverItem: TItem | null
+    dropPosition: 'above' | 'below' | 'inside' | null
 }
 
-export interface TQueryParams {
-    pagination?: TPaginationParams
-    sort?: TSortParams[]
-    filters?: TFilterParams[]
+export interface TContextMenuState {
+    isOpen: boolean
+    item: TItem | null
+    position: { x: number; y: number }
+}
+
+// Service result type
+export interface TServiceResult<T = any> {
+    success: boolean
+    data?: T
+    error?: string
+    message?: string
+    code?: string
+}
+
+// Union types
+export type TItem = TFolder | TNote
+
+// Stats type
+export type TStats = {
+    totalFolders: number
+    totalNotes: number
+    totalItems: number
+    favoriteItems: number
+    publicItems: number
 } 

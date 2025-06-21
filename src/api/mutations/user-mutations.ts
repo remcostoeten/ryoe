@@ -9,7 +9,7 @@ export function useRegisterUser(options?: TMutationOptions<TUser>) {
     return useMutation({
         mutationKey: ['user', 'register'],
         mutationFn: async (variables: TRegisterUserVariables) => {
-            const result = await userService.register(variables)
+            const result = await userService.register(variables as unknown as TCreateUserData)
             if (!result.success) {
                 throw new Error(result.error || 'Failed to register user')
             }
@@ -17,7 +17,7 @@ export function useRegisterUser(options?: TMutationOptions<TUser>) {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['user'] })
-            options?.onSuccess?.(data)
+            options?.onSuccess?.(data as any)
         },
         onError: options?.onError,
         onSettled: options?.onSettled,
@@ -38,7 +38,7 @@ export function useUpdateUserPreferences(options?: TMutationOptions<TUser>) {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['user'] })
-            options?.onSuccess?.(data)
+            options?.onSuccess?.(data as any)
         },
         onError: options?.onError,
         onSettled: options?.onSettled,

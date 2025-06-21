@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { registerUser, markUserSetupComplete } from '@/services/user-service'
+import type { TCreateUserData } from '@/types'
 import { CheckCircle, User, Rocket, ArrowRight, ArrowLeft, FolderOpen } from 'lucide-react'
-import { createUser, markUserSetupComplete } from '@/repositories/user-repository'
-import type { TCreateUserData } from '@/repositories/types'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface OnboardingStep {
     id: number
@@ -72,7 +73,7 @@ export function OnboardingFlow() {
                     },
                 }
 
-                const result = await createUser(userData)
+                const result = await registerUser(userData)
                 if (!result.success) {
                     throw new Error(result.error || 'Failed to create user')
                 }
